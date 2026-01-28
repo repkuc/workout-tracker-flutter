@@ -1,0 +1,34 @@
+{
+  "app_name": "Workout Diary",
+  "home": {
+    "title": "Home",
+    "total_workouts": "Total Workouts",
+    "start_workout": "Start Workout",
+    "no_workouts": "No workouts yet"
+  },
+  "history": {
+    "title": "History",
+    "exercises": "Exercises",
+    "reps": "Reps",
+    "volume": "Volume",
+    "repeat": "Repeat",
+    "edit": "Edit"
+  },
+  "workout": {
+    "title": "Workout",
+    "new_workout": "New Workout",
+    "add_exercise": "Add Exercise",
+    "exercise_name": "Exercise name",
+    "target_muscle": "Target muscle",
+    "add_set": "Add Set",
+    "reps": "Reps",
+    "weight": "Weight",
+    "save": "Save",
+    "cancel": "Cancel"
+  },
+  "nav": {
+    "home": "Home",
+    "workout": "Workout",
+    "history": "History"
+  }
+}

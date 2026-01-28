@@ -1,0 +1,34 @@
+{
+  "app_name": "Treniņu Dienasgrāmata",
+  "home": {
+    "title": "Sākums",
+    "total_workouts": "Kopā treniņi",
+    "start_workout": "Sākt treniņu",
+    "no_workouts": "Nav treniņu"
+  },
+  "history": {
+    "title": "Vēsture",
+    "exercises": "Vingrinājumi",
+    "reps": "Atkārtojumi",
+    "volume": "Apjoms",
+    "repeat": "Atkārtot",
+    "edit": "Rediģēt"
+  },
+  "workout": {
+    "title": "Treniņš",
+    "new_workout": "Jauns treniņš",
+    "add_exercise": "Pievienot vingrinājumu",
+    "exercise_name": "Vingrinājuma nosaukums",
+    "target_muscle": "Mērķa muskuļi",
+    "add_set": "Pievienot sēriju",
+    "reps": "Atkārtojumi",
+    "weight": "Svars",
+    "save": "Saglabāt",
+    "cancel": "Atcelt"
+  },
+  "nav": {
+    "home": "Sākums",
+    "workout": "Treniņš",
+    "history": "Vēsture"
+  }
+}
