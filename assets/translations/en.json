@@ -14,18 +14,20 @@
     "repeat": "Repeat",
     "edit": "Edit"
   },
-  "workout": {
-    "title": "Workout",
-    "new_workout": "New Workout",
-    "add_exercise": "Add Exercise",
-    "exercise_name": "Exercise name",
-    "target_muscle": "Target muscle",
-    "add_set": "Add Set",
-    "reps": "Reps",
-    "weight": "Weight",
-    "save": "Save",
-    "cancel": "Cancel"
-  },
+ "workout": {
+  "title": "Workout",
+  "new_workout": "New Workout",
+  "add_exercise": "Add Exercise",
+  "exercise_name": "Exercise name",
+  "target_muscle": "Target muscle",
+  "add_set": "Add Set",
+  "reps": "Reps",
+  "weight": "Weight",
+  "save": "Save",
+  "cancel": "Cancel",
+  "not_found": "Workout not found",
+  "in_development": "Workout editor (in development)"
+},
   "nav": {
     "home": "Home",
     "workout": "Workout",

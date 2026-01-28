@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'services/workout_service.dart';
+import 'pages/workout_editor_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -188,70 +189,72 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
         child: SafeArea(
-            child: Column(
-              children: [
-                // Верхняя панель
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // Иконка штанги + название
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFF97316), // ← ОРАНЖЕВЫЙ
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: const Icon(
-                              Icons.fitness_center,
-                              color: Colors.white,
-                              size: 28,
-                            ),
+          child: Column(
+            children: [
+              // Верхняя панель
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Иконка штанги + название
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF97316), // ← ОРАНЖЕВЫЙ
+                            borderRadius: BorderRadius.circular(8),
                           ),
-                          const SizedBox(width: 12),
-                          Text(
-                            'home.title'.tr(),
-                            style: const TextStyle(
-                              fontSize: 28,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                              letterSpacing: 1.2,
-                            ),
+                          child: const Icon(
+                            Icons.fitness_center,
+                            color: Colors.white,
+                            size: 28,
                           ),
-                        ],
-                      ),
-                      PopupMenuButton<Locale>(
-                        icon: const Icon(Icons.language,
-                            color: Colors.white, size: 28),
-                        onSelected: (Locale locale) {
-                          context.setLocale(locale);
-                        },
-                        itemBuilder: (BuildContext context) => [
-                          const PopupMenuItem(
-                            value: Locale('ru'),
-                            child: Text('🇷🇺 Русский'),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          'home.title'.tr(),
+                          style: const TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            letterSpacing: 1.2,
                           ),
-                          const PopupMenuItem(
-                            value: Locale('lv'),
-                            child: Text('🇱🇻 Latviešu'),
-                          ),
-                          const PopupMenuItem(
-                            value: Locale('en'),
-                            child: Text('🇬🇧 English'),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+                        ),
+                      ],
+                    ),
+                    PopupMenuButton<Locale>(
+                      icon: const Icon(Icons.language,
+                          color: Colors.white, size: 28),
+                      onSelected: (Locale locale) {
+                        context.setLocale(locale);
+                      },
+                      itemBuilder: (BuildContext context) => [
+                        const PopupMenuItem(
+                          value: Locale('ru'),
+                          child: Text('🇷🇺 Русский'),
+                        ),
+                        const PopupMenuItem(
+                          value: Locale('lv'),
+                          child: Text('🇱🇻 Latviešu'),
+                        ),
+                        const PopupMenuItem(
+                          value: Locale('en'),
+                          child: Text('🇬🇧 English'),
+                        ),
+                      ],
+                    ),
+                    // Временная кнопка для очистки черновика
+                  ],
                 ),
+              ),
 
-                // Основной контент
-                Flexible(
-                  child: SingleChildScrollView(  // ← ДОБАВЬ ЭТУ СТРОКУ
-    physics: const BouncingScrollPhysics(),
+              // Основной контент
+              Flexible(
+                child: SingleChildScrollView(
+                  // ← ДОБАВЬ ЭТУ СТРОКУ
+                  physics: const BouncingScrollPhysics(),
                   child: Center(
                     child: Padding(
                       padding: const EdgeInsets.all(24.0),
@@ -390,33 +393,42 @@ class _HomePageState extends State<HomePage> {
                             child: ElevatedButton.icon(
                               onPressed: () async {
                                 // Создаём новую тренировку
-                                final workout = await _service.createWorkout(
-                                  date: _service.getTodayDate(),
-                                  name: 'workout.new_workout'.tr(),
-                                );
+                                final draft = await _service.getDraftWorkout();
 
-                                // Показываем уведомление
-                                if (context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Row(
-                                        children: [
-                                          const Icon(Icons.check_circle,
-                                              color: Colors.white),
-                                          const SizedBox(width: 8),
-                                          Text('Тренировка создана! 🔥'),
-                                        ],
+                                if (draft != null) {
+                                  // Есть черновик - открываем его
+                                  if (context.mounted) {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => WorkoutEditorPage(
+                                            workoutId: draft.id),
                                       ),
-                                      backgroundColor: const Color(0xFF10B981),
-                                      behavior: SnackBarBehavior.floating,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                    ),
+                                    ).then((_) {
+                                      // Когда вернёмся - обновим счётчик
+                                      _loadWorkoutCount();
+                                    });
+                                  }
+                                } else {
+                                  // Нет черновика - создаём новую тренировку
+                                  final workout = await _service.createWorkout(
+                                    date: _service.getTodayDate(),
+                                    name: 'workout.new_workout'.tr(),
                                   );
 
-                                  // Обновляем счётчик
-                                  _loadWorkoutCount();
+                                  if (context.mounted) {
+                                    // Открываем редактор
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => WorkoutEditorPage(
+                                            workoutId: workout.id),
+                                      ),
+                                    ).then((_) {
+                                      // Когда вернёмся - обновим счётчик
+                                      _loadWorkoutCount();
+                                    });
+                                  }
                                 }
                               },
                               icon: const Icon(Icons.add_circle, size: 28),
@@ -438,12 +450,12 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                   ),
-                  ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
+      ),
     );
   }
 }

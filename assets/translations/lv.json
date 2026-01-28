@@ -14,18 +14,20 @@
     "repeat": "Atkārtot",
     "edit": "Rediģēt"
   },
-  "workout": {
-    "title": "Treniņš",
-    "new_workout": "Jauns treniņš",
-    "add_exercise": "Pievienot vingrinājumu",
-    "exercise_name": "Vingrinājuma nosaukums",
-    "target_muscle": "Mērķa muskuļi",
-    "add_set": "Pievienot sēriju",
-    "reps": "Atkārtojumi",
-    "weight": "Svars",
-    "save": "Saglabāt",
-    "cancel": "Atcelt"
-  },
+ "workout": {
+  "title": "Treniņš",
+  "new_workout": "Jauns treniņš",
+  "add_exercise": "Pievienot vingrinājumu",
+  "exercise_name": "Vingrinājuma nosaukums",
+  "target_muscle": "Mērķa muskuļi",
+  "add_set": "Pievienot sēriju",
+  "reps": "Atkārtojumi",
+  "weight": "Svars",
+  "save": "Saglabāt",
+  "cancel": "Atcelt",
+  "not_found": "Treniņš nav atrasts",
+  "in_development": "Treniņu redaktors (izstrādē)"
+},
   "nav": {
     "home": "Sākums",
     "workout": "Treniņš",
