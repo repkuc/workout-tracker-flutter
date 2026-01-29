@@ -350,23 +350,23 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
             const SizedBox(height: 16),
             // Поле "Целевая мышца"
             TextField(
-  controller: _targetMuscleController,
-  style: const TextStyle(color: Colors.white),
-  decoration: InputDecoration(
-    filled: true,
-    fillColor: const Color(0xFF374151),  // Тёмно-серый фон
-    hintText: 'workout.target_muscle_hint'.tr(),
-    hintStyle: TextStyle(color: Colors.grey[500]),
-    prefixIcon: Icon(
-      Icons.radio_button_checked,
-      color: Colors.grey[500],
-    ),
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
-      borderSide: BorderSide.none,
-    ),
-  ),
-),
+              controller: _targetMuscleController,
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: const Color(0xFF374151), // Тёмно-серый фон
+                hintText: 'workout.target_muscle_hint'.tr(),
+                hintStyle: TextStyle(color: Colors.grey[500]),
+                prefixIcon: Icon(
+                  Icons.radio_button_checked,
+                  color: Colors.grey[500],
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
           ],
         ),
         actions: [
