@@ -26,7 +26,14 @@
   "save": "Saglabāt",
   "cancel": "Atcelt",
   "not_found": "Treniņš nav atrasts",
-  "in_development": "Treniņu redaktors (izstrādē)"
+  "in_development": "Treniņu redaktors (izstrādē)",
+  "no_exercises": "Pagaidām nav vingrinājumu",
+  "add_first_exercise": "Nospied pogu zemāk, lai pievienotu pirmo",
+  "sets_count": "Sērijas",
+  "add_exercise_dialog_title": "Pievienot vingrinājumu",
+  "exercise_name_hint": "Piemēram: Guļus spiešana",
+  "target_muscle_hint": "Piemēram: Krūtis",
+  "exercise_name_required": "Ievadiet vingrinājuma nosaukumu"
 },
   "nav": {
     "home": "Sākums",

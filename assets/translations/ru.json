@@ -26,7 +26,14 @@
   "save": "Сохранить",
   "cancel": "Отменить",
   "not_found": "Тренировка не найдена",
-  "in_development": "Редактор тренировки (в разработке)"
+  "in_development": "Редактор тренировки (в разработке)",
+  "no_exercises": "Пока нет упражнений",
+  "add_first_exercise": "Нажми кнопку ниже чтобы добавить первое",
+  "sets_count": "Подходов",
+  "add_exercise_dialog_title": "Добавить упражнение",
+  "exercise_name_hint": "Например: Жим лёжа",
+  "target_muscle_hint": "Например: Грудь",
+  "exercise_name_required": "Введите название упражнения"
 },
   "nav": {
     "home": "Главная",

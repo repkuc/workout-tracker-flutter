@@ -26,7 +26,14 @@
   "save": "Save",
   "cancel": "Cancel",
   "not_found": "Workout not found",
-  "in_development": "Workout editor (in development)"
+  "in_development": "Workout editor (in development)",
+  "no_exercises": "No exercises yet",
+  "add_first_exercise": "Tap the button below to add your first one",
+  "sets_count": "Sets",
+  "add_exercise_dialog_title": "Add Exercise",
+  "exercise_name_hint": "e.g. Bench Press",
+  "target_muscle_hint": "e.g. Chest",
+  "exercise_name_required": "Enter exercise name"
 },
   "nav": {
     "home": "Home",
