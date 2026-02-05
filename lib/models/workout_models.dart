@@ -38,8 +38,8 @@ class WorkoutSet {
 class Exercise {
   final String id; // Уникальный идентификатор упражнения
   final String workoutId; // Идентификатор тренировки
-  final String name; // Название упражнения
-  final String targetMuscle; // Целевая мышца
+  String name; // Название упражнения
+  String targetMuscle; // Целевая мышца
   List<WorkoutSet> sets; // Сеты упражнения
   int position; // Позиция упражнения в тренировке
 

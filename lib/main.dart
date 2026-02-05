@@ -262,7 +262,6 @@ class _HomePageState extends State<HomePage> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           // Брутальная карточка
-                          // Брутальная карточка
                           Card(
                             elevation: 12,
                             child: Container(

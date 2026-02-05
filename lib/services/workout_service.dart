@@ -23,6 +23,7 @@ class WorkoutService {
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
   }
+
   // Получить SharedPreferences
   Future<SharedPreferences> get _preferences async {
     _prefs ??= await SharedPreferences.getInstance();
@@ -30,7 +31,7 @@ class WorkoutService {
   }
 
   // === ЗАГРУЗКА/СОХРАНЕНИЕ ===
-  
+
   // Загрузить все тренировки
   Future<List<Workout>> loadAllWorkouts() async {
     final prefs = await _preferences; // Получаем SharedPreferences
@@ -57,12 +58,12 @@ class WorkoutService {
     await prefs.setString(_workoutsKey, jsonString);
   }
 
-    // Получить ID текущей тренировки (черновик)
+  // Получить ID текущей тренировки (черновик)
   Future<String?> getCurrentWorkoutId() async {
     final prefs = await _preferences;
     return prefs.getString(_currentWorkoutIdKey);
   }
-  
+
   // Установить ID текущей тренировки
   Future<void> setCurrentWorkoutId(String? id) async {
     final prefs = await _preferences;
@@ -74,10 +75,10 @@ class WorkoutService {
   }
 
   // === РАБОТА С ТРЕНИРОВКАМИ ===
-  
+
   // Создать новую тренировку
-    Future<Workout> createWorkout({
-    required String date, 
+  Future<Workout> createWorkout({
+    required String date,
     String name = 'Тренировка',
     String notes = '',
   }) async {
@@ -88,12 +89,12 @@ class WorkoutService {
       notes: notes,
       status: 'draft',
     );
-    
+
     final workouts = await loadAllWorkouts();
     workouts.add(workout);
     await saveAllWorkouts(workouts);
     await setCurrentWorkoutId(workout.id);
-    
+
     return workout;
   }
 
@@ -111,7 +112,7 @@ class WorkoutService {
   Future<Workout?> getDraftWorkout() async {
     final currentId = await getCurrentWorkoutId();
     if (currentId == null) return null;
-    
+
     final workout = await getWorkout(currentId);
     if (workout?.status == 'draft') {
       return workout;
@@ -119,18 +120,18 @@ class WorkoutService {
     return null;
   }
 
-    // Получить список завершённых тренировок
+  // Получить список завершённых тренировок
   Future<List<Workout>> getCompletedWorkouts() async {
     final workouts = await loadAllWorkouts();
     final completed = workouts.where((w) => w.status == 'done').toList();
-    
+
     // Сортируем по дате (новые первые)
     completed.sort((a, b) {
       final aKey = a.finishedAt ?? '${a.date}T00:00:00';
       final bKey = b.finishedAt ?? '${b.date}T00:00:00';
       return bKey.compareTo(aKey);
     });
-    
+
     return completed;
   }
 
@@ -138,20 +139,20 @@ class WorkoutService {
   Future<bool> finishWorkout(String id) async {
     final workouts = await loadAllWorkouts();
     final index = workouts.indexWhere((w) => w.id == id);
-    
+
     if (index == -1) return false;
-    
+
     workouts[index].status = 'done';
     workouts[index].finishedAt = DateTime.now().toIso8601String();
-    
+
     await saveAllWorkouts(workouts);
-    
+
     // Очищаем ID текущей тренировки
     final currentId = await getCurrentWorkoutId();
     if (currentId == id) {
       await setCurrentWorkoutId(null);
     }
-    
+
     return true;
   }
 
@@ -159,33 +160,34 @@ class WorkoutService {
   Future<bool> deleteWorkout(String id) async {
     final workouts = await loadAllWorkouts();
     final index = workouts.indexWhere((w) => w.id == id);
-    
+
     if (index == -1) return false;
-    
+
     workouts.removeAt(index);
     await saveAllWorkouts(workouts);
-    
+
     // Очищаем ID если это текущая
     final currentId = await getCurrentWorkoutId();
     if (currentId == id) {
       await setCurrentWorkoutId(null);
     }
-    
+
     return true;
   }
 
-   // === РАБОТА С УПРАЖНЕНИЯМИ ===
-  
+  // === РАБОТА С УПРАЖНЕНИЯМИ ===
+
   // Добавить упражнение в тренировку
-  Future<bool> addExercise(String workoutId, {
+  Future<bool> addExercise(
+    String workoutId, {
     required String name,
     String targetMuscle = '',
   }) async {
     final workouts = await loadAllWorkouts();
     final index = workouts.indexWhere((w) => w.id == workoutId);
-    
+
     if (index == -1) return false;
-    
+
     final exercise = Exercise(
       id: _uuid.v4(),
       workoutId: workoutId,
@@ -193,10 +195,10 @@ class WorkoutService {
       targetMuscle: targetMuscle,
       position: workouts[index].exercises.length,
     );
-    
+
     workouts[index].exercises.add(exercise);
     await saveAllWorkouts(workouts);
-    
+
     return true;
   }
 
@@ -204,30 +206,61 @@ class WorkoutService {
   Future<bool> removeExercise(String workoutId, String exerciseId) async {
     final workouts = await loadAllWorkouts();
     final wIndex = workouts.indexWhere((w) => w.id == workoutId);
-    
+
     if (wIndex == -1) return false;
-    
+
     workouts[wIndex].exercises.removeWhere((e) => e.id == exerciseId);
     await saveAllWorkouts(workouts);
-    
+
+    return true;
+  }
+
+  // Обновить упражнение (название, целевую мышцу)
+  Future<bool> updateExercise(
+    String workoutId,
+    String exerciseId, {
+    String? name,
+    String? targetMuscle,
+  }) async {
+    final workouts = await loadAllWorkouts();
+    final wIndex = workouts.indexWhere((w) => w.id == workoutId);
+
+    if (wIndex == -1) return false;
+
+    final eIndex =
+        workouts[wIndex].exercises.indexWhere((e) => e.id == exerciseId);
+    if (eIndex == -1) return false;
+
+    // Обновляем только те поля, которые переданы
+    if (name != null) {
+      workouts[wIndex].exercises[eIndex].name = name;
+    }
+    if (targetMuscle != null) {
+      workouts[wIndex].exercises[eIndex].targetMuscle = targetMuscle;
+    }
+
+    await saveAllWorkouts(workouts);
     return true;
   }
 
   // === РАБОТА С ПОДХОДАМИ ===
-  
+
   // Добавить подход к упражнению
-  Future<bool> addSet(String workoutId, String exerciseId, {
+  Future<bool> addSet(
+    String workoutId,
+    String exerciseId, {
     required int reps,
     required double weight,
   }) async {
     final workouts = await loadAllWorkouts();
     final wIndex = workouts.indexWhere((w) => w.id == workoutId);
-    
+
     if (wIndex == -1) return false;
-    
-    final eIndex = workouts[wIndex].exercises.indexWhere((e) => e.id == exerciseId);
+
+    final eIndex =
+        workouts[wIndex].exercises.indexWhere((e) => e.id == exerciseId);
     if (eIndex == -1) return false;
-    
+
     final set = WorkoutSet(
       id: _uuid.v4(),
       exerciseId: exerciseId,
@@ -235,48 +268,57 @@ class WorkoutService {
       weight: weight,
       isDone: false,
     );
-    
+
     workouts[wIndex].exercises[eIndex].sets.add(set);
     await saveAllWorkouts(workouts);
-    
+
     return true;
   }
 
   // Удалить подход
-  Future<bool> removeSet(String workoutId, String exerciseId, String setId) async {
+  Future<bool> removeSet(
+      String workoutId, String exerciseId, String setId) async {
     final workouts = await loadAllWorkouts();
     final wIndex = workouts.indexWhere((w) => w.id == workoutId);
-    
+
     if (wIndex == -1) return false;
-    
-    final eIndex = workouts[wIndex].exercises.indexWhere((e) => e.id == exerciseId);
+
+    final eIndex =
+        workouts[wIndex].exercises.indexWhere((e) => e.id == exerciseId);
     if (eIndex == -1) return false;
-    
+
     workouts[wIndex].exercises[eIndex].sets.removeWhere((s) => s.id == setId);
     await saveAllWorkouts(workouts);
-    
+
     return true;
   }
 
   // Обновить подход (отметить выполнение, изменить вес/повторы)
-  Future<bool> updateSet(String workoutId, String exerciseId, String setId, {
+  Future<bool> updateSet(
+    String workoutId,
+    String exerciseId,
+    String setId, {
     int? reps,
     double? weight,
     bool? isDone,
   }) async {
     final workouts = await loadAllWorkouts();
     final wIndex = workouts.indexWhere((w) => w.id == workoutId);
-    
+
     if (wIndex == -1) return false;
-    
-    final eIndex = workouts[wIndex].exercises.indexWhere((e) => e.id == exerciseId);
+
+    final eIndex =
+        workouts[wIndex].exercises.indexWhere((e) => e.id == exerciseId);
     if (eIndex == -1) return false;
-    
-    final sIndex = workouts[wIndex].exercises[eIndex].sets.indexWhere((s) => s.id == setId);
+
+    final sIndex = workouts[wIndex]
+        .exercises[eIndex]
+        .sets
+        .indexWhere((s) => s.id == setId);
     if (sIndex == -1) return false;
-    
+
     final set = workouts[wIndex].exercises[eIndex].sets[sIndex];
-    
+
     // Создаём новый подход с обновлёнными данными
     workouts[wIndex].exercises[eIndex].sets[sIndex] = WorkoutSet(
       id: set.id,
@@ -285,30 +327,31 @@ class WorkoutService {
       weight: weight ?? set.weight,
       isDone: isDone ?? set.isDone,
     );
-    
+
     await saveAllWorkouts(workouts);
     return true;
   }
 
-    // Обновить мета-информацию тренировки (имя, дату, заметки)
-  Future<bool> updateWorkoutMeta(String workoutId, {
+  // Обновить мета-информацию тренировки (имя, дату, заметки)
+  Future<bool> updateWorkoutMeta(
+    String workoutId, {
     String? name,
     String? date,
     String? notes,
   }) async {
     final workouts = await loadAllWorkouts();
     final index = workouts.indexWhere((w) => w.id == workoutId);
-    
+
     if (index == -1) return false;
-    
+
     if (name != null) workouts[index].name = name;
     if (date != null) workouts[index].date = date;
     if (notes != null) workouts[index].notes = notes;
-    
+
     await saveAllWorkouts(workouts);
     return true;
   }
-  
+
   // Получить сегодняшнюю дату в формате YYYY-MM-DD
   String getTodayDate() {
     final now = DateTime.now();
