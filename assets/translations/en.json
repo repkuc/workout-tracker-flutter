@@ -12,7 +12,12 @@
     "reps": "Reps",
     "volume": "Volume",
     "repeat": "Repeat",
-    "edit": "Edit"
+    "edit": "Edit",
+    "no_workouts": "No completed workouts yet",
+    "start_first": "Start your first workout!",
+    "sets": "Sets",
+    "completed_sets": "Completed",
+    "view": "View"
   },
   "workout": {
     "title": "Workout",
@@ -63,7 +68,17 @@
     "finish_workout_message": "The workout will be saved to history",
     "finish": "Finish",
     "workout_finished": "Workout finished!",
-    "workout_saved": "Workout saved to history"
+    "workout_saved": "Workout saved to history",
+    "edit_workout_name": "Edit name",
+    "edit_workout_name_dialog_title": "Workout name",
+    "workout_name_hint": "Example: Chest and triceps",
+    "workout_name_required": "Enter workout name",
+    "workout_name_updated": "Name updated",
+    "create_workout_dialog_title": "New workout",
+    "create_workout_message": "What should we call this workout?",
+    "workout_details": "Workout details",
+    "completed": "Completed",
+    "no_exercises_in_workout": "No exercises in this workout"
   },
   "nav": {
     "home": "Home",

@@ -12,7 +12,12 @@
     "reps": "Повторений",
     "volume": "Объём",
     "repeat": "Повторить",
-    "edit": "Изменить"
+    "edit": "Изменить",
+    "no_workouts": "Пока нет завершённых тренировок",
+    "start_first": "Начни первую тренировку!",
+    "sets": "Подходов",
+    "completed_sets": "Выполнено",
+    "view": "Открыть"
   },
   "workout": {
     "title": "Тренировка",
@@ -63,7 +68,17 @@
     "finish_workout_message": "Тренировка будет сохранена в историю",
     "finish": "Завершить",
     "workout_finished": "Тренировка завершена!",
-    "workout_saved": "Тренировка сохранена в историю"
+    "workout_saved": "Тренировка сохранена в историю",
+    "edit_workout_name": "Изменить название",
+    "edit_workout_name_dialog_title": "Название тренировки",
+    "workout_name_hint": "Например: Грудь и трицепс",
+    "workout_name_required": "Введите название тренировки",
+    "workout_name_updated": "Название изменено",
+    "create_workout_dialog_title": "Новая тренировка",
+    "create_workout_message": "Как назовём тренировку?",
+    "workout_details": "Детали тренировки",
+    "completed": "Завершена",
+    "no_exercises_in_workout": "В этой тренировке нет упражнений" 
   },
   "nav": {
     "home": "Главная",

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'services/workout_service.dart';
 import 'pages/workout_editor_page.dart';
+import 'pages/history_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -148,6 +149,9 @@ class _HomePageState extends State<HomePage> {
   bool _isLoading = true;
   int _draftCount = 0;
 
+// Контроллер для названия новой тренировки
+  final _newWorkoutNameController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
@@ -222,6 +226,29 @@ class _HomePageState extends State<HomePage> {
                             letterSpacing: 1.2,
                           ),
                         ),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        IconButton(
+                          icon: const Icon(
+                            Icons.history,
+                            color: Colors.white,
+                            size: 28,
+                          ),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const HistoryPage(),
+                              ),
+                            ).then((_) {
+                              // Обновляем количество тренировок после возвращения из истории
+                              _loadWorkoutCount();
+                            });
+                          },
+                          tooltip: 'history.title'.tr(),
+                        )
                       ],
                     ),
                     PopupMenuButton<Locale>(
@@ -404,15 +431,22 @@ class _HomePageState extends State<HomePage> {
                                             workoutId: draft.id),
                                       ),
                                     ).then((_) {
-                                      // Когда вернёмся - обновим счётчик
                                       _loadWorkoutCount();
                                     });
                                   }
                                 } else {
-                                  // Нет черновика - создаём новую тренировку
+                                  // ← НОВАЯ ЛОГИКА: Показываем диалог для ввода названия
+                                  final workoutName =
+                                      await _showCreateWorkoutDialog();
+
+                                  // Если пользователь отменил диалог (нажал "Отмена")
+                                  if (workoutName == null) return;
+
+                                  // Создаём новую тренировку с введённым названием
                                   final workout = await _service.createWorkout(
                                     date: _service.getTodayDate(),
-                                    name: 'workout.new_workout'.tr(),
+                                    name:
+                                        workoutName, // ← Используем название из диалога
                                   );
 
                                   if (context.mounted) {
@@ -424,7 +458,6 @@ class _HomePageState extends State<HomePage> {
                                             workoutId: workout.id),
                                       ),
                                     ).then((_) {
-                                      // Когда вернёмся - обновим счётчик
                                       _loadWorkoutCount();
                                     });
                                   }
@@ -456,5 +489,120 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
     );
+  }
+
+// Показать диалог для ввода названия новой тренировки
+  Future<String?> _showCreateWorkoutDialog() async {
+    // Очищаем поле и ставим название по умолчанию
+    _newWorkoutNameController.text = 'workout.new_workout'.tr();
+
+    final result = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF1F2937),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(
+            color: Color(0xFFF97316),
+            width: 2,
+          ),
+        ),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF97316).withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.add_circle,
+                color: Color(0xFFF97316),
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'workout.create_workout_dialog_title'.tr(),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'workout.create_workout_message'.tr(),
+              style: TextStyle(
+                color: Colors.grey[400],
+                fontSize: 14,
+              ),
+            ),
+            const SizedBox(height: 16),
+            // Поле "Название тренировки"
+            TextField(
+              controller: _newWorkoutNameController,
+              autofocus: true,
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: const Color(0xFF374151),
+                hintText: 'workout.workout_name_hint'.tr(),
+                hintStyle: TextStyle(color: Colors.grey[500]),
+                prefixIcon: const Icon(
+                  Icons.fitness_center,
+                  color: Color(0xFFF97316),
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          // Кнопка "Отмена"
+          TextButton(
+            onPressed: () => Navigator.pop(context, null),
+            child: Text(
+              'workout.cancel'.tr(),
+              style: TextStyle(color: Colors.grey[400]),
+            ),
+          ),
+          // Кнопка "Создать"
+          ElevatedButton(
+            onPressed: () {
+              final name = _newWorkoutNameController.text.trim();
+              if (name.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('workout.workout_name_required'.tr()),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+                return;
+              }
+              Navigator.pop(context, name);
+            },
+            child: Text(
+                'workout.add_exercise'.tr()), // "Добавить" как кнопка создания
+          ),
+        ],
+      ),
+    );
+
+    return result;
+  }
+
+  @override
+  void dispose() {
+    _newWorkoutNameController.dispose();
+    super.dispose();
   }
 }

@@ -28,6 +28,9 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
   final _repsController = TextEditingController();
   final _weightController = TextEditingController();
 
+  // Контроллер для редактирования названия тренировки
+  final _workoutNameController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
@@ -40,6 +43,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
     _targetMuscleController.dispose();
     _repsController.dispose();
     _weightController.dispose();
+    _workoutNameController.dispose();
     super.dispose();
   }
 
@@ -110,52 +114,62 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
   }
 
   Widget _buildHeader() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1F2937).withOpacity(0.8),
-        border: Border(
-          bottom: BorderSide(
-            color: const Color(0xFFF97316).withOpacity(0.3),
-            width: 2,
-          ),
+  return Container(
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      color: const Color(0xFF1F2937).withOpacity(0.8),
+      border: Border(
+        bottom: BorderSide(
+          color: const Color(0xFFF97316).withOpacity(0.3),
+          width: 2,
         ),
       ),
-      child: Row(
-        children: [
-          // Кнопка назад
-          IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: () => Navigator.pop(context),
-          ),
-          const SizedBox(width: 8),
-          // Название тренировки
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  _workout?.name ?? 'workout.title'.tr(),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
+    ),
+    child: Row(
+      children: [
+        // Кнопка назад
+        IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
+        const SizedBox(width: 8),
+        // Название тренировки
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                _workout?.name ?? 'workout.title'.tr(),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
                 ),
-                Text(
-                  _workout?.date ?? '',
-                  style: TextStyle(
-                    color: Colors.grey[400],
-                    fontSize: 14,
-                  ),
+              ),
+              Text(
+                _workout?.date ?? '',
+                style: TextStyle(
+                  color: Colors.grey[400],
+                  fontSize: 14,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
-      ),
-    );
-  }
+        ),
+        // ← НОВАЯ КНОПКА: Редактировать название
+        IconButton(
+          icon: const Icon(
+            Icons.edit,
+            color: Color(0xFFF97316),
+            size: 24,
+          ),
+          onPressed: _showEditWorkoutNameDialog,
+          tooltip: 'workout.edit_workout_name'.tr(),
+        ),
+      ],
+    ),
+  );
+}
 
   // Пустое состояние
   // Пустое состояние (нет упражнений)
@@ -1594,6 +1608,130 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
 
         // Закрываем экран редактора и возвращаемся на главный экран
         Navigator.pop(context);
+      }
+    }
+  }
+
+  // Показать диалог редактирования названия тренировки
+  // Показать диалог редактирования названия тренировки
+  Future<void> _showEditWorkoutNameDialog() async {
+    // Заполняем поле текущим названием
+    _workoutNameController.text = _workout?.name ?? '';
+
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF1F2937),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(
+            color: Color(0xFFF97316),
+            width: 2,
+          ),
+        ),
+        title: Text(
+          'workout.edit_workout_name_dialog_title'.tr(),
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Иконка
+            Container(
+              padding: const EdgeInsets.all(12),
+              margin: const EdgeInsets.only(bottom: 16),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF97316).withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.edit,
+                color: Color(0xFFF97316),
+                size: 32,
+              ),
+            ),
+
+            // Поле "Название тренировки"
+            TextField(
+              controller: _workoutNameController,
+              autofocus: true,
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: const Color(0xFF374151),
+                hintText: 'workout.workout_name_hint'.tr(),
+                hintStyle: TextStyle(color: Colors.grey[500]),
+                prefixIcon: const Icon(
+                  Icons.fitness_center,
+                  color: Color(0xFFF97316),
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          // Кнопка "Отмена"
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(
+              'workout.cancel'.tr(),
+              style: TextStyle(color: Colors.grey[400]),
+            ),
+          ),
+          // Кнопка "Сохранить"
+          ElevatedButton(
+            onPressed: () {
+              if (_workoutNameController.text.trim().isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('workout.workout_name_required'.tr()),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+                return;
+              }
+              Navigator.pop(context, true);
+            },
+            child: Text('workout.save'.tr()),
+          ),
+        ],
+      ),
+    );
+
+    // Если нажали "Сохранить"
+    if (result == true) {
+      await _updateWorkoutName();
+    }
+  }
+
+// Обновить название тренировки
+  Future<void> _updateWorkoutName() async {
+    final name = _workoutNameController.text.trim();
+
+    final success = await _service.updateWorkoutMeta(
+      widget.workoutId,
+      name: name,
+    );
+
+    if (success) {
+      await _loadWorkout(); // ← Перезагружаем тренировку
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('workout.workout_name_updated'.tr()),
+            backgroundColor: const Color(0xFF10B981), // ← Зелёный (успех)
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 2),
+          ),
+        );
       }
     }
   }

@@ -12,7 +12,12 @@
     "reps": "Atkārtojumi",
     "volume": "Apjoms",
     "repeat": "Atkārtot",
-    "edit": "Rediģēt"
+    "edit": "Rediģēt",
+    "no_workouts": "Vēl nav pabeigtu treniņu",
+    "start_first": "Sāc savu pirmo treniņu!",
+    "sets": "Komplekti",
+    "completed_sets": "Pabeigts",
+    "view": "Atvērt"
   },
   "workout": {
     "title": "Treniņš",
@@ -63,7 +68,17 @@
     "finish_workout_message": "Treniņš tiks saglabāts vēsturē",
     "finish": "Pabeigt",
     "workout_finished": "Treniņš pabeigts!",
-    "workout_saved": "Treniņš saglabāts vēsturē"
+    "workout_saved": "Treniņš saglabāts vēsturē",
+    "edit_workout_name": "Mainīt nosaukumu",
+    "edit_workout_name_dialog_title": "Treniņa nosaukums",
+    "workout_name_hint": "Piemēram: Krūtis un tricepsi",
+    "workout_name_required": "Ievadiet treniņa nosaukumu",
+    "workout_name_updated": "Nosaukums mainīts",
+    "create_workout_dialog_title": "Jauns treniņš",
+    "create_workout_message": "Kā nosaukt treniņu?",
+    "workout_details": "Treniņa detaļas",
+    "completed": "Pabeigts",
+    "no_exercises_in_workout": "Šajā treniņā nav vingrinājumu"
   },
   "nav": {
     "home": "Sākums",
