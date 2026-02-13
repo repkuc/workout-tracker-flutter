@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../services/workout_service.dart';
 import '../models/workout_models.dart';
+import 'workout_editor_page.dart';
 
 class WorkoutDetailsPage extends StatefulWidget {
   final String workoutId;
@@ -80,6 +81,7 @@ class _WorkoutDetailsPageState extends State<WorkoutDetailsPage> {
                               ? _buildEmptyState()
                               : _buildExercisesList(),
                         ),
+                        _buildRepeatButton(),
                       ],
                     ),
         ),
@@ -354,6 +356,271 @@ class _WorkoutDetailsPageState extends State<WorkoutDetailsPage> {
             size: 24,
           ),
         ],
+      ),
+    );
+  }
+
+  // Показать диалог подтверждения копирования тренировки
+  Future<void> _showRepeatWorkoutDialog() async {
+    // Считаем статистику для показа
+    final totalExercises = _workout!.exercises.length;
+    final totalSets = _workout!.exercises.fold<int>(
+      0,
+      (sum, exercise) => sum + exercise.sets.length,
+    );
+
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF1F2937),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(
+            color: Color(0xFFF97316),
+            width: 2,
+          ),
+        ),
+        title: Row(
+          children: [
+            const Icon(
+              Icons.repeat,
+              color: Color(0xFFF97316),
+              size: 28,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'workout.repeat_workout_confirm'.tr(),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'workout.repeat_workout_message'.tr(),
+              style: TextStyle(
+                color: Colors.grey[400],
+                fontSize: 14,
+              ),
+            ),
+            const SizedBox(height: 16),
+            // Показываем что будет скопировано
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFF374151),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.fitness_center,
+                        color: Color(0xFFF97316),
+                        size: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _workout!.name,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _buildStatInfo(
+                        Icons.fitness_center,
+                        '$totalExercises',
+                        'history.exercises'.tr(),
+                      ),
+                      _buildStatInfo(
+                        Icons.repeat,
+                        '$totalSets',
+                        'history.sets'.tr(),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          // Кнопка "Отмена"
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(
+              'workout.cancel'.tr(),
+              style: TextStyle(color: Colors.grey[400]),
+            ),
+          ),
+          // Кнопка "Повторить"
+          ElevatedButton.icon(
+            onPressed: () => Navigator.pop(context, true),
+            icon: const Icon(Icons.repeat, size: 20),
+            label: Text('history.repeat'.tr()),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFF97316),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    // Если подтвердили
+    if (result == true) {
+      await _copyWorkout();
+    }
+  }
+
+// Скопировать тренировку
+  Future<void> _copyWorkout() async {
+    // Показываем индикатор загрузки
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text('workout.copy_in_progress'.tr()),
+            ],
+          ),
+          backgroundColor: const Color(0xFFF97316),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+
+    try {
+      // Копируем тренировку
+      final newWorkout = await _service.copyWorkout(widget.workoutId);
+
+      if (mounted) {
+        // Показываем успешное уведомление
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.white),
+                const SizedBox(width: 12),
+                Expanded(child: Text('workout.workout_copied'.tr())),
+              ],
+            ),
+            backgroundColor: const Color(0xFF10B981),
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+
+        // Открываем редактор новой тренировки (заменяем детали)
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => WorkoutEditorPage(workoutId: newWorkout.id),
+          ),
+        ).then((_) {
+          // Когда вернёмся из редактора - закроем детали и вернёмся в историю
+          if (mounted) {
+            Navigator.pop(context); // Закрываем детали, возвращаемся в историю
+          }
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Ошибка: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+// Вспомогательная функция для отображения статистики в диалоге
+  Widget _buildStatInfo(IconData icon, String value, String label) {
+    return Column(
+      children: [
+        Icon(icon, color: const Color(0xFFF97316), size: 20),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        Text(
+          label,
+          style: TextStyle(
+            color: Colors.grey[400],
+            fontSize: 11,
+          ),
+        ),
+      ],
+    );
+  }
+
+// Кнопка "Повторить тренировку"
+  Widget _buildRepeatButton() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1F2937) : const Color(0xFF374151),
+        border: Border(
+          top: BorderSide(
+            color: const Color(0xFFF97316).withOpacity(0.3),
+            width: 2,
+          ),
+        ),
+      ),
+      child: SafeArea(
+        top: false,
+        child: SizedBox(
+          width: double.infinity,
+          child: ElevatedButton.icon(
+            onPressed: _showRepeatWorkoutDialog,
+            icon: const Icon(Icons.repeat, size: 24),
+            label: Text(
+              'workout.repeat_workout'.tr(),
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFF97316), // Оранжевая
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+            ),
+          ),
+        ),
       ),
     );
   }

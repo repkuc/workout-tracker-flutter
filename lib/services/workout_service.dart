@@ -352,6 +352,59 @@ class WorkoutService {
     return true;
   }
 
+  // Скопировать тренировку (создать новую на основе существующей)
+Future<Workout> copyWorkout(String workoutId) async {
+  // Загружаем оригинальную тренировку
+  final original = await getWorkout(workoutId);
+  if (original == null) {
+    throw Exception('Workout not found');
+  }
+  
+  // Создаём новую тренировку с тем же названием
+  final newWorkout = Workout(
+    id: _uuid.v4(),
+    date: getTodayDate(),
+    name: original.name, // ← То же название
+    notes: original.notes,
+    status: 'draft', // ← Новая тренировка - черновик
+  );
+  
+  // Копируем все упражнения
+  for (final exercise in original.exercises) {
+    final newExercise = Exercise(
+      id: _uuid.v4(),
+      workoutId: newWorkout.id,
+      name: exercise.name,
+      targetMuscle: exercise.targetMuscle,
+      position: exercise.position,
+    );
+    
+    // Копируем все подходы (но делаем их невыполненными)
+    for (final set in exercise.sets) {
+      final newSet = WorkoutSet(
+        id: _uuid.v4(),
+        exerciseId: newExercise.id,
+        reps: set.reps, // ← Те же повторы
+        weight: set.weight, // ← Тот же вес
+        isDone: false, // ← НЕ выполнен (важно!)
+      );
+      newExercise.sets.add(newSet);
+    }
+    
+    newWorkout.exercises.add(newExercise);
+  }
+  
+  // Сохраняем новую тренировку
+  final workouts = await loadAllWorkouts();
+  workouts.add(newWorkout);
+  await saveAllWorkouts(workouts);
+  
+  // Устанавливаем как текущую тренировку
+  await setCurrentWorkoutId(newWorkout.id);
+  
+  return newWorkout;
+}
+
   // Получить сегодняшнюю дату в формате YYYY-MM-DD
   String getTodayDate() {
     final now = DateTime.now();

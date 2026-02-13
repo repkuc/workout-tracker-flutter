@@ -78,7 +78,16 @@
     "create_workout_message": "Как назовём тренировку?",
     "workout_details": "Детали тренировки",
     "completed": "Завершена",
-    "no_exercises_in_workout": "В этой тренировке нет упражнений" 
+    "no_exercises_in_workout": "В этой тренировке нет упражнений",
+    "repeat_workout": "Повторить тренировку",
+    "repeat_workout_confirm": "Повторить эту тренировку?",
+    "repeat_workout_message": "Будет создана новая тренировка с теми же упражнениями. Прошлые результаты помогут отслеживать прогресс!",
+    "workout_copied": "Тренировка скопирована!",
+    "copy_in_progress": "Копирую тренировку...",
+    "delete_workout": "Удалить тренировку",
+    "delete_workout_confirm": "Удалить эту тренировку?",
+    "delete_workout_message": "Тренировка будет удалена из истории безвозвратно",
+    "workout_deleted": "Тренировка удалена"
   },
   "nav": {
     "home": "Главная",

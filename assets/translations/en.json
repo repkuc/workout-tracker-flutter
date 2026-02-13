@@ -78,7 +78,16 @@
     "create_workout_message": "What should we call this workout?",
     "workout_details": "Workout details",
     "completed": "Completed",
-    "no_exercises_in_workout": "No exercises in this workout"
+    "no_exercises_in_workout": "No exercises in this workout",
+    "repeat_workout": "Repeat workout",
+    "repeat_workout_confirm": "Repeat this workout?",
+    "repeat_workout_message": "A new workout with the same exercises will be created. Previous results will help track progress!",
+    "workout_copied": "Workout copied!",
+    "copy_in_progress": "Copying workout...",
+    "delete_workout": "Delete workout",
+    "delete_workout_confirm": "Delete this workout?",
+    "delete_workout_message": "The workout will be permanently deleted from history",
+    "workout_deleted": "Workout deleted"
   },
   "nav": {
     "home": "Home",

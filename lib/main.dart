@@ -291,110 +291,126 @@ class _HomePageState extends State<HomePage> {
                           // Брутальная карточка
                           Card(
                             elevation: 12,
-                            child: Container(
-                              padding: const EdgeInsets.all(32.0),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(12),
-                                gradient: LinearGradient(
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                  colors: isDark
-                                      ? [
-                                          const Color(0xFF1F2937),
-                                          const Color(0xFF374151),
-                                        ]
-                                      : [
-                                          const Color(0xFF374151),
-                                          const Color(0xFF475569),
-                                        ],
+                            child: InkWell(
+                              onTap: () {
+                                // Открываем историю
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const HistoryPage(),
+                                  ),
+                                ).then((_) {
+                                  // Обновляем счётчик когда вернёмся
+                                  _loadWorkoutCount();
+                                });
+                              },
+                              borderRadius: BorderRadius.circular(12),
+                              child: Container(
+                                padding: const EdgeInsets.all(32.0),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(12),
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                    colors: isDark
+                                        ? [
+                                            const Color(0xFF1F2937),
+                                            const Color(0xFF374151),
+                                          ]
+                                        : [
+                                            const Color(0xFF374151),
+                                            const Color(0xFF475569),
+                                          ],
+                                  ),
                                 ),
-                              ),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min, // ← ВАЖНО!
-                                children: [
-                                  // Иконка с оранжевым фоном
-                                  Container(
-                                    padding: const EdgeInsets.all(16),
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFFF97316),
-                                      shape: BoxShape.circle,
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: const Color(0xFFF97316)
-                                              .withOpacity(0.4),
-                                          blurRadius: 20,
-                                          spreadRadius: 5,
-                                        ),
-                                      ],
-                                    ),
-                                    child: const Icon(
-                                      Icons.fitness_center,
-                                      size: 48, // ← Уменьшил размер
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 16),
-                                  Text(
-                                    'home.total_workouts'.tr().toUpperCase(),
-                                    style: TextStyle(
-                                      fontSize: 14, // ← Уменьшил
-                                      fontWeight: FontWeight.bold,
-                                      color: isDark
-                                          ? Colors.grey[400]
-                                          : Colors.grey[300],
-                                      letterSpacing: 2,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    _isLoading ? '...' : '$_workoutCount',
-                                    style: const TextStyle(
-                                      fontSize: 56, // ← Уменьшил с 72
-                                      fontWeight: FontWeight.bold,
-                                      color: Color(0xFFF97316),
-                                      height: 1,
-                                    ),
-                                  ),
-
-                                  // Бейдж черновика
-                                  if (_draftCount > 0) ...[
-                                    const SizedBox(height: 12),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min, // ← ВАЖНО!
+                                  children: [
+                                    // Иконка с оранжевым фоном
                                     Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 12, vertical: 6),
+                                      padding: const EdgeInsets.all(16),
                                       decoration: BoxDecoration(
-                                        color: const Color(0xFFF97316)
-                                            .withOpacity(0.2),
-                                        borderRadius: BorderRadius.circular(20),
-                                        border: Border.all(
-                                          color: const Color(0xFFF97316),
-                                          width: 2,
-                                        ),
-                                      ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          const Icon(
-                                            Icons.edit,
-                                            color: Color(0xFFF97316),
-                                            size: 14,
-                                          ),
-                                          const SizedBox(width: 4),
-                                          Text(
-                                            'Черновик',
-                                            style: TextStyle(
-                                              color: isDark
-                                                  ? Colors.white
-                                                  : Colors.grey[200],
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 11,
-                                            ),
+                                        color: const Color(0xFFF97316),
+                                        shape: BoxShape.circle,
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: const Color(0xFFF97316)
+                                                .withOpacity(0.4),
+                                            blurRadius: 20,
+                                            spreadRadius: 5,
                                           ),
                                         ],
                                       ),
+                                      child: const Icon(
+                                        Icons.fitness_center,
+                                        size: 48, // ← Уменьшил размер
+                                        color: Colors.white,
+                                      ),
                                     ),
+                                    const SizedBox(height: 16),
+                                    Text(
+                                      'home.total_workouts'.tr().toUpperCase(),
+                                      style: TextStyle(
+                                        fontSize: 14, // ← Уменьшил
+                                        fontWeight: FontWeight.bold,
+                                        color: isDark
+                                            ? Colors.grey[400]
+                                            : Colors.grey[300],
+                                        letterSpacing: 2,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      _isLoading ? '...' : '$_workoutCount',
+                                      style: const TextStyle(
+                                        fontSize: 56, // ← Уменьшил с 72
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFFF97316),
+                                        height: 1,
+                                      ),
+                                    ),
+
+                                    // Бейдж черновика
+                                    if (_draftCount > 0) ...[
+                                      const SizedBox(height: 12),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 12, vertical: 6),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFFF97316)
+                                              .withOpacity(0.2),
+                                          borderRadius:
+                                              BorderRadius.circular(20),
+                                          border: Border.all(
+                                            color: const Color(0xFFF97316),
+                                            width: 2,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            const Icon(
+                                              Icons.edit,
+                                              color: Color(0xFFF97316),
+                                              size: 14,
+                                            ),
+                                            const SizedBox(width: 4),
+                                            Text(
+                                              'Черновик',
+                                              style: TextStyle(
+                                                color: isDark
+                                                    ? Colors.white
+                                                    : Colors.grey[200],
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 11,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
                                   ],
-                                ],
+                                ),
                               ),
                             ),
                           ),

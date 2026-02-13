@@ -78,7 +78,16 @@
     "create_workout_message": "Kā nosaukt treniņu?",
     "workout_details": "Treniņa detaļas",
     "completed": "Pabeigts",
-    "no_exercises_in_workout": "Šajā treniņā nav vingrinājumu"
+    "no_exercises_in_workout": "Šajā treniņā nav vingrinājumu",
+    "repeat_workout": "Atkārtot treniņu",
+    "repeat_workout_confirm": "Atkārtot šo treniņu?",
+    "repeat_workout_message": "Tiks izveidots jauns treniņš ar tādiem pašiem vingrinājumiem. Iepriekšējie rezultāti palīdzēs izsekot progresu!",
+    "workout_copied": "Treniņš nokopēts!",
+    "copy_in_progress": "Kopēju treniņu...",
+    "delete_workout": "Dzēst treniņu",
+    "delete_workout_confirm": "Dzēst šo treniņu?",
+    "delete_workout_message": "Treniņš tiks neatgriezeniski dzēsts no vēstures",
+    "workout_deleted": "Treniņš dzēsts"
   },
   "nav": {
     "home": "Sākums",
