@@ -62,23 +62,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
     return Scaffold(
       // Градиентный фон
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: isDark
-                ? [
-                    const Color(0xFF0F172A),
-                    const Color(0xFF1F2937),
-                    const Color(0xFF374151),
-                  ]
-                : [
-                    const Color(0xFF1F2937),
-                    const Color(0xFF374151),
-                    const Color(0xFF4B5563),
-                  ],
-          ),
-        ),
+        color: isDark ? const Color(0xFF1F2937) : const Color(0xFF374151),
         child: SafeArea(
           child: _isLoading
               ? const Center(
@@ -114,62 +98,62 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
   }
 
   Widget _buildHeader() {
-  return Container(
-    padding: const EdgeInsets.all(16),
-    decoration: BoxDecoration(
-      color: const Color(0xFF1F2937).withOpacity(0.8),
-      border: Border(
-        bottom: BorderSide(
-          color: const Color(0xFFF97316).withOpacity(0.3),
-          width: 2,
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1F2937).withOpacity(0.8),
+        border: Border(
+          bottom: BorderSide(
+            color: const Color(0xFFF97316).withOpacity(0.3),
+            width: 2,
+          ),
         ),
       ),
-    ),
-    child: Row(
-      children: [
-        // Кнопка назад
-        IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
-        ),
-        const SizedBox(width: 8),
-        // Название тренировки
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                _workout?.name ?? 'workout.title'.tr(),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                _workout?.date ?? '',
-                style: TextStyle(
-                  color: Colors.grey[400],
-                  fontSize: 14,
-                ),
-              ),
-            ],
+      child: Row(
+        children: [
+          // Кнопка назад
+          IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () => Navigator.pop(context),
           ),
-        ),
-        // ← НОВАЯ КНОПКА: Редактировать название
-        IconButton(
-          icon: const Icon(
-            Icons.edit,
-            color: Color(0xFFF97316),
-            size: 24,
+          const SizedBox(width: 8),
+          // Название тренировки
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  _workout?.name ?? 'workout.title'.tr(),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  _workout?.date ?? '',
+                  style: TextStyle(
+                    color: Colors.grey[400],
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
           ),
-          onPressed: _showEditWorkoutNameDialog,
-          tooltip: 'workout.edit_workout_name'.tr(),
-        ),
-      ],
-    ),
-  );
-}
+          // ← НОВАЯ КНОПКА: Редактировать название
+          IconButton(
+            icon: const Icon(
+              Icons.edit,
+              color: Color(0xFFF97316),
+              size: 24,
+            ),
+            onPressed: _showEditWorkoutNameDialog,
+            tooltip: 'workout.edit_workout_name'.tr(),
+          ),
+        ],
+      ),
+    );
+  }
 
   // Пустое состояние
   // Пустое состояние (нет упражнений)
@@ -247,7 +231,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      elevation: 4,
+      elevation: 2,
       color: isDark ? const Color(0xFF1F2937) : const Color(0xFF374151),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),

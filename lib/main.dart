@@ -57,7 +57,7 @@ class MyApp extends StatelessWidget {
           centerTitle: true,
         ),
         cardTheme: CardThemeData(
-          elevation: 8,
+          elevation: 4,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
@@ -175,23 +175,9 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       // Брутальный градиент (чёрный → тёмно-серый)
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: isDark
-                ? [
-                    const Color(0xFF0F172A), // Глубокий чёрный
-                    const Color(0xFF1F2937), // Тёмно-серый
-                    const Color(0xFF374151), // Серый (без красного!)
-                  ]
-                : [
-                    const Color(0xFF1F2937), // Тёмно-серый
-                    const Color(0xFF374151), // Серый
-                    const Color(0xFF4B5563), // Светло-серый
-                  ],
-          ),
-        ),
+        color: isDark
+            ? const Color(0xFF1F2937) // Один цвет вместо градиента
+            : const Color(0xFF374151),
         child: SafeArea(
           child: Column(
             children: [
@@ -290,7 +276,7 @@ class _HomePageState extends State<HomePage> {
                         children: [
                           // Брутальная карточка
                           Card(
-                            elevation: 12,
+                            elevation: 4,
                             child: InkWell(
                               onTap: () {
                                 // Открываем историю

@@ -37,23 +37,7 @@ class _HistoryPageState extends State<HistoryPage> {
 
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: isDark
-                ? [
-                    const Color(0xFF0F172A),
-                    const Color(0xFF1F2937),
-                    const Color(0xFF374151),
-                  ]
-                : [
-                    const Color(0xFF1F2937),
-                    const Color(0xFF374151),
-                    const Color(0xFF4B5563),
-                  ],
-          ),
-        ),
+        color: isDark ? const Color(0xFF1F2937) : const Color(0xFF374151),
         child: SafeArea(
           child: Column(
             children: [
@@ -207,7 +191,7 @@ class _HistoryPageState extends State<HistoryPage> {
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      elevation: 4,
+      elevation: 2,
       color: isDark ? const Color(0xFF1F2937) : const Color(0xFF374151),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
@@ -225,7 +209,7 @@ class _HistoryPageState extends State<HistoryPage> {
             ),
           );
         },
-        onLongPress: () => _showWorkoutActionsMenu( workout),
+        onLongPress: () => _showWorkoutActionsMenu(workout),
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -545,232 +529,232 @@ class _HistoryPageState extends State<HistoryPage> {
   }
 
   // Показать меню действий для тренировки (долгое нажатие)
-Future<void> _showWorkoutActionsMenu(Workout workout) async {
-  showModalBottomSheet(
-    context: context,
-    backgroundColor: const Color(0xFF1F2937),
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.only(
-        topLeft: Radius.circular(20),
-        topRight: Radius.circular(20),
-      ),
-    ),
-    builder: (context) => SafeArea(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Заголовок
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              children: [
-                const Icon(
-                  Icons.fitness_center,
-                  color: Color(0xFFF97316),
-                  size: 24,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    workout.name,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const Divider(color: Color(0xFFF97316), height: 1),
-          
-          // Кнопка "Повторить"
-          ListTile(
-            leading: const Icon(
-              Icons.repeat,
-              color: Color(0xFFF97316),
-            ),
-            title: Text(
-              'history.repeat'.tr(),
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            onTap: () {
-              Navigator.pop(context); // Закрываем меню
-              _showRepeatWorkoutDialog(workout);
-            },
-          ),
-          
-          // Кнопка "Удалить"
-          ListTile(
-            leading: const Icon(
-              Icons.delete,
-              color: Colors.red,
-            ),
-            title: Text(
-              'workout.delete_workout'.tr(),
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            onTap: () {
-              Navigator.pop(context); // Закрываем меню
-              _showDeleteWorkoutDialog(workout);
-            },
-          ),
-          
-          const SizedBox(height: 8),
-        ],
-      ),
-    ),
-  );
-}
-
-// Показать диалог подтверждения удаления тренировки
-Future<void> _showDeleteWorkoutDialog(Workout workout) async {
-  // Считаем статистику для показа
-  final totalExercises = workout.exercises.length;
-  final totalSets = workout.exercises.fold<int>(
-    0,
-    (sum, exercise) => sum + exercise.sets.length,
-  );
-
-  final result = await showDialog<bool>(
-    context: context,
-    builder: (context) => AlertDialog(
+  Future<void> _showWorkoutActionsMenu(Workout workout) async {
+    showModalBottomSheet(
+      context: context,
       backgroundColor: const Color(0xFF1F2937),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: const BorderSide(
-          color: Colors.red, // ← Красная рамка
-          width: 2,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
         ),
       ),
-      title: Row(
-        children: [
-          const Icon(
-            Icons.warning_rounded,
-            color: Colors.red,
-            size: 28,
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              'workout.delete_workout_confirm'.tr(),
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ],
-      ),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'workout.delete_workout_message'.tr(),
-            style: TextStyle(
-              color: Colors.grey[400],
-              fontSize: 14,
-            ),
-          ),
-          const SizedBox(height: 16),
-          // Показываем что удаляем
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: const Color(0xFF374151),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.fitness_center,
-                      color: Color(0xFFF97316),
-                      size: 20,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        workout.name,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Заголовок
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.fitness_center,
+                    color: Color(0xFFF97316),
+                    size: 24,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      workout.name,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  '${totalExercises} ${'history.exercises'.tr().toLowerCase()}, ${totalSets} ${'history.sets'.tr().toLowerCase()}',
-                  style: TextStyle(
-                    color: Colors.grey[400],
-                    fontSize: 12,
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
+            const Divider(color: Color(0xFFF97316), height: 1),
+
+            // Кнопка "Повторить"
+            ListTile(
+              leading: const Icon(
+                Icons.repeat,
+                color: Color(0xFFF97316),
+              ),
+              title: Text(
+                'history.repeat'.tr(),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              onTap: () {
+                Navigator.pop(context); // Закрываем меню
+                _showRepeatWorkoutDialog(workout);
+              },
+            ),
+
+            // Кнопка "Удалить"
+            ListTile(
+              leading: const Icon(
+                Icons.delete,
+                color: Colors.red,
+              ),
+              title: Text(
+                'workout.delete_workout'.tr(),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              onTap: () {
+                Navigator.pop(context); // Закрываем меню
+                _showDeleteWorkoutDialog(workout);
+              },
+            ),
+
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
+
+// Показать диалог подтверждения удаления тренировки
+  Future<void> _showDeleteWorkoutDialog(Workout workout) async {
+    // Считаем статистику для показа
+    final totalExercises = workout.exercises.length;
+    final totalSets = workout.exercises.fold<int>(
+      0,
+      (sum, exercise) => sum + exercise.sets.length,
+    );
+
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF1F2937),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(
+            color: Colors.red, // ← Красная рамка
+            width: 2,
+          ),
+        ),
+        title: Row(
+          children: [
+            const Icon(
+              Icons.warning_rounded,
+              color: Colors.red,
+              size: 28,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'workout.delete_workout_confirm'.tr(),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'workout.delete_workout_message'.tr(),
+              style: TextStyle(
+                color: Colors.grey[400],
+                fontSize: 14,
+              ),
+            ),
+            const SizedBox(height: 16),
+            // Показываем что удаляем
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFF374151),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.fitness_center,
+                        color: Color(0xFFF97316),
+                        size: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          workout.name,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '${totalExercises} ${'history.exercises'.tr().toLowerCase()}, ${totalSets} ${'history.sets'.tr().toLowerCase()}',
+                    style: TextStyle(
+                      color: Colors.grey[400],
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(
+              'workout.cancel'.tr(),
+              style: TextStyle(color: Colors.grey[400]),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red, // ← Красная кнопка
+              foregroundColor: Colors.white,
+            ),
+            child: Text('workout.delete'.tr()),
           ),
         ],
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context, false),
-          child: Text(
-            'workout.cancel'.tr(),
-            style: TextStyle(color: Colors.grey[400]),
-          ),
-        ),
-        ElevatedButton(
-          onPressed: () => Navigator.pop(context, true),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.red, // ← Красная кнопка
-            foregroundColor: Colors.white,
-          ),
-          child: Text('workout.delete'.tr()),
-        ),
-      ],
-    ),
-  );
+    );
 
-  if (result == true) {
-    await _deleteWorkout(workout.id);
-  }
-}
-
-// Удалить тренировку
-Future<void> _deleteWorkout(String workoutId) async {
-  final success = await _service.deleteWorkout(workoutId);
-
-  if (success) {
-    await _loadWorkouts(); // ← Обновляем список
-    
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              const Icon(Icons.check_circle, color: Colors.white),
-              const SizedBox(width: 12),
-              Expanded(child: Text('workout.workout_deleted'.tr())),
-            ],
-          ),
-          backgroundColor: Colors.red, // ← Красный для удаления
-          behavior: SnackBarBehavior.floating,
-          duration: const Duration(seconds: 2),
-        ),
-      );
+    if (result == true) {
+      await _deleteWorkout(workout.id);
     }
   }
-}
+
+// Удалить тренировку
+  Future<void> _deleteWorkout(String workoutId) async {
+    final success = await _service.deleteWorkout(workoutId);
+
+    if (success) {
+      await _loadWorkouts(); // ← Обновляем список
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.white),
+                const SizedBox(width: 12),
+                Expanded(child: Text('workout.workout_deleted'.tr())),
+              ],
+            ),
+            backgroundColor: Colors.red, // ← Красный для удаления
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    }
+  }
 }

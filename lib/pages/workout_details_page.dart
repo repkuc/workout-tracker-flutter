@@ -41,23 +41,7 @@ class _WorkoutDetailsPageState extends State<WorkoutDetailsPage> {
 
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: isDark
-                ? [
-                    const Color(0xFF0F172A),
-                    const Color(0xFF1F2937),
-                    const Color(0xFF374151),
-                  ]
-                : [
-                    const Color(0xFF1F2937),
-                    const Color(0xFF374151),
-                    const Color(0xFF4B5563),
-                  ],
-          ),
-        ),
+        color: isDark ? const Color(0xFF1F2937) : const Color(0xFF374151),
         child: SafeArea(
           child: _isLoading
               ? const Center(
@@ -222,7 +206,7 @@ class _WorkoutDetailsPageState extends State<WorkoutDetailsPage> {
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      elevation: 4,
+      elevation: 2,
       color: isDark ? const Color(0xFF1F2937) : const Color(0xFF374151),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
