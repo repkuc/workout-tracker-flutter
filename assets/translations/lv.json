@@ -87,7 +87,16 @@
     "delete_workout": "Dzēst treniņu",
     "delete_workout_confirm": "Dzēst šo treniņu?",
     "delete_workout_message": "Treniņš tiks neatgriezeniski dzēsts no vēstures",
-    "workout_deleted": "Treniņš dzēsts"
+    "workout_deleted": "Treniņš dzēsts",
+    "complete_exercise": "Pabeigt vingrinājumu",
+    "uncomplete_exercise": "Atcelt pabeigšanu",
+    "exercise_completed": "Vingrinājums pabeigts",
+    "sets_word": "komplekti",
+    "completed_badge": "Pabeigts",
+    "volume": "Apjoms",
+    "previous_volume": "Bija",
+    "current_volume": "Tagad",
+    "volume_change": "Izmaiņas"
   },
   "nav": {
     "home": "Sākums",

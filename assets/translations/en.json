@@ -87,7 +87,16 @@
     "delete_workout": "Delete workout",
     "delete_workout_confirm": "Delete this workout?",
     "delete_workout_message": "The workout will be permanently deleted from history",
-    "workout_deleted": "Workout deleted"
+    "workout_deleted": "Workout deleted",
+    "complete_exercise": "Complete exercise",
+    "uncomplete_exercise": "Uncomplete exercise",
+    "exercise_completed": "Exercise completed",
+    "sets_word": "sets",
+    "completed_badge": "Completed",
+    "volume": "Volume",
+    "previous_volume": "Was",
+    "current_volume": "Now",
+    "volume_change": "Change"
   },
   "nav": {
     "home": "Home",

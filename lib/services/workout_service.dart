@@ -243,6 +243,25 @@ class WorkoutService {
     return true;
   }
 
+  // Переключить статус завершенности упражнения
+  Future<bool> toggleExerciseCompleted(
+      String workoutId, String exerciseId, bool isCompleted) async {
+    final workouts = await loadAllWorkouts();
+    final wIndex = workouts.indexWhere((w) => w.id == workoutId);
+
+    if (wIndex == -1) return false;
+
+    final eIndex =
+        workouts[wIndex].exercises.indexWhere((e) => e.id == exerciseId);
+    if (eIndex == -1) return false;
+
+    // Переключаем статус
+    workouts[wIndex].exercises[eIndex].isCompleted = isCompleted;
+
+    await saveAllWorkouts(workouts);
+    return true;
+  }
+
   // === РАБОТА С ПОДХОДАМИ ===
 
   // Добавить подход к упражнению
@@ -353,57 +372,78 @@ class WorkoutService {
   }
 
   // Скопировать тренировку (создать новую на основе существующей)
-Future<Workout> copyWorkout(String workoutId) async {
-  // Загружаем оригинальную тренировку
-  final original = await getWorkout(workoutId);
-  if (original == null) {
-    throw Exception('Workout not found');
-  }
-  
-  // Создаём новую тренировку с тем же названием
-  final newWorkout = Workout(
-    id: _uuid.v4(),
-    date: getTodayDate(),
-    name: original.name, // ← То же название
-    notes: original.notes,
-    status: 'draft', // ← Новая тренировка - черновик
-  );
-  
-  // Копируем все упражнения
-  for (final exercise in original.exercises) {
-    final newExercise = Exercise(
-      id: _uuid.v4(),
-      workoutId: newWorkout.id,
-      name: exercise.name,
-      targetMuscle: exercise.targetMuscle,
-      position: exercise.position,
-    );
-    
-    // Копируем все подходы (но делаем их невыполненными)
-    for (final set in exercise.sets) {
-      final newSet = WorkoutSet(
-        id: _uuid.v4(),
-        exerciseId: newExercise.id,
-        reps: set.reps, // ← Те же повторы
-        weight: set.weight, // ← Тот же вес
-        isDone: false, // ← НЕ выполнен (важно!)
-      );
-      newExercise.sets.add(newSet);
+  Future<Workout> copyWorkout(String workoutId) async {
+    // Загружаем оригинальную тренировку
+    final original = await getWorkout(workoutId);
+    if (original == null) {
+      throw Exception('Workout not found');
     }
-    
-    newWorkout.exercises.add(newExercise);
+
+    // Создаём новую тренировку с тем же названием
+    final newWorkout = Workout(
+      id: _uuid.v4(),
+      date: getTodayDate(),
+      name: original.name,
+      notes: original.notes,
+      status: 'draft',
+      copiedFromWorkoutId: original.id, // ← НОВОЕ: сохраняем ID оригинала
+    );
+
+    // Копируем все упражнения
+    for (final exercise in original.exercises) {
+      final newExercise = Exercise(
+        id: _uuid.v4(),
+        workoutId: newWorkout.id,
+        name: exercise.name,
+        targetMuscle: exercise.targetMuscle,
+        position: exercise.position,
+        copiedFromExerciseId:
+            exercise.id, // ← НОВОЕ: сохраняем ID оригинального упражнения
+      );
+
+      // Копируем все подходы (но делаем их невыполненными)
+      for (final set in exercise.sets) {
+        final newSet = WorkoutSet(
+          id: _uuid.v4(),
+          exerciseId: newExercise.id,
+          reps: set.reps,
+          weight: set.weight,
+          isDone: false, // ← НЕ выполнен
+        );
+        newExercise.sets.add(newSet);
+      }
+
+      newWorkout.exercises.add(newExercise);
+    }
+
+    // Сохраняем новую тренировку
+    final workouts = await loadAllWorkouts();
+    workouts.add(newWorkout);
+    await saveAllWorkouts(workouts);
+
+    // Устанавливаем как текущую тренировку
+    await setCurrentWorkoutId(newWorkout.id);
+
+    return newWorkout;
   }
-  
-  // Сохраняем новую тренировку
-  final workouts = await loadAllWorkouts();
-  workouts.add(newWorkout);
-  await saveAllWorkouts(workouts);
-  
-  // Устанавливаем как текущую тренировку
-  await setCurrentWorkoutId(newWorkout.id);
-  
-  return newWorkout;
-}
+
+  // Получить оригинальное упражнение (для сравнения при копировании)
+  Future<Exercise?> getOriginalExercise(String copiedFromExerciseId) async {
+    final workouts = await loadAllWorkouts();
+
+    // Ищем упражнение во всех тренировках
+    for (final workout in workouts) {
+      try {
+        final exercise =
+            workout.exercises.firstWhere((e) => e.id == copiedFromExerciseId);
+        return exercise;
+      } catch (e) {
+        // Продолжаем поиск
+      }
+    }
+
+    return null; // Не найдено
+  }
 
   // Получить сегодняшнюю дату в формате YYYY-MM-DD
   String getTodayDate() {

@@ -87,7 +87,16 @@
     "delete_workout": "Удалить тренировку",
     "delete_workout_confirm": "Удалить эту тренировку?",
     "delete_workout_message": "Тренировка будет удалена из истории безвозвратно",
-    "workout_deleted": "Тренировка удалена"
+    "workout_deleted": "Тренировка удалена",
+    "complete_exercise": "Завершить упражнение",
+    "uncomplete_exercise": "Отменить завершение",
+    "exercise_completed": "Упражнение завершено",
+    "sets_word": "подходов",
+    "completed_badge": "Завершено",
+    "volume": "Объём",
+    "previous_volume": "Было",
+    "current_volume": "Сейчас",
+    "volume_change": "Изменение"
   },
   "nav": {
     "home": "Главная",

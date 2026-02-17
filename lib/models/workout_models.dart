@@ -42,6 +42,8 @@ class Exercise {
   String targetMuscle; // Целевая мышца
   List<WorkoutSet> sets; // Сеты упражнения
   int position; // Позиция упражнения в тренировке
+  bool isCompleted; // Завершено ли упражнение
+  String? copiedFromExerciseId; // Идентификатор упражнения, из которого было скопировано (если применимо)
 
   // Конструктор
   Exercise({
@@ -51,6 +53,8 @@ class Exercise {
     this.targetMuscle = '', // По умолчанию пустая строка
     List<WorkoutSet>? sets,
     this.position = 0,
+    this.isCompleted = false, // По умолчанию упражнение не завершено
+    this.copiedFromExerciseId,
   }) : sets = sets ?? []; // Инициализация пустым списком, если не передан
 
   // Конвертация в JSON для сохранения
@@ -61,6 +65,8 @@ class Exercise {
     'targetMuscle': targetMuscle,
     'sets': sets.map((s) => s.toJson()).toList(),
     'position': position,
+    'isCompleted': isCompleted,
+    'copiedFromExerciseId': copiedFromExerciseId,
   };
 
   // Создание из JSON
@@ -74,6 +80,8 @@ class Exercise {
         .toList() ??
         [],
     position: json['position'] ?? 0,
+    isCompleted: json['isCompleted'] ?? false,
+    copiedFromExerciseId: json['copiedFromExerciseId'],
   );
 }
 
@@ -85,6 +93,7 @@ class Workout {
   String notes; // Заметки к тренировке
   String status; // Статус тренировки ('draft' или 'done')
   String? finishedAt; // Время завершения тренировки
+  String? copiedFromWorkoutId; // Идентификатор тренировки, из которой была скопирована (если применимо)
   List<Exercise> exercises; // Упражнения в тренировке
 
   Workout({
@@ -94,6 +103,7 @@ class Workout {
     this.notes = '',
     this.status = 'draft',
     this.finishedAt,
+    this.copiedFromWorkoutId,
     List<Exercise>? exercises,
   }) : exercises = exercises ?? [];
 
@@ -105,6 +115,7 @@ class Workout {
     'notes': notes,
     'status': status,
     'finishedAt': finishedAt,
+    'copiedFromWorkoutId': copiedFromWorkoutId,
     'exercises': exercises.map((e) => e.toJson()).toList(),
   };
 
@@ -116,6 +127,7 @@ class Workout {
     notes: json['notes'] ?? '',
     status: json['status'] ?? 'draft',
     finishedAt: json['finishedAt'],
+    copiedFromWorkoutId: json['copiedFromWorkoutId'],
     exercises: (json['exercises'] as List?)
         ?.map((e) => Exercise.fromJson(e))
         .toList() ??

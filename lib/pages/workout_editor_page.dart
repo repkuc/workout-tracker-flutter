@@ -225,7 +225,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
     );
   }
 
-  // Карточка одного упражнения
+  // Карточка одного упражнения (сворачиваемая)
   Widget _buildExerciseCard(Exercise exercise) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -236,118 +236,225 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
-          color: const Color(0xFFF97316).withOpacity(0.3),
-          width: 1,
+          // ← Зеленая рамка если завершено
+          color: exercise.isCompleted
+              ? const Color(0xFF10B981)
+              : const Color(0xFFF97316).withOpacity(0.3),
+          width: exercise.isCompleted ? 2 : 1,
         ),
       ),
-      // ← ДОБАВИЛИ InkWell для обработки долгого нажатия
-      child: InkWell(
-        onLongPress: () =>
-            _showDeleteExerciseDialog(exercise), // ← Долгое нажатие
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+      child: Theme(
+        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          initiallyExpanded: !exercise.isCompleted, // ← Свернуто если завершено
+          tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          childrenPadding:
+              const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+          // Заголовок
+          title: Row(
             children: [
-              // Название упражнения + кнопка редактирования
+              // Иконка + название
+              Icon(
+                exercise.isCompleted
+                    ? Icons.check_circle
+                    : Icons.fitness_center,
+                color: exercise.isCompleted
+                    ? const Color(0xFF10B981)
+                    : const Color(0xFFF97316),
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  exercise.name,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    decoration: exercise.isCompleted
+                        ? TextDecoration.lineThrough
+                        : null,
+                  ),
+                ),
+              ),
+              // Кнопка редактирования
+              IconButton(
+                icon: const Icon(
+                  Icons.edit,
+                  color: Color(0xFFF97316),
+                  size: 20,
+                ),
+                onPressed: () => _showEditExerciseDialog(exercise),
+                tooltip: 'workout.edit_exercise'.tr(),
+              ),
+            ],
+          ),
+          // Подзаголовок (когда свернуто)
+          // subtitle: exercise.isCompleted
+          //     ? Padding(
+          //         padding: const EdgeInsets.only(top: 4),
+          //         child: Text(
+          //           [
+          //             if (exercise.targetMuscle.isNotEmpty)
+          //               exercise.targetMuscle,
+          //             '${exercise.sets.length} ${'workout.sets_word'.tr()}',
+          //             if (exercise.sets.isNotEmpty)
+          //               '${exercise.sets.fold<double>(0, (sum, s) => sum + (s.weight * s.reps)).toStringAsFixed(0)} ${'workout.kg'.tr()}',
+          //           ].join(' • '),
+          //           style: TextStyle(
+          //             color: Colors.grey[400],
+          //             fontSize: 12,
+          //           ),
+          //         ),
+          //       )
+          //     : null,
+          // Контент (подходы + кнопки)
+          children: [
+            // Целевая мышца (если есть и не завершено)
+            if (exercise.targetMuscle.isNotEmpty && !exercise.isCompleted) ...[
               Row(
                 children: [
-                  const Icon(
-                    Icons.fitness_center,
-                    color: Color(0xFFF97316),
-                    size: 20,
+                  Icon(
+                    Icons.radio_button_checked,
+                    color: Colors.grey[500],
+                    size: 16,
                   ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      exercise.name,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
+                  const SizedBox(width: 6),
+                  Text(
+                    exercise.targetMuscle,
+                    style: TextStyle(
+                      color: Colors.grey[400],
+                      fontSize: 14,
                     ),
-                  ),
-                  // ← НОВАЯ КНОПКА РЕДАКТИРОВАНИЯ
-                  IconButton(
-                    icon: const Icon(
-                      Icons.edit,
-                      color: Color(0xFFF97316),
-                      size: 20,
-                    ),
-                    onPressed: () => _showEditExerciseDialog(exercise),
-                    tooltip: 'workout.edit_exercise'
-                        .tr(), // ← Подсказка при долгом нажатии
                   ),
                 ],
               ),
+              const SizedBox(height: 12),
+            ],
 
-              // Целевая мышца (если есть)
-              if (exercise.targetMuscle.isNotEmpty) ...[
-                const SizedBox(height: 8),
-                Row(
+            // Текущий объём упражнения
+            if (exercise.sets.isNotEmpty) ...[
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF97316).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: const Color(0xFFF97316).withOpacity(0.3),
+                    width: 1,
+                  ),
+                ),
+                child: Row(
                   children: [
-                    Icon(
-                      Icons.radio_button_checked,
-                      color: Colors.grey[500],
+                    const Icon(
+                      Icons.monitor_weight,
+                      color: Color(0xFFF97316),
                       size: 16,
                     ),
-                    const SizedBox(width: 6),
+                    const SizedBox(width: 8),
                     Text(
-                      exercise.targetMuscle,
+                      '${'workout.volume'.tr()}: ',
                       style: TextStyle(
                         color: Colors.grey[400],
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      '${exercise.sets.fold<double>(0, (sum, s) => sum + (s.weight * s.reps)).toStringAsFixed(0)} ${'workout.kg'.tr()}',
+                      style: const TextStyle(
+                        color: Color(0xFFF97316),
                         fontSize: 14,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ],
                 ),
-              ],
-
-              // Список подходов
-              if (exercise.sets.isNotEmpty) ...[
-                const SizedBox(height: 16),
-                const Divider(color: Color(0xFFF97316), height: 1),
-                const SizedBox(height: 12),
-                ...exercise.sets.asMap().entries.map((entry) {
-                  final index = entry.key;
-                  final set = entry.value;
-                  return _buildSetItem(exercise, set, index);
-                }).toList(),
-              ],
-
-              // Кнопка "Добавить подход"
+              ),
               const SizedBox(height: 12),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: () => _showAddSetDialog(exercise),
-                  icon: const Icon(
-                    Icons.add,
-                    color: Color(0xFFF97316),
-                    size: 20,
-                  ),
-                  label: Text(
-                    'workout.add_set_button'.tr(),
-                    style: const TextStyle(
+            ],
+
+            // Список подходов
+            if (exercise.sets.isNotEmpty) ...[
+              if (!exercise.isCompleted)
+                const Divider(color: Color(0xFFF97316), height: 1),
+              const SizedBox(height: 12),
+              ...exercise.sets.asMap().entries.map((entry) {
+                final index = entry.key;
+                final set = entry.value;
+                return _buildSetItem(exercise, set, index);
+              }).toList(),
+            ],
+
+            // Две кнопки рядом
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                // Кнопка "Добавить подход"
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => _showAddSetDialog(exercise),
+                    icon: const Icon(
+                      Icons.add,
                       color: Color(0xFFF97316),
-                      fontWeight: FontWeight.bold,
+                      size: 20,
                     ),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(
-                      color: Color(0xFFF97316),
-                      width: 2,
+                    label: Text(
+                      'workout.add_set_button'.tr(),
+                      style: const TextStyle(
+                        color: Color(0xFFF97316),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
                     ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(
+                        color: Color(0xFFF97316),
+                        width: 2,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
                     ),
                   ),
                 ),
-              ),
-            ],
-          ),
+
+                const SizedBox(width: 8),
+
+                // Кнопка "Завершить упражнение" / "Отменить"
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () => _toggleExerciseCompleted(exercise),
+                    icon: Icon(
+                      exercise.isCompleted ? Icons.undo : Icons.check,
+                      size: 20,
+                    ),
+                    label: Text(
+                      exercise.isCompleted
+                          ? 'workout.uncomplete_exercise'.tr()
+                          : 'workout.complete_exercise'.tr(),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: exercise.isCompleted
+                          ? Colors.grey[700]
+                          : const Color(0xFF10B981), // Зеленая
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
@@ -962,6 +1069,49 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
           SnackBar(
             content: Text('workout.exercise_updated'.tr()),
             backgroundColor: const Color(0xFF10B981), // ← Зелёный (успех)
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    }
+  }
+
+  // Переключить статус завершенности упражнения
+  Future<void> _toggleExerciseCompleted(Exercise exercise) async {
+    final newStatus = !exercise.isCompleted;
+
+    final success = await _service.toggleExerciseCompleted(
+      widget.workoutId,
+      exercise.id,
+      newStatus,
+    );
+
+    if (success) {
+      await _loadWorkout(); // ← Перезагружаем тренировку
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(
+                  newStatus ? Icons.check_circle : Icons.undo,
+                  color: Colors.white,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    newStatus
+                        ? 'workout.exercise_completed'.tr()
+                        : 'workout.uncomplete_exercise'.tr(),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: newStatus
+                ? const Color(0xFF10B981) // Зеленый если завершили
+                : const Color(0xFFF97316), // Оранжевый если отменили
             behavior: SnackBarBehavior.floating,
             duration: const Duration(seconds: 2),
           ),
