@@ -20,6 +20,9 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
   Workout? _workout;
   bool _isLoading = true;
 
+  Map<String, Exercise> _originalExercises =
+      {}; // Храним оригинальные упражнения для сравнения
+
   // Контроллеры для формы добавления упражнения
   final _exerciseNameController = TextEditingController();
   final _targetMuscleController = TextEditingController();
@@ -47,10 +50,26 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
     super.dispose();
   }
 
+//
   Future<void> _loadWorkout() async {
     final workout = await _service.getWorkout(widget.workoutId);
+
+    final originalExercises = <String, Exercise>{};
+    if (workout != null) {
+      for (final exercise in workout.exercises) {
+        if (exercise.copiedFromExerciseId != null) {
+          final original = await _service
+              .getOriginalExercise(exercise.copiedFromExerciseId!);
+          if (original != null) {
+            originalExercises[exercise.id] = original;
+          }
+        }
+      }
+    }
+
     setState(() {
       _workout = workout;
+      _originalExercises = originalExercises; // ← Сохраняем
       _isLoading = false;
     });
   }
@@ -333,44 +352,146 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
             ],
 
             // Текущий объём упражнения
+            // Объём упражнения (с сравнением если скопировано)
             if (exercise.sets.isNotEmpty) ...[
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF97316).withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: const Color(0xFFF97316).withOpacity(0.3),
-                    width: 1,
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.monitor_weight,
-                      color: Color(0xFFF97316),
-                      size: 16,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      '${'workout.volume'.tr()}: ',
-                      style: TextStyle(
-                        color: Colors.grey[400],
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
+              Builder(
+                builder: (context) {
+                  // Текущий объём
+                  final currentVolume = exercise.sets.fold<double>(
+                    0,
+                    (sum, s) => sum + (s.weight * s.reps),
+                  );
+
+                  // Оригинальное упражнение (если скопировано)
+                  final original = _originalExercises[exercise.id];
+                  final previousVolume = original?.sets.fold<double>(
+                    0,
+                    (sum, s) => sum + (s.weight * s.reps),
+                  );
+
+                  // Разница
+                  final hasPrevious = previousVolume != null;
+                  final difference =
+                      hasPrevious ? currentVolume - previousVolume : 0;
+                  final isIncrease = difference > 0;
+                  final isDecrease = difference < 0;
+
+                  return Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF97316).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: const Color(0xFFF97316).withOpacity(0.3),
+                        width: 1,
                       ),
                     ),
-                    Text(
-                      '${exercise.sets.fold<double>(0, (sum, s) => sum + (s.weight * s.reps)).toStringAsFixed(0)} ${'workout.kg'.tr()}',
-                      style: const TextStyle(
-                        color: Color(0xFFF97316),
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
+                    child: hasPrevious
+                        ? Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Сравнение
+                              Row(
+                                children: [
+                                  const Icon(
+                                    Icons.monitor_weight,
+                                    color: Color(0xFFF97316),
+                                    size: 16,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    '${'workout.previous_volume'.tr()}: ',
+                                    style: TextStyle(
+                                      color: Colors.grey[400],
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                  Text(
+                                    '${previousVolume.toStringAsFixed(0)} ${'workout.kg'.tr()}',
+                                    style: TextStyle(
+                                      color: Colors.grey[400],
+                                      fontSize: 12,
+                                      decoration: TextDecoration.lineThrough,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  const Icon(
+                                    Icons.arrow_forward,
+                                    color: Color(0xFFF97316),
+                                    size: 14,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    '${currentVolume.toStringAsFixed(0)} ${'workout.kg'.tr()}',
+                                    style: const TextStyle(
+                                      color: Color(0xFFF97316),
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              // Разница
+                              if (difference != 0) ...[
+                                const SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    const SizedBox(
+                                        width: 24), // Отступ под иконку
+                                    Icon(
+                                      isIncrease
+                                          ? Icons.trending_up
+                                          : Icons.trending_down,
+                                      color: isIncrease
+                                          ? const Color(0xFF10B981)
+                                          : Colors.red,
+                                      size: 16,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      '${isIncrease ? '+' : ''}${difference.toStringAsFixed(0)} ${'workout.kg'.tr()}',
+                                      style: TextStyle(
+                                        color: isIncrease
+                                            ? const Color(0xFF10B981)
+                                            : Colors.red,
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ],
+                          )
+                        : Row(
+                            children: [
+                              const Icon(
+                                Icons.monitor_weight,
+                                color: Color(0xFFF97316),
+                                size: 16,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                '${'workout.volume'.tr()}: ',
+                                style: TextStyle(
+                                  color: Colors.grey[400],
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                '${currentVolume.toStringAsFixed(0)} ${'workout.kg'.tr()}',
+                                style: const TextStyle(
+                                  color: Color(0xFFF97316),
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                  );
+                },
               ),
               const SizedBox(height: 12),
             ],
@@ -1563,6 +1684,16 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
 
   // Показать диалог подтверждения завершения тренировки
   Future<void> _showFinishWorkoutDialog() async {
+    // ← НОВОЕ: Проверяем незавершенные упражнения
+    final incomplete = _getIncompleteExercises();
+    if (incomplete.isNotEmpty) {
+      // Показываем предупреждение
+      final shouldContinue = await _showIncompleteExercisesDialog(incomplete);
+      if (!shouldContinue) {
+        return; // Пользователь нажал "Вернуться"
+      }
+    }
+
     // Считаем статистику
     final totalExercises = _workout!.exercises.length;
     final totalSets = _workout!.exercises.fold<int>(
@@ -1685,6 +1816,156 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
     if (result == true) {
       await _finishWorkout();
     }
+  }
+
+  // Проверить есть ли незавершенные упражнения
+  List<Map<String, dynamic>> _getIncompleteExercises() {
+    final incomplete = <Map<String, dynamic>>[];
+
+    for (final exercise in _workout!.exercises) {
+      // Нет подходов
+      if (exercise.sets.isEmpty) {
+        incomplete.add({
+          'name': exercise.name,
+          'issue': 'workout.no_sets'.tr(),
+        });
+        continue;
+      }
+
+      // Есть невыполненные подходы
+      final incompleteSets = exercise.sets.where((s) => !s.isDone).length;
+      if (incompleteSets > 0) {
+        incomplete.add({
+          'name': exercise.name,
+          'issue': '$incompleteSets ${'workout.incomplete_sets'.tr()}',
+        });
+      }
+    }
+
+    return incomplete;
+  }
+
+  // Показать диалог о незавершенных упражнениях
+  Future<bool> _showIncompleteExercisesDialog(
+      List<Map<String, dynamic>> incomplete) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF1F2937),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(
+            color: Colors.orange,
+            width: 2,
+          ),
+        ),
+        title: Row(
+          children: [
+            const Icon(
+              Icons.warning_rounded,
+              color: Colors.orange,
+              size: 28,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'workout.incomplete_exercises'.tr(),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'workout.incomplete_exercises_warning'.tr(),
+              style: TextStyle(
+                color: Colors.grey[400],
+                fontSize: 14,
+              ),
+            ),
+            const SizedBox(height: 16),
+            // Список незавершенных упражнений
+            Container(
+              constraints: const BoxConstraints(maxHeight: 200),
+              child: SingleChildScrollView(
+                child: Column(
+                  children: incomplete.map((item) {
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF374151),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.fitness_center,
+                            color: Colors.orange,
+                            size: 16,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  item['name'],
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  item['issue'],
+                                  style: TextStyle(
+                                    color: Colors.grey[400],
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          // Кнопка "Вернуться"
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(
+              'workout.go_back'.tr(),
+              style: const TextStyle(color: Color(0xFFF97316)),
+            ),
+          ),
+          // Кнопка "Всё равно завершить"
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF10B981),
+              foregroundColor: Colors.white,
+            ),
+            child: Text('workout.finish_anyway'.tr()),
+          ),
+        ],
+      ),
+    );
+
+    return result ?? false;
   }
 
   // Вспомогательная функция для строки статистики

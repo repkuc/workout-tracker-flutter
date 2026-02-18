@@ -96,7 +96,15 @@
     "volume": "Volume",
     "previous_volume": "Was",
     "current_volume": "Now",
-    "volume_change": "Change"
+    "volume_change": "Change",
+    "create": "Create",
+    "start": "Start",
+    "incomplete_exercises": "Incomplete exercises",
+    "incomplete_exercises_warning": "You have incomplete exercises:",
+    "finish_anyway": "Finish anyway",
+    "go_back": "Go back",
+    "no_sets": "no sets",
+    "incomplete_sets": "sets incomplete"
   },
   "nav": {
     "home": "Home",

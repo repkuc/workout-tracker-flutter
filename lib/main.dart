@@ -593,7 +593,7 @@ class _HomePageState extends State<HomePage> {
               Navigator.pop(context, name);
             },
             child: Text(
-                'workout.add_exercise'.tr()), // "Добавить" как кнопка создания
+                'workout.create'.tr()), // "Добавить" как кнопка создания
           ),
         ],
       ),

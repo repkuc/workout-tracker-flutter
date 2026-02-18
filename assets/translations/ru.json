@@ -96,7 +96,15 @@
     "volume": "Объём",
     "previous_volume": "Было",
     "current_volume": "Сейчас",
-    "volume_change": "Изменение"
+    "volume_change": "Изменение",
+    "create": "Создать",
+    "start": "Начать",
+    "incomplete_exercises": "Незавершённые упражнения",
+    "incomplete_exercises_warning": "У вас есть незавершённые упражнения:",
+    "finish_anyway": "Всё равно завершить",
+    "go_back": "Вернуться",
+    "no_sets": "нет подходов",
+    "incomplete_sets": "подходов не выполнено"
   },
   "nav": {
     "home": "Главная",

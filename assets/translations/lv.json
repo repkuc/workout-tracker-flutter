@@ -96,7 +96,15 @@
     "volume": "Apjoms",
     "previous_volume": "Bija",
     "current_volume": "Tagad",
-    "volume_change": "Izmaiņas"
+    "volume_change": "Izmaiņas",
+    "create": "Izveidot",
+    "start": "Sākt",
+    "incomplete_exercises": "Nepabeigti vingrinājumi",
+    "incomplete_exercises_warning": "Jums ir nepabeigti vingrinājumi:",
+    "finish_anyway": "Pabeigt tik un tā",
+    "go_back": "Atgriezties",
+    "no_sets": "nav komplektu",
+    "incomplete_sets": "komplekti nav pabeigti"
   },
   "nav": {
     "home": "Sākums",
