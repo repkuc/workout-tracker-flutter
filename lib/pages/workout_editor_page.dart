@@ -374,7 +374,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                   final difference =
                       hasPrevious ? currentVolume - previousVolume : 0;
                   final isIncrease = difference > 0;
-                  final isDecrease = difference < 0;
+                  //final isDecrease = difference < 0;
 
                   return Container(
                     padding:
@@ -936,130 +936,6 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
             content:
                 Text('$name - ${'workout.add_exercise'.tr().toLowerCase()}!'),
             backgroundColor: const Color(0xFF10B981),
-          ),
-        );
-      }
-    }
-  }
-
-  // Показать диалог подтверждения удаления упражнения
-  Future<void> _showDeleteExerciseDialog(Exercise exercise) async {
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1F2937),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(
-            color: Colors.red, // ← КРАСНАЯ рамка для опасного действия
-            width: 2,
-          ),
-        ),
-        title: Row(
-          children: [
-            const Icon(
-              Icons.warning_rounded, // ← Иконка предупреждения
-              color: Colors.red,
-              size: 28,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                'workout.delete_exercise_confirm'.tr(),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'workout.delete_exercise_message'.tr(),
-              style: TextStyle(
-                color: Colors.grey[400],
-                fontSize: 14,
-              ),
-            ),
-            const SizedBox(height: 12),
-            // Показываем название удаляемого упражнения
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: const Color(0xFF374151),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.fitness_center,
-                    color: Color(0xFFF97316),
-                    size: 20,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      exercise.name,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          // Кнопка "Отмена"
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(
-              'workout.cancel'.tr(),
-              style: TextStyle(color: Colors.grey[400]),
-            ),
-          ),
-          // Кнопка "Удалить" (красная!)
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red, // ← КРАСНАЯ кнопка
-              foregroundColor: Colors.white,
-            ),
-            child: Text('workout.delete'.tr()),
-          ),
-        ],
-      ),
-    );
-
-    // Если пользователь подтвердил удаление
-    if (result == true) {
-      await _deleteExercise(exercise.id);
-    }
-  }
-
-  // Удалить упражнение из тренировки
-  Future<void> _deleteExercise(String exerciseId) async {
-    final success = await _service.removeExercise(
-      widget.workoutId,
-      exerciseId,
-    );
-
-    if (success) {
-      await _loadWorkout(); // ← Перезагружаем тренировку
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('workout.exercise_deleted'.tr()),
-            backgroundColor: Colors.red, // ← Красный snackbar для удаления
-            behavior: SnackBarBehavior.floating,
-            duration: const Duration(seconds: 2),
           ),
         );
       }
