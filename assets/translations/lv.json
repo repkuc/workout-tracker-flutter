@@ -104,7 +104,13 @@
     "finish_anyway": "Pabeigt tik un tā",
     "go_back": "Atgriezties",
     "no_sets": "nav komplektu",
-    "incomplete_sets": "komplekti nav pabeigti"
+    "incomplete_sets": "komplekti nav pabeigti",
+    "start_timer": "Sākt treniņu",
+    "timer_running": "Treniņš notiek",
+    "duration": "Ilgums",
+    "workout_duration": "Treniņa ilgums",
+    "total_volume": "Kopējais apjoms",
+    "total_volume_short": "Apjoms"
   },
   "nav": {
     "home": "Sākums",

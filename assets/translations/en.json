@@ -104,7 +104,13 @@
     "finish_anyway": "Finish anyway",
     "go_back": "Go back",
     "no_sets": "no sets",
-    "incomplete_sets": "sets incomplete"
+    "incomplete_sets": "sets incomplete",
+    "start_timer": "Start workout",
+    "timer_running": "Workout in progress",
+    "duration": "Duration",
+    "workout_duration": "Workout duration",
+    "total_volume": "Total volume",
+    "total_volume_short": "Volume"
   },
   "nav": {
     "home": "Home",

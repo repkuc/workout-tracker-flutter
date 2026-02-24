@@ -137,6 +137,22 @@ class _WorkoutDetailsPageState extends State<WorkoutDetailsPage> {
                             fontSize: 14,
                           ),
                         ),
+                        if (_workout?.duration != null) ...[
+                          const SizedBox(width: 12),
+                          Icon(
+                            Icons.timer,
+                            color: const Color(0xFF10B981),
+                            size: 16,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            _formatDuration(_workout!.duration!),
+                            style: TextStyle(
+                              color: Colors.grey[400],
+                              fontSize: 14,
+                            ),
+                          )
+                        ]
                       ],
                     ),
                   ],
@@ -607,5 +623,18 @@ class _WorkoutDetailsPageState extends State<WorkoutDetailsPage> {
         ),
       ),
     );
+  }
+
+  // Вспомогательная функция для форматирования продолжительности
+  // Форматировать длительность (секунды → ЧЧ:ММ или ММ:СС)
+  String _formatDuration(int seconds) {
+    final hours = seconds ~/ 3600;
+    final minutes = (seconds % 3600) ~/ 60;
+
+    if (hours > 0) {
+      return '${hours}ч ${minutes}м';
+    } else {
+      return '${minutes}м';
+    }
   }
 }

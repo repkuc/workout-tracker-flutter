@@ -326,6 +326,12 @@ class _HistoryPageState extends State<HistoryPage> {
                     'history.volume'.tr(),
                     '${totalVolume.toStringAsFixed(0)} ${'workout.kg'.tr()}',
                   ),
+                  if (workout.duration != null)
+                    _buildStatColumn(
+                      Icons.timer,
+                      'workout.duration'.tr(),
+                      _formatDuration(workout.duration!),
+                    ),
                 ],
               ),
             ],
@@ -755,6 +761,18 @@ class _HistoryPageState extends State<HistoryPage> {
           ),
         );
       }
+    }
+  }
+
+  // Форматировать длительность (секунды → ЧЧ:ММ или ММ:СС)
+  String _formatDuration(int seconds) {
+    final hours = seconds ~/ 3600;
+    final minutes = (seconds % 3600) ~/ 60;
+
+    if (hours > 0) {
+      return '${hours}ч ${minutes}м';
+    } else {
+      return '${minutes}м';
     }
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../services/workout_service.dart';
 import '../models/workout_models.dart';
+import 'dart:async';
 
 class WorkoutEditorPage extends StatefulWidget {
   final String workoutId;
@@ -22,6 +23,9 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
 
   Map<String, Exercise> _originalExercises =
       {}; // Храним оригинальные упражнения для сравнения
+
+  Timer? _timer; // Таймер для отслеживания длительности тренировки
+  int _elapsedSeconds = 0; // Прошедшее время в секундах
 
   // Контроллеры для формы добавления упражнения
   final _exerciseNameController = TextEditingController();
@@ -47,13 +51,15 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
     _repsController.dispose();
     _weightController.dispose();
     _workoutNameController.dispose();
+    _timer?.cancel(); // Останавливаем таймер при уничтожении страницы
     super.dispose();
   }
 
-//
+  // Загрузка тренировки и оригинальных упражнений для сравнения
   Future<void> _loadWorkout() async {
     final workout = await _service.getWorkout(widget.workoutId);
 
+    // Загружаем оригинальные упражнения для сравнения
     final originalExercises = <String, Exercise>{};
     if (workout != null) {
       for (final exercise in workout.exercises) {
@@ -69,9 +75,62 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
 
     setState(() {
       _workout = workout;
-      _originalExercises = originalExercises; // ← Сохраняем
+      _originalExercises = originalExercises;
       _isLoading = false;
     });
+
+    // ← НОВОЕ: Если тренировка уже начата - продолжаем таймер
+    if (workout?.startedAt != null && _timer == null) {
+      final startTime = DateTime.parse(workout!.startedAt!);
+      final elapsed = DateTime.now().difference(startTime).inSeconds;
+      setState(() {
+        _elapsedSeconds = elapsed;
+      });
+
+      // Запускаем таймер для обновления UI
+      _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+        if (!mounted) return;
+        if (_workout?.startedAt != null) {
+          final startTime = DateTime.parse(_workout!.startedAt!);
+          final elapsed = DateTime.now().difference(startTime).inSeconds;
+          setState(() {
+            _elapsedSeconds = elapsed;
+          });
+        }
+      });
+    }
+  }
+
+  // Запустить таймер тренировки
+  Future<void> _startTimer() async {
+    // Сохраняем время начала в базу
+    await _service.startWorkoutTimer(widget.workoutId);
+    await _loadWorkout(); // Перезагружаем тренировку
+
+    // Запускаем таймер UI
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) return;
+      if (_workout?.startedAt != null) {
+        final startTime = DateTime.parse(_workout!.startedAt!);
+        final elapsed = DateTime.now().difference(startTime).inSeconds;
+        setState(() {
+          _elapsedSeconds = elapsed;
+        });
+      }
+    });
+  }
+
+// Форматировать время (секунды → ЧЧ:ММ:СС или ММ:СС)
+  String _formatDuration(int seconds) {
+    final hours = seconds ~/ 3600;
+    final minutes = (seconds % 3600) ~/ 60;
+    final secs = seconds % 60;
+
+    if (hours > 0) {
+      return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
+    } else {
+      return '${minutes.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
+    }
   }
 
   @override
@@ -116,6 +175,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
     );
   }
 
+  //  Построить заголовок тренировки
   Widget _buildHeader() {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -128,47 +188,231 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
           ),
         ),
       ),
-      child: Row(
+      child: Column(
         children: [
-          // Кнопка назад
-          IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: () => Navigator.pop(context),
+          Row(
+            children: [
+              // Кнопка назад
+              IconButton(
+                icon: const Icon(Icons.arrow_back, color: Colors.white),
+                onPressed: () => Navigator.pop(context),
+              ),
+              const SizedBox(width: 8),
+              // Название тренировки
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _workout?.name ?? 'workout.title'.tr(),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      _workout?.date ?? '',
+                      style: TextStyle(
+                        color: Colors.grey[400],
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Кнопка редактирования названия
+              IconButton(
+                icon: const Icon(
+                  Icons.edit,
+                  color: Color(0xFFF97316),
+                  size: 24,
+                ),
+                onPressed: _showEditWorkoutNameDialog,
+                tooltip: 'workout.edit_workout_name'.tr(),
+              ),
+            ],
           ),
-          const SizedBox(width: 8),
-          // Название тренировки
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  _workout?.name ?? 'workout.title'.tr(),
+
+          // ← НОВОЕ: Таймер или кнопка запуска
+          // ← НОВОЕ: Таймер + объём в одну строку
+          const SizedBox(height: 12),
+          if (_workout?.startedAt == null)
+            // Кнопка "Начать тренировку" (на всю ширину)
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: _startTimer,
+                icon: const Icon(Icons.play_arrow, size: 20),
+                label: Text(
+                  'workout.start_timer'.tr(),
                   style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
+                    fontSize: 14,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                Text(
-                  _workout?.date ?? '',
-                  style: TextStyle(
-                    color: Colors.grey[400],
-                    fontSize: 14,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF10B981),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+              ),
+            )
+          else
+            // Таймер + Объём (50/50)
+            Row(
+              children: [
+                // Левая часть: Таймер
+                Expanded(
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF10B981).withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: const Color(0xFF10B981),
+                        width: 2,
+                      ),
+                    ),
+                    child: Column(
+                      children: [
+                        const Icon(
+                          Icons.timer,
+                          color: Color(0xFF10B981),
+                          size: 18,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          _formatDuration(_elapsedSeconds),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            fontFeatures: [FontFeature.tabularFigures()],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                const SizedBox(width: 8),
+
+                // Правая часть: Объём
+                Expanded(
+                  child: Builder(
+                    builder: (context) {
+                      // Текущий объём всей тренировки
+                      final currentVolume = _workout!.exercises.fold<double>(
+                        0,
+                        (sum, ex) =>
+                            sum +
+                            ex.sets.fold<double>(
+                              0,
+                              (s, set) => s + (set.weight * set.reps),
+                            ),
+                      );
+
+                      // Прошлый объём (если тренировка скопирована)
+                      final previousVolume =
+                          _workout!.copiedFromWorkoutId != null
+                              ? _originalExercises.values.fold<double>(
+                                  0,
+                                  (sum, ex) =>
+                                      sum +
+                                      ex.sets.fold<double>(
+                                        0,
+                                        (s, set) => s + (set.weight * set.reps),
+                                      ),
+                                )
+                              : null;
+
+                      final difference = previousVolume != null
+                          ? currentVolume - previousVolume
+                          : 0;
+                      final isIncrease = difference > 0;
+
+                      return Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF97316).withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: const Color(0xFFF97316),
+                            width: 2,
+                          ),
+                        ),
+                        child: previousVolume != null
+                            ? Column(
+                                children: [
+                                  const Icon(
+                                    Icons.monitor_weight,
+                                    color: Color(0xFFF97316),
+                                    size: 16,
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    '${currentVolume.toStringAsFixed(0)}',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  if (difference != 0)
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          isIncrease
+                                              ? Icons.arrow_upward
+                                              : Icons.arrow_downward,
+                                          color: isIncrease
+                                              ? const Color(0xFF10B981)
+                                              : Colors.red,
+                                          size: 12,
+                                        ),
+                                        Text(
+                                          '${difference.abs().toStringAsFixed(0)}',
+                                          style: TextStyle(
+                                            color: isIncrease
+                                                ? const Color(0xFF10B981)
+                                                : Colors.red,
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                ],
+                              )
+                            : Column(
+                                children: [
+                                  const Icon(
+                                    Icons.monitor_weight,
+                                    color: Color(0xFFF97316),
+                                    size: 18,
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    '${currentVolume.toStringAsFixed(0)}',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                      );
+                    },
                   ),
                 ),
               ],
             ),
-          ),
-          // ← НОВАЯ КНОПКА: Редактировать название
-          IconButton(
-            icon: const Icon(
-              Icons.edit,
-              color: Color(0xFFF97316),
-              size: 24,
-            ),
-            onPressed: _showEditWorkoutNameDialog,
-            tooltip: 'workout.edit_workout_name'.tr(),
-          ),
         ],
       ),
     );
@@ -1570,27 +1814,54 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
       }
     }
 
-    // Считаем статистику
+    // Считаем текущую статистику
     final totalExercises = _workout!.exercises.length;
-    final totalSets = _workout!.exercises.fold<int>(
-      0,
-      (sum, exercise) => sum + exercise.sets.length,
-    );
     final completedSets = _workout!.exercises.fold<int>(
       0,
       (sum, exercise) => sum + exercise.sets.where((s) => s.isDone).length,
     );
-
-    // ← НОВОЕ: Считаем общий объём (вес × повторы для выполненных подходов)
+    final totalSets = _workout!.exercises.fold<int>(
+      0,
+      (sum, exercise) => sum + exercise.sets.length,
+    );
     final totalVolume = _workout!.exercises.fold<double>(
-      0.0,
+      0,
       (sum, exercise) =>
           sum +
-          exercise.sets
-              .where((s) => s.isDone) // Только выполненные подходы
-              .fold<double>(
-                  0.0, (setSum, set) => setSum + (set.weight * set.reps)),
+          exercise.sets.fold<double>(
+            0,
+            (s, set) => s + (set.isDone ? set.weight * set.reps : 0),
+          ),
     );
+
+// ← НОВОЕ: Считаем прошлую статистику (если скопировано)
+    int? previousExercises;
+    int? previousSets;
+    double? previousVolume;
+    int? previousDuration;
+
+    if (_workout!.copiedFromWorkoutId != null &&
+        _originalExercises.isNotEmpty) {
+      previousExercises = _originalExercises.length;
+      previousSets = _originalExercises.values.fold<int>(
+        0,
+        (sum, ex) => sum + ex.sets.length,
+      );
+      previousVolume = _originalExercises.values.fold<double>(
+        0,
+        (sum, ex) =>
+            sum +
+            ex.sets.fold<double>(
+              0,
+              (s, set) => s + (set.weight * set.reps),
+            ),
+      );
+
+      // Загружаем оригинальную тренировку для времени
+      final originalWorkout =
+          await _service.getWorkout(_workout!.copiedFromWorkoutId!);
+      previousDuration = originalWorkout?.duration;
+    }
 
     final result = await showDialog<bool>(
       context: context,
@@ -1643,24 +1914,37 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
               ),
               child: Column(
                 children: [
-                  _buildStatRow(
+                  // Упражнения
+                  _buildStatRowWithComparison(
                     Icons.fitness_center,
-                    'Упражнений',
-                    '$totalExercises',
+                    'history.exercises'.tr(),
+                    totalExercises,
+                    previousExercises,
                   ),
                   const SizedBox(height: 8),
-                  _buildStatRow(
+
+                  // Подходы
+                  _buildStatRowWithComparison(
                     Icons.repeat,
-                    'Подходов',
-                    '$completedSets / $totalSets',
+                    'history.sets'.tr(),
+                    totalSets,
+                    previousSets,
                   ),
-                  // ← НОВОЕ: Показываем общий объём
                   const SizedBox(height: 8),
-                  _buildStatRow(
-                    Icons.monitor_weight,
-                    'Общий объём',
-                    '${totalVolume.toStringAsFixed(0)} ${'workout.kg'.tr()}',
+
+                  // Объём
+                  _buildVolumeComparison(
+                    totalVolume,
+                    previousVolume,
                   ),
+                  const SizedBox(height: 8),
+
+                  // Длительность
+                  if (_workout!.startedAt != null)
+                    _buildDurationComparison(
+                      _elapsedSeconds,
+                      previousDuration,
+                    ),
                 ],
               ),
             ),
@@ -1867,6 +2151,277 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
           ),
         ),
       ],
+    );
+  }
+
+// Строка статистики с сравнением (вертикальная)
+  Widget _buildStatRowWithComparison(
+    IconData icon,
+    String label,
+    int current,
+    int? previous,
+  ) {
+    final difference = previous != null ? current - previous : null;
+    final isIncrease = difference != null && difference > 0;
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF374151),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: const Color(0xFF10B981), size: 24),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: Colors.grey[400],
+                    fontSize: 12,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    if (previous != null) ...[
+                      Text(
+                        '$previous',
+                        style: TextStyle(
+                          color: Colors.grey[500],
+                          fontSize: 16,
+                          decoration: TextDecoration.lineThrough,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      const Icon(Icons.arrow_forward,
+                          color: Color(0xFFF97316), size: 16),
+                      const SizedBox(width: 6),
+                    ],
+                    Text(
+                      '$current',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    if (difference != null && difference != 0) ...[
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: isIncrease
+                              ? const Color(0xFF10B981).withOpacity(0.2)
+                              : Colors.red.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          '${isIncrease ? '+' : ''}$difference',
+                          style: TextStyle(
+                            color: isIncrease
+                                ? const Color(0xFF10B981)
+                                : Colors.red,
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+// Сравнение объёма (вертикальная)
+  Widget _buildVolumeComparison(double current, double? previous) {
+    final difference = previous != null ? current - previous : null;
+    final isIncrease = difference != null && difference > 0;
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF374151),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.monitor_weight, color: Color(0xFF10B981), size: 24),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'workout.total_volume_short'.tr(),
+                  style: TextStyle(
+                    color: Colors.grey[400],
+                    fontSize: 12,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    if (previous != null) ...[
+                      Text(
+                        '${previous.toStringAsFixed(0)}',
+                        style: TextStyle(
+                          color: Colors.grey[500],
+                          fontSize: 16,
+                          decoration: TextDecoration.lineThrough,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      const Icon(Icons.arrow_forward,
+                          color: Color(0xFFF97316), size: 16),
+                      const SizedBox(width: 6),
+                    ],
+                    Text(
+                      '${current.toStringAsFixed(0)} ${'workout.kg'.tr()}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    if (difference != null && difference != 0) ...[
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: isIncrease
+                              ? const Color(0xFF10B981).withOpacity(0.2)
+                              : Colors.red.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          '${isIncrease ? '+' : ''}${difference.toStringAsFixed(0)}',
+                          style: TextStyle(
+                            color: isIncrease
+                                ? const Color(0xFF10B981)
+                                : Colors.red,
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+// Сравнение длительности (вертикальная)
+  Widget _buildDurationComparison(int currentSeconds, int? previousSeconds) {
+    final difference =
+        previousSeconds != null ? currentSeconds - previousSeconds : null;
+    final isFaster = difference != null && difference < 0;
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF374151),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.timer, color: Color(0xFF10B981), size: 24),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'workout.duration'.tr(),
+                  style: TextStyle(
+                    color: Colors.grey[400],
+                    fontSize: 12,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    if (previousSeconds != null) ...[
+                      Text(
+                        _formatDuration(previousSeconds),
+                        style: TextStyle(
+                          color: Colors.grey[500],
+                          fontSize: 16,
+                          decoration: TextDecoration.lineThrough,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      const Icon(Icons.arrow_forward,
+                          color: Color(0xFFF97316), size: 16),
+                      const SizedBox(width: 6),
+                    ],
+                    Text(
+                      _formatDuration(currentSeconds),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    if (difference != null && difference != 0) ...[
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: isFaster
+                              ? const Color(0xFF10B981).withOpacity(0.2)
+                              : Colors.red.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              isFaster ? Icons.flash_on : Icons.schedule,
+                              size: 14,
+                              color: isFaster
+                                  ? const Color(0xFF10B981)
+                                  : Colors.red,
+                            ),
+                            const SizedBox(width: 2),
+                            Text(
+                              _formatDuration(difference.abs()),
+                              style: TextStyle(
+                                color: isFaster
+                                    ? const Color(0xFF10B981)
+                                    : Colors.red,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 

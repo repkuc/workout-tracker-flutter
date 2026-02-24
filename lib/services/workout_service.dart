@@ -142,8 +142,16 @@ class WorkoutService {
 
     if (index == -1) return false;
 
+    final now = DateTime.now();
     workouts[index].status = 'done';
-    workouts[index].finishedAt = DateTime.now().toIso8601String();
+    workouts[index].finishedAt = now.toIso8601String();
+
+    // ← НОВОЕ: Рассчитываем длительность
+    if (workouts[index].startedAt != null) {
+      final startTime = DateTime.parse(workouts[index].startedAt!);
+      final duration = now.difference(startTime).inSeconds;
+      workouts[index].duration = duration;
+    }
 
     await saveAllWorkouts(workouts);
 
@@ -153,6 +161,20 @@ class WorkoutService {
       await setCurrentWorkoutId(null);
     }
 
+    return true;
+  }
+
+  // Запустить таймер тренировки
+  Future<bool> startWorkoutTimer(String workoutId) async {
+    final workouts = await loadAllWorkouts();
+    final index = workouts.indexWhere((w) => w.id == workoutId);
+
+    if (index == -1) return false;
+
+    // Устанавливаем время начала
+    workouts[index].startedAt = DateTime.now().toIso8601String();
+
+    await saveAllWorkouts(workouts);
     return true;
   }
 

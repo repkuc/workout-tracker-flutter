@@ -104,7 +104,13 @@
     "finish_anyway": "Всё равно завершить",
     "go_back": "Вернуться",
     "no_sets": "нет подходов",
-    "incomplete_sets": "подходов не выполнено"
+    "incomplete_sets": "подходов не выполнено",
+    "start_timer": "Начать тренировку",
+    "timer_running": "Идёт тренировка",
+    "duration": "Длительность",
+    "workout_duration": "Длительность тренировки",
+    "total_volume": "Общий объём",
+    "total_volume_short": "Объём"
   },
   "nav": {
     "home": "Главная",

@@ -94,6 +94,8 @@ class Workout {
   String status; // Статус тренировки ('draft' или 'done')
   String? finishedAt; // Время завершения тренировки
   String? copiedFromWorkoutId; // Идентификатор тренировки, из которой была скопирована (если применимо)
+  String? startedAt; // Время начала тренировки
+  int? duration; // Длительность тренировки в секундах
   List<Exercise> exercises; // Упражнения в тренировке
 
   Workout({
@@ -104,6 +106,8 @@ class Workout {
     this.status = 'draft',
     this.finishedAt,
     this.copiedFromWorkoutId,
+    this.startedAt,
+    this.duration,
     List<Exercise>? exercises,
   }) : exercises = exercises ?? [];
 
@@ -114,6 +118,8 @@ class Workout {
     'name': name,
     'notes': notes,
     'status': status,
+    'startedAt': startedAt,
+    'duration': duration,
     'finishedAt': finishedAt,
     'copiedFromWorkoutId': copiedFromWorkoutId,
     'exercises': exercises.map((e) => e.toJson()).toList(),
@@ -128,6 +134,8 @@ class Workout {
     status: json['status'] ?? 'draft',
     finishedAt: json['finishedAt'],
     copiedFromWorkoutId: json['copiedFromWorkoutId'],
+    startedAt: json['startedAt'],
+    duration: json['duration'],
     exercises: (json['exercises'] as List?)
         ?.map((e) => Exercise.fromJson(e))
         .toList() ??
