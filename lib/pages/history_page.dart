@@ -180,6 +180,18 @@ class _HistoryPageState extends State<HistoryPage> {
               0.0, (setSum, set) => setSum + (set.weight * set.reps)),
     );
 
+    // ← НОВОЕ: Считаем общие повторения (только выполненные!)
+    final totalReps = workout.exercises.fold<int>(
+      0,
+      (sum, exercise) =>
+          sum +
+          exercise.sets.where((s) => s.isDone).fold<int>(
+                // ← ДОБАВЬ .where((s) => s.isDone)
+                0,
+                (s, set) => s + set.reps,
+              ),
+    );
+
     // Форматируем дату
     final dateTime = DateTime.tryParse(workout.finishedAt ?? workout.date);
     final formattedDate = dateTime != null
@@ -321,10 +333,16 @@ class _HistoryPageState extends State<HistoryPage> {
                     'history.completed_sets'.tr(),
                     '$completedSets/$totalSets',
                   ),
+                  // ← НОВОЕ: Повторения
+                  _buildStatColumn(
+                    Icons.play_arrow,
+                    'history.reps'.tr(),
+                    '$totalReps',
+                  ),
                   _buildStatColumn(
                     Icons.monitor_weight,
                     'history.volume'.tr(),
-                    '${totalVolume.toStringAsFixed(0)} ${'workout.kg'.tr()}',
+                    '${totalVolume.toStringAsFixed(1)} ${'workout.kg'.tr()}',
                   ),
                   if (workout.duration != null)
                     _buildStatColumn(

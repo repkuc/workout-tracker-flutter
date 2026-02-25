@@ -310,7 +310,8 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                             sum +
                             ex.sets.fold<double>(
                               0,
-                              (s, set) => s + (set.weight * set.reps),
+                              (s, set) =>
+                                  s + (set.isDone ? set.weight * set.reps : 0),
                             ),
                       );
 
@@ -354,7 +355,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                                   ),
                                   const SizedBox(height: 2),
                                   Text(
-                                    '${currentVolume.toStringAsFixed(0)}',
+                                    '${currentVolume.toStringAsFixed(1)}',
                                     style: const TextStyle(
                                       color: Colors.white,
                                       fontSize: 16,
@@ -376,7 +377,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                                           size: 12,
                                         ),
                                         Text(
-                                          '${difference.abs().toStringAsFixed(0)}',
+                                          '${difference.abs().toStringAsFixed(1)}',
                                           style: TextStyle(
                                             color: isIncrease
                                                 ? const Color(0xFF10B981)
@@ -398,7 +399,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    '${currentVolume.toStringAsFixed(0)}',
+                                    '${currentVolume.toStringAsFixed(1)}',
                                     style: const TextStyle(
                                       color: Colors.white,
                                       fontSize: 18,
@@ -652,7 +653,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                                     ),
                                   ),
                                   Text(
-                                    '${previousVolume.toStringAsFixed(0)} ${'workout.kg'.tr()}',
+                                    '${previousVolume.toStringAsFixed(1)} ${'workout.kg'.tr()}',
                                     style: TextStyle(
                                       color: Colors.grey[400],
                                       fontSize: 12,
@@ -667,7 +668,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
-                                    '${currentVolume.toStringAsFixed(0)} ${'workout.kg'.tr()}',
+                                    '${currentVolume.toStringAsFixed(1)} ${'workout.kg'.tr()}',
                                     style: const TextStyle(
                                       color: Color(0xFFF97316),
                                       fontSize: 14,
@@ -694,7 +695,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                                     ),
                                     const SizedBox(width: 4),
                                     Text(
-                                      '${isIncrease ? '+' : ''}${difference.toStringAsFixed(0)} ${'workout.kg'.tr()}',
+                                      '${isIncrease ? '+' : ''}${difference.toStringAsFixed(1)} ${'workout.kg'.tr()}',
                                       style: TextStyle(
                                         color: isIncrease
                                             ? const Color(0xFF10B981)
@@ -725,7 +726,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                                 ),
                               ),
                               Text(
-                                '${currentVolume.toStringAsFixed(0)} ${'workout.kg'.tr()}',
+                                '${currentVolume.toStringAsFixed(1)} ${'workout.kg'.tr()}',
                                 style: const TextStyle(
                                   color: Color(0xFFF97316),
                                   fontSize: 14,
@@ -1834,9 +1835,21 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
           ),
     );
 
-// ← НОВОЕ: Считаем прошлую статистику (если скопировано)
+    // ← НОВОЕ: Считаем текущие повторения (только выполненные!)
+    final totalReps = _workout!.exercises.fold<int>(
+      0,
+      (sum, exercise) =>
+          sum +
+          exercise.sets.fold<int>(
+            0,
+            (s, set) => s + (set.isDone ? set.reps : 0),
+          ),
+    );
+
+    // ← НОВОЕ: Считаем прошлую статистику (если скопировано)
     int? previousExercises;
     int? previousSets;
+    int? previousReps;
     double? previousVolume;
     int? previousDuration;
 
@@ -1861,6 +1874,16 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
       final originalWorkout =
           await _service.getWorkout(_workout!.copiedFromWorkoutId!);
       previousDuration = originalWorkout?.duration;
+
+      previousReps = _originalExercises.values.fold<int>(
+        0,
+        (sum, ex) =>
+            sum +
+            ex.sets.fold<int>(
+              0,
+              (s, set) => s + set.reps,
+            ),
+      );
     }
 
     final result = await showDialog<bool>(
@@ -1931,6 +1954,15 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                     previousSets,
                   ),
                   const SizedBox(height: 8),
+
+                  // ← НОВОЕ: Повторения
+                  _buildStatRowWithComparison(
+                    Icons.fitness_center,
+                    'history.reps'.tr(),
+                    totalReps,
+                    previousReps,
+                  ),
+                  const SizedBox(height: 6),
 
                   // Объём
                   _buildVolumeComparison(
@@ -2274,7 +2306,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                   children: [
                     if (previous != null) ...[
                       Text(
-                        '${previous.toStringAsFixed(0)}',
+                        '${previous.toStringAsFixed(1)}',
                         style: TextStyle(
                           color: Colors.grey[500],
                           fontSize: 16,
@@ -2287,7 +2319,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                       const SizedBox(width: 6),
                     ],
                     Text(
-                      '${current.toStringAsFixed(0)} ${'workout.kg'.tr()}',
+                      '${current.toStringAsFixed(1)} ${'workout.kg'.tr()}',
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 18,
@@ -2306,7 +2338,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
-                          '${isIncrease ? '+' : ''}${difference.toStringAsFixed(0)}',
+                          '${isIncrease ? '+' : ''}${difference.toStringAsFixed(1)}',
                           style: TextStyle(
                             color: isIncrease
                                 ? const Color(0xFF10B981)

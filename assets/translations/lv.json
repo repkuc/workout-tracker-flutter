@@ -110,7 +110,8 @@
     "duration": "Ilgums",
     "workout_duration": "Treniņa ilgums",
     "total_volume": "Kopējais apjoms",
-    "total_volume_short": "Apjoms"
+    "total_volume_short": "Apjoms",
+    "total_reps": "Kopā atkārtojumi"
   },
   "nav": {
     "home": "Sākums",
