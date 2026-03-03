@@ -382,7 +382,7 @@ class _HomePageState extends State<HomePage> {
                                             ),
                                             const SizedBox(width: 4),
                                             Text(
-                                              'Черновик',
+                                              'workout.draft'.tr(),
                                               style: TextStyle(
                                                 color: isDark
                                                     ? Colors.white
@@ -592,8 +592,8 @@ class _HomePageState extends State<HomePage> {
               }
               Navigator.pop(context, name);
             },
-            child: Text(
-                'workout.create'.tr()), // "Добавить" как кнопка создания
+            child:
+                Text('workout.create'.tr()), // "Добавить" как кнопка создания
           ),
         ],
       ),
