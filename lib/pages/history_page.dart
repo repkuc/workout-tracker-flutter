@@ -342,7 +342,7 @@ class _HistoryPageState extends State<HistoryPage> {
                   _buildStatColumn(
                     Icons.monitor_weight,
                     'history.volume'.tr(),
-                    '${totalVolume.toStringAsFixed(1)} ${'workout.kg'.tr()}',
+                    _formatVolume(totalVolume),
                   ),
                   if (workout.duration != null)
                     _buildStatColumn(
@@ -361,28 +361,32 @@ class _HistoryPageState extends State<HistoryPage> {
 
 // Вспомогательная функция для колонки статистики
   Widget _buildStatColumn(IconData icon, String label, String value) {
-    return Column(
-      children: [
-        Icon(icon, color: const Color(0xFFF97316), size: 20),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
+    return Expanded(
+      child: Column(
+        children: [
+          Icon(icon, color: const Color(0xFFF97316), size: 18),
+          const SizedBox(height: 2),
+          Text(
+            value,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.grey[400],
-            fontSize: 11,
+          const SizedBox(height: 2),
+          Text(
+            label,
+            style: TextStyle(
+              color: Colors.grey[400],
+              fontSize: 10,
+            ),
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
+            textAlign: TextAlign.center,
           ),
-          textAlign: TextAlign.center,
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -793,4 +797,16 @@ class _HistoryPageState extends State<HistoryPage> {
       return '${minutes}м';
     }
   }
+
+  // Форматировать объём (кг или тонны)
+String _formatVolume(double kg) {
+  if (kg < 1000) {
+    return '${kg.toStringAsFixed(1)} ${'workout.kg'.tr()}';
+  } else if (kg < 10000) {
+    return '${kg.toStringAsFixed(0)} ${'workout.kg'.tr()}';
+  } else {
+    final tons = kg / 1000;
+    return '${tons.toStringAsFixed(1)} ${'workout.t'.tr()}';
+  }
+}
 }

@@ -111,7 +111,8 @@
     "workout_duration": "Длительность тренировки",
     "total_volume": "Общий объём",
     "total_volume_short": "Объём",
-    "total_reps": "Всего повторений"
+    "total_reps": "Всего повторений",
+    "t": "т"
   },
   "nav": {
     "home": "Главная",

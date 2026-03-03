@@ -133,6 +133,21 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
     }
   }
 
+  // Форматировать объём (кг или тонны)
+  String _formatVolume(double kg) {
+    if (kg < 1000) {
+      // Меньше тонны - показываем кг с одним знаком
+      return '${kg.toStringAsFixed(1)} ${'workout.kg'.tr()}';
+    } else if (kg < 10000) {
+      // 1-10 тонн - показываем кг без дробной
+      return '${kg.toStringAsFixed(0)} ${'workout.kg'.tr()}';
+    } else {
+      // 10+ тонн - показываем в тоннах
+      final tons = kg / 1000;
+      return '${tons.toStringAsFixed(1)} ${'workout.t'.tr()}';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -354,14 +369,32 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                                     size: 16,
                                   ),
                                   const SizedBox(height: 2),
+                                  // ← НОВОЕ: Показываем "было" если есть
+                                  if (previousVolume != null) ...[
+                                    Text(
+                                      _formatVolume(previousVolume),
+                                      style: TextStyle(
+                                        color: Colors.grey[500],
+                                        fontSize: 11,
+                                        decoration: TextDecoration.lineThrough,
+                                      ),
+                                    ),
+                                    const Icon(
+                                      Icons.arrow_downward,
+                                      color: Color(0xFFF97316),
+                                      size: 12,
+                                    ),
+                                  ],
+                                  // Текущий объём
                                   Text(
-                                    '${currentVolume.toStringAsFixed(1)}',
+                                    _formatVolume(currentVolume),
                                     style: const TextStyle(
                                       color: Colors.white,
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
+                                  // Разница (если есть)
                                   if (difference != 0)
                                     Row(
                                       mainAxisAlignment:
@@ -377,7 +410,8 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                                           size: 12,
                                         ),
                                         Text(
-                                          '${difference.abs().toStringAsFixed(1)}',
+                                          _formatVolume(
+                                              difference.abs().toDouble()),
                                           style: TextStyle(
                                             color: isIncrease
                                                 ? const Color(0xFF10B981)
@@ -399,7 +433,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    '${currentVolume.toStringAsFixed(1)}',
+                                    _formatVolume(currentVolume),
                                     style: const TextStyle(
                                       color: Colors.white,
                                       fontSize: 18,
@@ -553,26 +587,6 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
               ),
             ],
           ),
-          // Подзаголовок (когда свернуто)
-          // subtitle: exercise.isCompleted
-          //     ? Padding(
-          //         padding: const EdgeInsets.only(top: 4),
-          //         child: Text(
-          //           [
-          //             if (exercise.targetMuscle.isNotEmpty)
-          //               exercise.targetMuscle,
-          //             '${exercise.sets.length} ${'workout.sets_word'.tr()}',
-          //             if (exercise.sets.isNotEmpty)
-          //               '${exercise.sets.fold<double>(0, (sum, s) => sum + (s.weight * s.reps)).toStringAsFixed(0)} ${'workout.kg'.tr()}',
-          //           ].join(' • '),
-          //           style: TextStyle(
-          //             color: Colors.grey[400],
-          //             fontSize: 12,
-          //           ),
-          //         ),
-          //       )
-          //     : null,
-          // Контент (подходы + кнопки)
           children: [
             // Целевая мышца (если есть и не завершено)
             if (exercise.targetMuscle.isNotEmpty && !exercise.isCompleted) ...[
@@ -604,7 +618,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                   // Текущий объём
                   final currentVolume = exercise.sets.fold<double>(
                     0,
-                    (sum, s) => sum + (s.weight * s.reps),
+                    (sum, s) => sum + (s.isDone ? s.weight * s.reps : 0),
                   );
 
                   // Оригинальное упражнение (если скопировано)
@@ -653,7 +667,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                                     ),
                                   ),
                                   Text(
-                                    '${previousVolume.toStringAsFixed(1)} ${'workout.kg'.tr()}',
+                                    _formatVolume(previousVolume),
                                     style: TextStyle(
                                       color: Colors.grey[400],
                                       fontSize: 12,
@@ -668,7 +682,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
-                                    '${currentVolume.toStringAsFixed(1)} ${'workout.kg'.tr()}',
+                                    _formatVolume(currentVolume),
                                     style: const TextStyle(
                                       color: Color(0xFFF97316),
                                       fontSize: 14,
@@ -695,7 +709,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                                     ),
                                     const SizedBox(width: 4),
                                     Text(
-                                      '${isIncrease ? '+' : ''}${difference.toStringAsFixed(1)} ${'workout.kg'.tr()}',
+                                      '${isIncrease ? '+' : ''}${_formatVolume(difference.abs().toDouble())}',
                                       style: TextStyle(
                                         color: isIncrease
                                             ? const Color(0xFF10B981)
@@ -726,7 +740,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                                 ),
                               ),
                               Text(
-                                '${currentVolume.toStringAsFixed(1)} ${'workout.kg'.tr()}',
+                                _formatVolume(currentVolume),
                                 style: const TextStyle(
                                   color: Color(0xFFF97316),
                                   fontSize: 14,
@@ -2305,46 +2319,58 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                 Row(
                   children: [
                     if (previous != null) ...[
-                      Text(
-                        '${previous.toStringAsFixed(1)}',
-                        style: TextStyle(
-                          color: Colors.grey[500],
-                          fontSize: 16,
-                          decoration: TextDecoration.lineThrough,
+                      Flexible(
+                        child: Text(
+                          _formatVolume(previous)
+                              .replaceAll(' ${'workout.kg'.tr()}', '')
+                              .replaceAll(' ${'workout.t'.tr()}', ''),
+                          style: TextStyle(
+                            color: Colors.grey[500],
+                            fontSize: 14,
+                            decoration: TextDecoration.lineThrough,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      const SizedBox(width: 6),
+                      const SizedBox(width: 4),
                       const Icon(Icons.arrow_forward,
-                          color: Color(0xFFF97316), size: 16),
-                      const SizedBox(width: 6),
+                          color: Color(0xFFF97316), size: 14),
+                      const SizedBox(width: 4),
                     ],
-                    Text(
-                      '${current.toStringAsFixed(1)} ${'workout.kg'.tr()}',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                    Flexible(
+                      child: Text(
+                        _formatVolume(current),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     if (difference != null && difference != 0) ...[
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: isIncrease
-                              ? const Color(0xFF10B981).withOpacity(0.2)
-                              : Colors.red.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          '${isIncrease ? '+' : ''}${difference.toStringAsFixed(1)}',
-                          style: TextStyle(
+                      const SizedBox(width: 4),
+                      Flexible(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 4, vertical: 2),
+                          decoration: BoxDecoration(
                             color: isIncrease
-                                ? const Color(0xFF10B981)
-                                : Colors.red,
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
+                                ? const Color(0xFF10B981).withOpacity(0.2)
+                                : Colors.red.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            '${isIncrease ? '+' : ''}${_formatVolume(difference.abs())}',
+                            style: TextStyle(
+                              color: isIncrease
+                                  ? const Color(0xFF10B981)
+                                  : Colors.red,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
                           ),
                         ),
                       ),

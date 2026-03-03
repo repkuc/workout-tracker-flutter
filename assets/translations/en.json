@@ -111,7 +111,8 @@
     "workout_duration": "Workout duration",
     "total_volume": "Total volume",
     "total_volume_short": "Volume",
-    "total_reps": "Total reps"
+    "total_reps": "Total reps",
+    "t": "t"
   },
   "nav": {
     "home": "Home",
