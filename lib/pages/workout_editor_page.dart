@@ -193,7 +193,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
   //  Построить заголовок тренировки
   Widget _buildHeader() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
       decoration: BoxDecoration(
         color: const Color(0xFF1F2937).withOpacity(0.8),
         border: Border(
@@ -222,7 +222,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                       _workout?.name ?? 'workout.title'.tr(),
                       style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 20,
+                        fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -230,7 +230,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                       _workout?.date ?? '',
                       style: TextStyle(
                         color: Colors.grey[400],
-                        fontSize: 14,
+                        fontSize: 10,
                       ),
                     ),
                   ],
@@ -251,7 +251,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
 
           // ← НОВОЕ: Таймер или кнопка запуска
           // ← НОВОЕ: Таймер + объём в одну строку
-          const SizedBox(height: 12),
+          const SizedBox(height: 4), // Отступ между названием и таймером
           if (_workout?.startedAt == null)
             // Кнопка "Начать тренировку" (на всю ширину)
             SizedBox(
@@ -275,179 +275,148 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
             )
           else
             // Таймер + Объём (50/50)
-            Row(
+            Column(
               children: [
-                // Левая часть: Таймер
-                Expanded(
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF10B981).withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: const Color(0xFF10B981),
-                        width: 2,
+                // Таймер (сверху)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 12, vertical: 6), // ← Уменьшили с 8
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF10B981).withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: const Color(0xFF10B981),
+                      width: 1, // ← Уменьшили с 2
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.timer,
+                        color: Color(0xFF10B981),
+                        size: 16, // ← Уменьшили с 18
                       ),
-                    ),
-                    child: Column(
-                      children: [
-                        const Icon(
-                          Icons.timer,
-                          color: Color(0xFF10B981),
-                          size: 18,
+                      const SizedBox(width: 8),
+                      Text(
+                        _formatDuration(_elapsedSeconds),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16, // ← Уменьшили с 18
+                          fontWeight: FontWeight.bold,
+                          fontFeatures: [FontFeature.tabularFigures()],
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          _formatDuration(_elapsedSeconds),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            fontFeatures: [FontFeature.tabularFigures()],
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
 
-                const SizedBox(width: 8),
+                const SizedBox(height: 6),
 
-                // Правая часть: Объём
-                Expanded(
-                  child: Builder(
-                    builder: (context) {
-                      // Текущий объём всей тренировки
-                      final currentVolume = _workout!.exercises.fold<double>(
-                        0,
-                        (sum, ex) =>
-                            sum +
-                            ex.sets.fold<double>(
-                              0,
-                              (s, set) =>
-                                  s + (set.isDone ? set.weight * set.reps : 0),
-                            ),
-                      );
-
-                      // Прошлый объём (если тренировка скопирована)
-                      final previousVolume =
-                          _workout!.copiedFromWorkoutId != null
-                              ? _originalExercises.values.fold<double>(
-                                  0,
-                                  (sum, ex) =>
-                                      sum +
-                                      ex.sets.fold<double>(
-                                        0,
-                                        (s, set) => s + (set.weight * set.reps),
-                                      ),
-                                )
-                              : null;
-
-                      final difference = previousVolume != null
-                          ? currentVolume - previousVolume
-                          : 0;
-                      final isIncrease = difference > 0;
-
-                      return Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF97316).withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: const Color(0xFFF97316),
-                            width: 2,
+                // Объём (снизу)
+                Builder(
+                  builder: (context) {
+                    // Текущий объём всей тренировки (только выполненные подходы!)
+                    final currentVolume = _workout!.exercises.fold<double>(
+                      0,
+                      (sum, ex) =>
+                          sum +
+                          ex.sets.fold<double>(
+                            0,
+                            (s, set) =>
+                                s + (set.isDone ? set.weight * set.reps : 0),
                           ),
+                    );
+
+                    // Прошлый объём (если тренировка скопирована)
+                    final previousVolume = _workout!.copiedFromWorkoutId != null
+                        ? _originalExercises.values.fold<double>(
+                            0,
+                            (sum, ex) =>
+                                sum +
+                                ex.sets.fold<double>(
+                                  0,
+                                  (s, set) => s + (set.weight * set.reps),
+                                ),
+                          )
+                        : null;
+
+                    final difference = previousVolume != null
+                        ? currentVolume - previousVolume
+                        : 0;
+                    final isIncrease = difference > 0;
+
+                    return Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6), // ← Уменьшили
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF97316).withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: const Color(0xFFF97316),
+                          width: 1, // ← Уменьшили с 2
                         ),
-                        child: previousVolume != null
-                            ? Column(
-                                children: [
-                                  const Icon(
-                                    Icons.monitor_weight,
-                                    color: Color(0xFFF97316),
-                                    size: 16,
-                                  ),
-                                  const SizedBox(height: 2),
-                                  // ← НОВОЕ: Показываем "было" если есть
-                                  if (previousVolume != null) ...[
-                                    Text(
-                                      _formatVolume(previousVolume),
-                                      style: TextStyle(
-                                        color: Colors.grey[500],
-                                        fontSize: 11,
-                                        decoration: TextDecoration.lineThrough,
-                                      ),
-                                    ),
-                                    const Icon(
-                                      Icons.arrow_downward,
-                                      color: Color(0xFFF97316),
-                                      size: 12,
-                                    ),
-                                  ],
-                                  // Текущий объём
-                                  Text(
-                                    _formatVolume(currentVolume),
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  // Разница (если есть)
-                                  if (difference != 0)
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Icon(
-                                          isIncrease
-                                              ? Icons.arrow_upward
-                                              : Icons.arrow_downward,
-                                          color: isIncrease
-                                              ? const Color(0xFF10B981)
-                                              : Colors.red,
-                                          size: 12,
-                                        ),
-                                        Text(
-                                          _formatVolume(
-                                              difference.abs().toDouble()),
-                                          style: TextStyle(
-                                            color: isIncrease
-                                                ? const Color(0xFF10B981)
-                                                : Colors.red,
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                ],
-                              )
-                            : Column(
-                                children: [
-                                  const Icon(
-                                    Icons.monitor_weight,
-                                    color: Color(0xFFF97316),
-                                    size: 18,
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    _formatVolume(currentVolume),
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            Icons.monitor_weight,
+                            color: Color(0xFFF97316),
+                            size: 16, // ← Уменьшили
+                          ),
+                          const SizedBox(width: 8),
+                          // Если есть прошлый объём - показываем сравнение
+                          if (previousVolume != null) ...[
+                            Text(
+                              _formatVolume(previousVolume),
+                              style: TextStyle(
+                                color: Colors.grey[500],
+                                fontSize: 12, // ← Уменьшили
+                                decoration: TextDecoration.lineThrough,
                               ),
-                      );
-                    },
-                  ),
+                            ),
+                            const Icon(Icons.arrow_forward,
+                                color: Color(0xFFF97316), size: 12),
+                            const SizedBox(width: 4),
+                          ],
+                          Text(
+                            _formatVolume(currentVolume),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 14, // ← Уменьшили с 16
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          if (difference != 0) ...[
+                            const SizedBox(width: 4),
+                            Icon(
+                              isIncrease
+                                  ? Icons.arrow_upward
+                                  : Icons.arrow_downward,
+                              color: isIncrease
+                                  ? const Color(0xFF10B981)
+                                  : Colors.red,
+                              size: 12,
+                            ),
+                            Text(
+                              _formatVolume(difference.abs().toDouble()),
+                              style: TextStyle(
+                                color: isIncrease
+                                    ? const Color(0xFF10B981)
+                                    : Colors.red,
+                                fontSize: 11, // ← Уменьшили
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    );
+                  },
                 ),
               ],
-            ),
+            ), // ← Отступ между таймером и объёмом
         ],
       ),
     );
@@ -1911,6 +1880,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
             width: 2,
           ),
         ),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 16),
         title: Row(
           children: [
             const Icon(
@@ -1958,7 +1928,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                     totalExercises,
                     previousExercises,
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 2),
 
                   // Подходы
                   _buildStatRowWithComparison(
@@ -1967,7 +1937,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                     totalSets,
                     previousSets,
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 2),
 
                   // ← НОВОЕ: Повторения
                   _buildStatRowWithComparison(
@@ -1976,14 +1946,14 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                     totalReps,
                     previousReps,
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 2),
 
                   // Объём
                   _buildVolumeComparison(
                     totalVolume,
                     previousVolume,
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 2),
 
                   // Длительность
                   if (_workout!.startedAt != null)
@@ -2219,7 +2189,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
       child: Row(
         children: [
           Icon(icon, color: const Color(0xFF10B981), size: 24),
-          const SizedBox(width: 12),
+          const SizedBox(width: 10),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -2231,7 +2201,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                     fontSize: 12,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 6),
                 Row(
                   children: [
                     if (previous != null) ...[
@@ -2239,7 +2209,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                         '$previous',
                         style: TextStyle(
                           color: Colors.grey[500],
-                          fontSize: 16,
+                          fontSize: 10,
                           decoration: TextDecoration.lineThrough,
                         ),
                       ),
@@ -2252,12 +2222,12 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                       '$current',
                       style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 18,
+                        fontSize: 10,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     if (difference != null && difference != 0) ...[
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 6),
                       Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 6, vertical: 2),
@@ -2273,7 +2243,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                             color: isIncrease
                                 ? const Color(0xFF10B981)
                                 : Colors.red,
-                            fontSize: 14,
+                            fontSize: 10,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -2326,7 +2296,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                               .replaceAll(' ${'workout.t'.tr()}', ''),
                           style: TextStyle(
                             color: Colors.grey[500],
-                            fontSize: 14,
+                            fontSize: 12,
                             decoration: TextDecoration.lineThrough,
                           ),
                           overflow: TextOverflow.ellipsis,
@@ -2342,7 +2312,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                         _formatVolume(current),
                         style: const TextStyle(
                           color: Colors.white,
-                          fontSize: 16,
+                          fontSize: 12,
                           fontWeight: FontWeight.bold,
                         ),
                         overflow: TextOverflow.ellipsis,
@@ -2366,7 +2336,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                               color: isIncrease
                                   ? const Color(0xFF10B981)
                                   : Colors.red,
-                              fontSize: 12,
+                              fontSize: 10,
                               fontWeight: FontWeight.bold,
                             ),
                             overflow: TextOverflow.ellipsis,
