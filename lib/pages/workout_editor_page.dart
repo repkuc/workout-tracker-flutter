@@ -2615,7 +2615,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF1F2937) : const Color(0xFF374151),
         border: Border(
@@ -2627,48 +2627,46 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
       ),
       child: SafeArea(
         top: false,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+        child: Row(
           children: [
             // Кнопка "Добавить упражнение" (оранжевая)
-            SizedBox(
-              width: double.infinity,
+            Expanded(
               child: ElevatedButton.icon(
                 onPressed: _showAddExerciseDialog,
-                icon: const Icon(Icons.add_circle, size: 24),
+                icon: const Icon(Icons.add_circle, size: 18), // ← Еще меньше
                 label: Text(
                   'workout.add_exercise'.tr(),
                   style: const TextStyle(
-                    fontSize: 16,
+                    fontSize: 13, // ← Еще меньше
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFF97316), // Оранжевый
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  backgroundColor: const Color(0xFFF97316),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
                 ),
               ),
             ),
 
-            const SizedBox(height: 12), // ← Отступ между кнопками
+            const SizedBox(
+                width: 8), // ← Отступ между кнопками (горизонтальный!)
 
             // Кнопка "Завершить тренировку" (зелёная)
-            SizedBox(
-              width: double.infinity,
+            Expanded(
               child: ElevatedButton.icon(
                 onPressed: _showFinishWorkoutDialog,
-                icon: const Icon(Icons.check_circle, size: 24),
+                icon: const Icon(Icons.check_circle, size: 18),
                 label: Text(
                   'workout.finish_workout'.tr(),
                   style: const TextStyle(
-                    fontSize: 16,
+                    fontSize: 13,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF10B981), // ← ЗЕЛЁНЫЙ
+                  backgroundColor: const Color(0xFF10B981),
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
                 ),
               ),
             ),
