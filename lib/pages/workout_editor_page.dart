@@ -514,12 +514,18 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(
           initiallyExpanded: !exercise.isCompleted, // ← Свернуто если завершено
-          tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          childrenPadding:
-              const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+          tilePadding: const EdgeInsets.symmetric(
+              horizontal: 10, vertical: 2), // Отступы заголовка
+          childrenPadding: const EdgeInsets.only(
+              left: 12,
+              right: 12,
+              top: 0,
+              bottom: 12), // Отступы внутри раскрывающейся части
           // Заголовок
           title: Row(
+            
             children: [
+              
               // Иконка + название
               Icon(
                 exercise.isCompleted
@@ -528,7 +534,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                 color: exercise.isCompleted
                     ? const Color(0xFF10B981)
                     : const Color(0xFFF97316),
-                size: 20,
+                size: 16,
               ),
               const SizedBox(width: 8),
               Expanded(
@@ -536,7 +542,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                   exercise.name,
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 18,
+                    fontSize: 12,
                     fontWeight: FontWeight.bold,
                     decoration: exercise.isCompleted
                         ? TextDecoration.lineThrough
@@ -549,7 +555,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                 icon: const Icon(
                   Icons.edit,
                   color: Color(0xFFF97316),
-                  size: 20,
+                  size: 16,
                 ),
                 onPressed: () => _showEditExerciseDialog(exercise),
                 tooltip: 'workout.edit_exercise'.tr(),
@@ -564,19 +570,19 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                   Icon(
                     Icons.radio_button_checked,
                     color: Colors.grey[500],
-                    size: 16,
+                    size: 12,
                   ),
-                  const SizedBox(width: 6),
+                  const SizedBox(width: 4),
                   Text(
                     exercise.targetMuscle,
                     style: TextStyle(
                       color: Colors.grey[400],
-                      fontSize: 14,
+                      fontSize: 10,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 6),
             ],
 
             // Текущий объём упражнения
@@ -616,78 +622,62 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                       ),
                     ),
                     child: hasPrevious
-                        ? Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                        ? Row(
                             children: [
-                              // Сравнение
-                              Row(
-                                children: [
-                                  const Icon(
-                                    Icons.monitor_weight,
-                                    color: Color(0xFFF97316),
-                                    size: 16,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    '${'workout.previous_volume'.tr()}: ',
-                                    style: TextStyle(
-                                      color: Colors.grey[400],
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                  Text(
-                                    _formatVolume(previousVolume),
-                                    style: TextStyle(
-                                      color: Colors.grey[400],
-                                      fontSize: 12,
-                                      decoration: TextDecoration.lineThrough,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  const Icon(
-                                    Icons.arrow_forward,
-                                    color: Color(0xFFF97316),
-                                    size: 14,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    _formatVolume(currentVolume),
-                                    style: const TextStyle(
-                                      color: Color(0xFFF97316),
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
+                              const Icon(
+                                Icons.monitor_weight,
+                                color: Color(0xFFF97316),
+                                size: 14,
                               ),
-                              // Разница
+                              const SizedBox(width: 6),
+                              Flexible(
+                                child: Text(
+                                  _formatVolume(previousVolume),
+                                  style: TextStyle(
+                                    color: Colors.grey[500],
+                                    fontSize: 11,
+                                    decoration: TextDecoration.lineThrough,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              const Icon(Icons.arrow_forward,
+                                  color: Color(0xFFF97316), size: 12),
+                              const SizedBox(width: 4),
+                              Flexible(
+                                child: Text(
+                                  _formatVolume(currentVolume),
+                                  style: const TextStyle(
+                                    color: Color(0xFFF97316),
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
                               if (difference != 0) ...[
-                                const SizedBox(height: 4),
-                                Row(
-                                  children: [
-                                    const SizedBox(
-                                        width: 24), // Отступ под иконку
-                                    Icon(
-                                      isIncrease
-                                          ? Icons.trending_up
-                                          : Icons.trending_down,
+                                const SizedBox(width: 4),
+                                Icon(
+                                  isIncrease
+                                      ? Icons.arrow_upward
+                                      : Icons.arrow_downward,
+                                  color: isIncrease
+                                      ? const Color(0xFF10B981)
+                                      : Colors.red,
+                                  size: 11,
+                                ),
+                                Flexible(
+                                  child: Text(
+                                    _formatVolume(difference.abs().toDouble()),
+                                    style: TextStyle(
                                       color: isIncrease
                                           ? const Color(0xFF10B981)
                                           : Colors.red,
-                                      size: 16,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold,
                                     ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      '${isIncrease ? '+' : ''}${_formatVolume(difference.abs().toDouble())}',
-                                      style: TextStyle(
-                                        color: isIncrease
-                                            ? const Color(0xFF10B981)
-                                            : Colors.red,
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ],
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
                               ],
                             ],
@@ -697,14 +687,14 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                               const Icon(
                                 Icons.monitor_weight,
                                 color: Color(0xFFF97316),
-                                size: 16,
+                                size: 12,
                               ),
                               const SizedBox(width: 8),
                               Text(
                                 '${'workout.volume'.tr()}: ',
                                 style: TextStyle(
                                   color: Colors.grey[400],
-                                  fontSize: 13,
+                                  fontSize: 12,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -712,7 +702,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                                 _formatVolume(currentVolume),
                                 style: const TextStyle(
                                   color: Color(0xFFF97316),
-                                  fontSize: 14,
+                                  fontSize: 12,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -721,7 +711,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                   );
                 },
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
             ],
 
             // Список подходов
@@ -747,25 +737,25 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                     icon: const Icon(
                       Icons.add,
                       color: Color(0xFFF97316),
-                      size: 20,
+                      size: 16,
                     ),
                     label: Text(
                       'workout.add_set_button'.tr(),
                       style: const TextStyle(
                         color: Color(0xFFF97316),
                         fontWeight: FontWeight.bold,
-                        fontSize: 14,
+                        fontSize: 12,
                       ),
                     ),
                     style: OutlinedButton.styleFrom(
                       side: const BorderSide(
                         color: Color(0xFFF97316),
-                        width: 2,
+                        width: 1,
                       ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      padding: const EdgeInsets.symmetric(vertical: 8),
                     ),
                   ),
                 ),
@@ -778,7 +768,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                     onPressed: () => _toggleExerciseCompleted(exercise),
                     icon: Icon(
                       exercise.isCompleted ? Icons.undo : Icons.check,
-                      size: 20,
+                      size: 16,
                     ),
                     label: Text(
                       exercise.isCompleted
@@ -786,7 +776,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                           : 'workout.complete_exercise'.tr(),
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
-                        fontSize: 14,
+                        fontSize: 12,
                       ),
                     ),
                     style: ElevatedButton.styleFrom(
@@ -797,7 +787,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      padding: const EdgeInsets.symmetric(vertical: 8),
                     ),
                   ),
                 ),
@@ -811,9 +801,10 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
 
 // Элемент списка подходов
   Widget _buildSetItem(Exercise exercise, WorkoutSet set, int index) {
+    // Если упражнение завершено - все подходы серые и зачёркнутые
     return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.only(bottom: 4),
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: set.isDone
             ? const Color(0xFF10B981).withOpacity(0.1)
@@ -834,8 +825,8 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
           children: [
             // Номер подхода
             Container(
-              width: 32,
-              height: 32,
+              width: 28,
+              height: 28,
               decoration: BoxDecoration(
                 color: set.isDone
                     ? const Color(0xFF10B981)
@@ -848,19 +839,19 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
-                    fontSize: 14,
+                    fontSize: 12,
                   ),
                 ),
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 6),
             // Повторы и вес
             Expanded(
               child: Text(
                 '${set.reps} ${'workout.reps'.tr().toLowerCase()} × ${set.weight} ${'workout.kg'.tr()}',
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 16,
+                  fontSize: 13,
                   decoration: set.isDone ? TextDecoration.lineThrough : null,
                 ),
               ),
@@ -869,7 +860,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
             Icon(
               set.isDone ? Icons.check_circle : Icons.radio_button_unchecked,
               color: set.isDone ? const Color(0xFF10B981) : Colors.grey,
-              size: 24,
+              size: 20,
             ),
           ],
         ),
