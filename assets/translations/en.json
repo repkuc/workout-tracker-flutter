@@ -113,7 +113,9 @@
     "total_volume_short": "Volume",
     "total_reps": "Total reps",
     "t": "t",
-    "draft": "Draft"
+    "draft": "Draft",
+    "workout_started": "⏱️ Workout started!",
+    "continue_workout": "Continue workout"
   },
   "nav": {
     "home": "Home",

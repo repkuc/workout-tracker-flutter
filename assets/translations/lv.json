@@ -113,7 +113,9 @@
     "total_volume_short": "Apjoms",
     "total_reps": "Kopā atkārtojumi",
     "t": "t",
-    "draft": "Melnraksts"
+    "draft": "Melnraksts",
+    "workout_started": "⏱️ Treniņš sākās!",
+    "continue_workout": "Turpināt treniņu"
   },
   "nav": {
     "home": "Sākums",

@@ -284,6 +284,41 @@ class WorkoutService {
     return true;
   }
 
+  // Переключить статус выполнения подхода
+  Future<bool> toggleSetDone(
+    String workoutId,
+    String exerciseId,
+    String setId,
+    bool isDone,
+  ) async {
+    final workouts = await loadAllWorkouts();
+    final workoutIndex = workouts.indexWhere((w) => w.id == workoutId);
+
+    if (workoutIndex == -1) return false;
+
+    // Находим упражнение
+    final exerciseIndex = workouts[workoutIndex].exercises.indexWhere(
+          (e) => e.id == exerciseId,
+        );
+
+    if (exerciseIndex == -1) return false;
+
+    // Находим подход
+    final setIndex = workouts[workoutIndex]
+        .exercises[exerciseIndex]
+        .sets
+        .indexWhere((s) => s.id == setId);
+
+    if (setIndex == -1) return false;
+
+    // Меняем статус
+    workouts[workoutIndex].exercises[exerciseIndex].sets[setIndex].isDone =
+        isDone;
+
+    await saveAllWorkouts(workouts);
+    return true;
+  }
+
   // === РАБОТА С ПОДХОДАМИ ===
 
   // Добавить подход к упражнению

@@ -3,6 +3,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'services/workout_service.dart';
 import 'pages/workout_editor_page.dart';
 import 'pages/history_page.dart';
+import 'models/workout_models.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -148,6 +149,7 @@ class _HomePageState extends State<HomePage> {
   int _workoutCount = 0;
   bool _isLoading = true;
   int _draftCount = 0;
+  Workout? _currentWorkout; 
 
 // Контроллер для названия новой тренировки
   final _newWorkoutNameController = TextEditingController();
@@ -164,6 +166,7 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       _workoutCount = workouts.length;
       _draftCount = draft != null ? 1 : 0;
+      _currentWorkout = draft;
       _isLoading = false;
     });
   }
@@ -447,8 +450,7 @@ class _HomePageState extends State<HomePage> {
                                   // Создаём новую тренировку с введённым названием
                                   final workout = await _service.createWorkout(
                                     date: _service.getTodayDate(),
-                                    name:
-                                        workoutName, // ← Используем название из диалога
+                                    name: workoutName,
                                   );
 
                                   if (context.mounted) {
@@ -465,18 +467,35 @@ class _HomePageState extends State<HomePage> {
                                   }
                                 }
                               },
-                              icon: const Icon(Icons.add_circle, size: 28),
+                              icon: Icon(
+                                _currentWorkout != null
+                                    ? Icons.play_arrow
+                                    : Icons.add_circle, // ← Умная иконка
+                                size: 28,
+                              ),
                               label: Padding(
                                 padding:
                                     const EdgeInsets.symmetric(vertical: 4),
                                 child: Text(
-                                  'home.start_workout'.tr().toUpperCase(),
+                                  (_currentWorkout != null
+                                          ? 'workout.continue_workout'
+                                          : 'home.start_workout')
+                                      .tr()
+                                      .toUpperCase(),
                                   style: const TextStyle(
-                                    fontSize: 16, // ← Чуть меньше
+                                    fontSize: 16,
                                     fontWeight: FontWeight.bold,
                                     letterSpacing: 1.5,
                                   ),
                                 ),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: _currentWorkout != null
+                                    ? const Color(
+                                        0xFFF97316) // Оранжевая если черновик
+                                    : const Color(
+                                        0xFF10B981), // Зелёная если нет
+                                foregroundColor: Colors.white,
                               ),
                             ),
                           ),

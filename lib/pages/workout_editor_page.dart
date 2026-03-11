@@ -869,16 +869,28 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
   }
 
 // Отметить/снять отметку "выполнен"
-  Future<void> _toggleSetDone(
-      String exerciseId, String setId, bool isDone) async {
-    await _service.updateSet(
-      widget.workoutId,
-      exerciseId,
-      setId,
-      isDone: isDone,
-    );
-    await _loadWorkout();
+ Future<void> _toggleSetDone(String exerciseId, String setId, bool isDone) async {
+  await _service.toggleSetDone(widget.workoutId, exerciseId, setId, isDone);
+  
+  // ← НОВОЕ: Автостарт таймера при первой отметке
+  if (isDone && _workout?.startedAt == null) {
+    // Это первый выполненный подход - запускаем таймер!
+    await _startTimer();
+    
+    // Показываем уведомление
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('workout.workout_started'.tr()),
+          backgroundColor: const Color(0xFF10B981),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
   }
+  
+  await _loadWorkout();
+}
 
   // Показать диалог добавления подхода
   Future<void> _showAddSetDialog(Exercise exercise) async {

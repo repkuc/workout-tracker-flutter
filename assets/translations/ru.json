@@ -113,7 +113,9 @@
     "total_volume_short": "Объём",
     "total_reps": "Всего повторений",
     "t": "т",
-    "draft": "Черновик"
+    "draft": "Черновик",
+    "workout_started": "⏱️ Тренировка началась!",
+    "continue_workout": "Продолжить тренировку"
   },
   "nav": {
     "home": "Главная",
