@@ -23,10 +23,21 @@ class _HistoryPageState extends State<HistoryPage> {
     _loadWorkouts();
   }
 
+// Загрузка тренировок: сначала черновик (если есть), потом завершённые
   Future<void> _loadWorkouts() async {
-    final workouts = await _service.getCompletedWorkouts();
+    final completed = await _service.getCompletedWorkouts(); // Получаем завершённые тренировки
+    final draft = await _service.getDraftWorkout();       // Получаем черновик (если есть)
+
+    // Объединяем: сначала черновик (если есть), потом завершённые
+    final allWorkouts = <Workout>[]; // Новый список для отображения
+    if (draft != null) {
+      allWorkouts.add(draft);
+    }
+    allWorkouts.addAll(completed); // Добавляем завершённые тренировки после черновика
+    
+    // Обновляем состояние
     setState(() {
-      _workouts = workouts;
+      _workouts = allWorkouts;
       _isLoading = false;
     });
   }
@@ -202,161 +213,199 @@ class _HistoryPageState extends State<HistoryPage> {
         : '';
 
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      elevation: 2,
-      color: isDark ? const Color(0xFF1F2937) : const Color(0xFF374151),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
-          color: const Color(0xFFF97316).withOpacity(0.3),
-          width: 1,
-        ),
-      ),
-      child: InkWell(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => WorkoutDetailsPage(workoutId: workout.id),
-            ),
-          );
-        },
-        onLongPress: () => _showWorkoutActionsMenu(workout),
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+  margin: const EdgeInsets.only(bottom: 12),
+  elevation: 2,
+  color: isDark ? const Color(0xFF1F2937) : const Color(0xFF374151),
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(12),
+    side: BorderSide(
+      color: workout.finishedAt == null 
+          ? const Color(0xFFF97316)  // Яркая оранжевая для черновика
+          : const Color(0xFFF97316).withOpacity(0.3), // Тусклая для завершённых
+      width: workout.finishedAt == null ? 2 : 1, // Толще для черновика
+    ),
+  ),
+  child: InkWell(
+    onTap: () {
+      // Если черновик - открываем редактор, иначе детали
+      if (workout.finishedAt == null) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => WorkoutEditorPage(workoutId: workout.id),
+          ),
+        ).then((_) => _loadWorkouts());
+      } else {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => WorkoutDetailsPage(workoutId: workout.id),
+          ),
+        );
+      }
+    },
+    onLongPress: () => _showWorkoutActionsMenu(workout),
+    borderRadius: BorderRadius.circular(12),
+    child: Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Заголовок: название + дата
+          Row(
             children: [
-              // Заголовок: название + дата
-              Row(
-                children: [
-                  const Icon(
-                    Icons.fitness_center,
-                    color: Color(0xFFF97316),
-                    size: 20,
+              const Icon(
+                Icons.fitness_center,
+                color: Color(0xFFF97316),
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  workout.name,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
                   ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      workout.name,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
+                ),
+              ),
+              
+              // НОВОЕ: Бейдж "ЧЕРНОВИК" вместо кнопки повтора
+              if (workout.finishedAt == null) 
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF97316),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    'workout.draft'.tr().toUpperCase(),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.5,
                     ),
                   ),
-                  // ← НОВОЕ: Кнопка повторить
-                  GestureDetector(
-                    onTap: () {
-                      // Останавливаем всплытие к InkWell
-                      _showRepeatWorkoutDialog(workout);
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      child: const Icon(
-                        Icons.repeat,
-                        color: Color(0xFFF97316),
-                        size: 24,
-                      ),
-                    ),
-                  ),
-                  // Иконка галочки (завершено)
-                  Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF10B981).withOpacity(0.2),
-                      shape: BoxShape.circle,
-                    ),
+                )
+              else ...[
+                // Кнопка повторить (только для завершённых)
+                GestureDetector(
+                  onTap: () {
+                    _showRepeatWorkoutDialog(workout);
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
                     child: const Icon(
-                      Icons.check,
-                      color: Color(0xFF10B981),
-                      size: 16,
+                      Icons.repeat,
+                      color: Color(0xFFF97316),
+                      size: 24,
                     ),
                   ),
-                ],
-              ),
-
-              const SizedBox(height: 8),
-
-              // Дата и время
-              Row(
-                children: [
-                  Icon(
-                    Icons.calendar_today,
-                    color: Colors.grey[500],
-                    size: 14,
+                ),
+                // Иконка галочки (только для завершённых)
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF10B981).withOpacity(0.2),
+                    shape: BoxShape.circle,
                   ),
-                  const SizedBox(width: 6),
-                  Text(
-                    formattedDate,
-                    style: TextStyle(
-                      color: Colors.grey[400],
-                      fontSize: 14,
-                    ),
+                  child: const Icon(
+                    Icons.check,
+                    color: Color(0xFF10B981),
+                    size: 16,
                   ),
-                  if (formattedTime.isNotEmpty) ...[
-                    const SizedBox(width: 12),
-                    Icon(
-                      Icons.access_time,
-                      color: Colors.grey[500],
-                      size: 14,
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      formattedTime,
-                      style: TextStyle(
-                        color: Colors.grey[400],
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-
-              const SizedBox(height: 12),
-              const Divider(color: Color(0xFFF97316), height: 1),
-              const SizedBox(height: 12),
-
-              // Статистика
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _buildStatColumn(
-                    Icons.fitness_center,
-                    'history.exercises'.tr(),
-                    '$totalExercises',
-                  ),
-                  _buildStatColumn(
-                    Icons.repeat,
-                    'history.completed_sets'.tr(),
-                    '$completedSets/$totalSets',
-                  ),
-                  // ← НОВОЕ: Повторения
-                  _buildStatColumn(
-                    Icons.play_arrow,
-                    'history.reps'.tr(),
-                    '$totalReps',
-                  ),
-                  _buildStatColumn(
-                    Icons.monitor_weight,
-                    'history.volume'.tr(),
-                    _formatVolume(totalVolume),
-                  ),
-                  if (workout.duration != null)
-                    _buildStatColumn(
-                      Icons.timer,
-                      'workout.duration'.tr(),
-                      _formatDuration(workout.duration!),
-                    ),
-                ],
-              ),
+                ),
+              ],
             ],
           ),
-        ),
+
+          const SizedBox(height: 8),
+
+          // Дата и время
+          Row(
+            children: [
+              Icon(
+                Icons.calendar_today,
+                color: Colors.grey[500],
+                size: 14,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                workout.finishedAt == null 
+                    ? 'history.in_progress'.tr() // Покажем "В процессе" для черновика
+                    : formattedDate,
+                style: TextStyle(
+                  color: workout.finishedAt == null 
+                      ? const Color(0xFFF97316) 
+                      : Colors.grey[400],
+                  fontSize: 14,
+                  fontWeight: workout.finishedAt == null 
+                      ? FontWeight.bold 
+                      : FontWeight.normal,
+                ),
+              ),
+              if (formattedTime.isNotEmpty && workout.finishedAt != null) ...[
+                const SizedBox(width: 12),
+                Icon(
+                  Icons.access_time,
+                  color: Colors.grey[500],
+                  size: 14,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  formattedTime,
+                  style: TextStyle(
+                    color: Colors.grey[400],
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ],
+          ),
+
+          const SizedBox(height: 12),
+          const Divider(color: Color(0xFFF97316), height: 1),
+          const SizedBox(height: 12),
+
+          // Статистика (остаётся без изменений)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildStatColumn(
+                Icons.fitness_center,
+                'history.exercises'.tr(),
+                '$totalExercises',
+              ),
+              _buildStatColumn(
+                Icons.repeat,
+                'history.completed_sets'.tr(),
+                '$completedSets/$totalSets',
+              ),
+              _buildStatColumn(
+                Icons.play_arrow,
+                'history.reps'.tr(),
+                '$totalReps',
+              ),
+              _buildStatColumn(
+                Icons.monitor_weight,
+                'history.volume'.tr(),
+                _formatVolume(totalVolume),
+              ),
+              if (workout.duration != null)
+                _buildStatColumn(
+                  Icons.timer,
+                  'workout.duration'.tr(),
+                  _formatDuration(workout.duration!),
+                ),
+            ],
+          ),
+        ],
       ),
-    );
+    ),
+  ),
+);
   }
 
 // Вспомогательная функция для колонки статистики

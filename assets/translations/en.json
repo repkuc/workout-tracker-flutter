@@ -17,7 +17,8 @@
     "start_first": "Start your first workout!",
     "sets": "Sets",
     "completed_sets": "Completed",
-    "view": "View"
+    "view": "View",
+    "in_progress": "In progress"
   },
   "workout": {
     "title": "Workout",
@@ -116,6 +117,7 @@
     "draft": "Draft",
     "workout_started": "⏱️ Workout started!",
     "continue_workout": "Continue workout"
+    
   },
   "nav": {
     "home": "Home",

@@ -17,7 +17,8 @@
     "start_first": "Sāc savu pirmo treniņu!",
     "sets": "Komplekti",
     "completed_sets": "Pabeigts",
-    "view": "Atvērt"
+    "view": "Atvērt",
+    "in_progress": "Procesā"
   },
   "workout": {
     "title": "Treniņš",
@@ -116,6 +117,7 @@
     "draft": "Melnraksts",
     "workout_started": "⏱️ Treniņš sākās!",
     "continue_workout": "Turpināt treniņu"
+    
   },
   "nav": {
     "home": "Sākums",
