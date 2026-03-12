@@ -4,6 +4,7 @@ import 'services/workout_service.dart';
 import 'pages/workout_editor_page.dart';
 import 'pages/history_page.dart';
 import 'models/workout_models.dart';
+import 'pages/statistics_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -149,7 +150,7 @@ class _HomePageState extends State<HomePage> {
   int _workoutCount = 0;
   bool _isLoading = true;
   int _draftCount = 0;
-  Workout? _currentWorkout; 
+  Workout? _currentWorkout;
 
 // Контроллер для названия новой тренировки
   final _newWorkoutNameController = TextEditingController();
@@ -219,6 +220,24 @@ class _HomePageState extends State<HomePage> {
                     ),
                     Row(
                       children: [
+                        // Кнопка статистики
+                        IconButton(
+                          icon: const Icon(
+                            Icons.bar_chart,
+                            color: Colors.white,
+                            size: 28,
+                          ),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const StatisticsPage(),
+                              ),
+                            );
+                          },
+                          tooltip: 'statistics.title'.tr(),
+                        ),
+                        // Кнопка истории
                         IconButton(
                           icon: const Icon(
                             Icons.history,

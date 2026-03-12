@@ -123,5 +123,19 @@
     "home": "Home",
     "workout": "Workout",
     "history": "History"
-  }
+  },
+  "statistics": {
+  "title": "Statistics",
+  "all_time": "All Time",
+  "total_workouts": "Total Workouts",
+  "total_volume": "Total Volume",
+  "total_reps": "Total Reps",
+  "total_time": "Total Time",
+  "top_exercises": "🏆 Top-5 Exercises",
+  "no_exercises": "No completed workouts yet",
+  "last_7_days": "7 Days",
+  "last_30_days": "30 Days",
+  "all_time_short": "All Time",
+  "last_year": "Year"
+}
 }

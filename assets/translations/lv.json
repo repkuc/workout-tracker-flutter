@@ -123,5 +123,19 @@
     "home": "Sākums",
     "workout": "Treniņš",
     "history": "Vēsture"
-  }
+  },
+  "statistics": {
+  "title": "Statistika",
+  "all_time": "Visu laiku",
+  "total_workouts": "Kopā treniņi",
+  "total_volume": "Kopējais apjoms",
+  "total_reps": "Kopā atkārtojumi",
+  "total_time": "Kopējais laiks",
+  "top_exercises": "🏆 Top-5 vingrinājumi",
+  "no_exercises": "Vēl nav pabeigtu treniņu",
+  "last_7_days": "7 dienas",
+  "last_30_days": "30 dienas",
+  "all_time_short": "Viss laiks",
+  "last_year": "Gads"
+}
 }

@@ -123,5 +123,19 @@
     "home": "Главная",
     "workout": "Тренировка",
     "history": "История"
-  }
+  },
+  "statistics": {
+  "title": "Статистика",
+  "all_time": "За всё время",
+  "total_workouts": "Всего тренировок",
+  "total_volume": "Общий объём",
+  "total_reps": "Всего повторений",
+  "total_time": "Общее время",
+  "top_exercises": "🏆 Топ-5 упражнений",
+  "no_exercises": "Пока нет завершённых тренировок",
+  "last_7_days": "7 дней",
+  "last_30_days": "30 дней",
+  "all_time_short": "Всё время",
+  "last_year": "Год"
+}
 }
