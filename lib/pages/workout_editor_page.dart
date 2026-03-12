@@ -523,9 +523,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
               bottom: 12), // Отступы внутри раскрывающейся части
           // Заголовок
           title: Row(
-            
             children: [
-              
               // Иконка + название
               Icon(
                 exercise.isCompleted
@@ -727,48 +725,90 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
             ],
 
             // Две кнопки рядом
-            const SizedBox(height: 12),
-            Row(
+            const SizedBox(height: 8),
+            // Кнопки управления
+            Column(
               children: [
-                // Кнопка "Добавить подход"
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () => _showAddSetDialog(exercise),
-                    icon: const Icon(
-                      Icons.add,
-                      color: Color(0xFFF97316),
-                      size: 16,
-                    ),
-                    label: Text(
-                      'workout.add_set_button'.tr(),
-                      style: const TextStyle(
-                        color: Color(0xFFF97316),
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
+                // Первая строка: "Добавить подход" + "+1"
+                Row(
+                  children: [
+                    // Кнопка "Добавить подход"
+                    Expanded(
+                      flex: 2,
+                      child: OutlinedButton.icon(
+                        onPressed: () => _showAddSetDialog(exercise),
+                        icon: const Icon(
+                          Icons.add,
+                          color: Color(0xFFF97316),
+                          size: 18,
+                        ),
+                        label: Text(
+                          'workout.add_set_button'.tr(),
+                          style: const TextStyle(
+                            color: Color(0xFFF97316),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                          ),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(
+                            color: Color(0xFFF97316),
+                            width: 1,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                        ),
                       ),
                     ),
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(
-                        color: Color(0xFFF97316),
-                        width: 1,
+
+                    const SizedBox(width: 8),
+
+                    // НОВОЕ: Кнопка "+1"
+                    Expanded(
+                      flex: 1,
+                      child: OutlinedButton(
+                        onPressed: exercise.sets.isEmpty
+                            ? null // Disabled если нет подходов
+                            : () => _addOneMoreSet(exercise),
+                        child: Text(
+                          'workout.add_one_more'.tr(),
+                          style: TextStyle(
+                            color: exercise.sets.isEmpty
+                                ? Colors.grey
+                                : const Color(0xFF10B981),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(
+                            color: exercise.sets.isEmpty
+                                ? Colors.grey
+                                : const Color(0xFF10B981),
+                            width: 1,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                        ),
                       ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 8),
                     ),
-                  ),
+                  ],
                 ),
 
-                const SizedBox(width: 8),
+                const SizedBox(height: 8),
 
-                // Кнопка "Завершить упражнение" / "Отменить"
-                Expanded(
+                // Вторая строка: "Завершить упражнение"
+                SizedBox(
+                  width: double.infinity,
                   child: ElevatedButton.icon(
                     onPressed: () => _toggleExerciseCompleted(exercise),
                     icon: Icon(
                       exercise.isCompleted ? Icons.undo : Icons.check,
-                      size: 16,
+                      size: 18,
                     ),
                     label: Text(
                       exercise.isCompleted
@@ -776,18 +816,18 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                           : 'workout.complete_exercise'.tr(),
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
-                        fontSize: 12,
+                        fontSize: 13,
                       ),
                     ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: exercise.isCompleted
                           ? Colors.grey[700]
-                          : const Color(0xFF10B981), // Зеленая
+                          : const Color(0xFF10B981),
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      padding: const EdgeInsets.symmetric(vertical: 10),
                     ),
                   ),
                 ),
@@ -869,28 +909,29 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
   }
 
 // Отметить/снять отметку "выполнен"
- Future<void> _toggleSetDone(String exerciseId, String setId, bool isDone) async {
-  await _service.toggleSetDone(widget.workoutId, exerciseId, setId, isDone);
-  
-  // ← НОВОЕ: Автостарт таймера при первой отметке
-  if (isDone && _workout?.startedAt == null) {
-    // Это первый выполненный подход - запускаем таймер!
-    await _startTimer();
-    
-    // Показываем уведомление
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('workout.workout_started'.tr()),
-          backgroundColor: const Color(0xFF10B981),
-          duration: const Duration(seconds: 2),
-        ),
-      );
+  Future<void> _toggleSetDone(
+      String exerciseId, String setId, bool isDone) async {
+    await _service.toggleSetDone(widget.workoutId, exerciseId, setId, isDone);
+
+    // ← НОВОЕ: Автостарт таймера при первой отметке
+    if (isDone && _workout?.startedAt == null) {
+      // Это первый выполненный подход - запускаем таймер!
+      await _startTimer();
+
+      // Показываем уведомление
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('workout.workout_started'.tr()),
+            backgroundColor: const Color(0xFF10B981),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
     }
+
+    await _loadWorkout();
   }
-  
-  await _loadWorkout();
-}
 
   // Показать диалог добавления подхода
   Future<void> _showAddSetDialog(Exercise exercise) async {
@@ -1015,6 +1056,38 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
     // Если нажали "Добавить"
     if (result == true) {
       await _addSet(exercise.id);
+    }
+  }
+
+// НОВОЕ: Быстро добавить подход как последний
+  Future<void> _addOneMoreSet(Exercise exercise) async {
+    if (exercise.sets.isEmpty) return;
+
+    // Берём параметры последнего подхода
+    final lastSet = exercise.sets.last;
+
+    // Добавляем через сервис (передаём параметры напрямую)
+    await _service.addSet(
+      widget.workoutId,
+      exercise.id,
+      reps: lastSet.reps,
+      weight: lastSet.weight,
+    );
+
+    // Обновляем
+    await _loadWorkout();
+
+    // Показываем уведомление
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            '✅ ${lastSet.reps} reps × ${lastSet.weight} ${'workout.kg'.tr()}',
+          ),
+          backgroundColor: const Color(0xFF10B981),
+          duration: const Duration(seconds: 1),
+        ),
+      );
     }
   }
 
