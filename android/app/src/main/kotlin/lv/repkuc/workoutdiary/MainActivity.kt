@@ -1,4 +1,4 @@
-package com.example.workout_diary
+package lv.repkuc.workoutdiary
 
 import io.flutter.embedding.android.FlutterActivity
 
