@@ -5,6 +5,7 @@ import 'pages/workout_editor_page.dart';
 import 'pages/history_page.dart';
 import 'models/workout_models.dart';
 import 'pages/statistics_page.dart';
+import 'pages/progress_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -219,6 +220,23 @@ class _HomePageState extends State<HomePage> {
                     ),
                     Row(
                       children: [
+                        // Кнопка прогресса
+IconButton(
+  icon: const Icon(
+    Icons.trending_up,
+    color: Colors.white,
+    size: 28,
+  ),
+  onPressed: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const ProgressPage(),
+      ),
+    );
+  },
+  tooltip: 'Прогресс',
+),
                         // Кнопка статистики
                         IconButton(
                           icon: const Icon(

@@ -137,5 +137,13 @@
   "last_30_days": "30 dienas",
   "all_time_short": "Viss laiks",
   "last_year": "Gads"
+},
+"progress": {
+  "title": "Progress",
+  "placeholder": "Šeit būs grafiki",
+  "filter_7d": "7d",
+  "filter_30d": "30d",
+  "filter_year": "Gads",
+  "filter_all": "Viss"
 }
 }

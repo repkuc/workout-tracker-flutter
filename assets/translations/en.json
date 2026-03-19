@@ -137,5 +137,13 @@
   "last_30_days": "30 Days",
   "all_time_short": "All Time",
   "last_year": "Year"
-}
+},
+ "progress": {
+  "title": "Progress",
+  "placeholder": "Charts will be here",
+  "filter_7d": "7d",
+  "filter_30d": "30d",
+  "filter_year": "Year",
+  "filter_all": "All"
+  }
 }
