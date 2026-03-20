@@ -36,6 +36,9 @@ dependencies:
   shared_preferences: ^2.2.3  # для сохранения данных
   uuid: ^4.4.0                 # для генерации ID
   fl_chart: ^0.69.0           # для графиков
+  path_provider: ^2.1.2     # для доступа к файловой системе
+  share_plus: ^9.0.0        # для шаринга данных
+  file_picker: ^8.0.0         # для выбора файлов
 
 dev_dependencies:
   flutter_test:

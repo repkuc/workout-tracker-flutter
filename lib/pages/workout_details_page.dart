@@ -114,47 +114,37 @@ class _WorkoutDetailsPageState extends State<WorkoutDetailsPage> {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.check_circle,
-                          color: const Color(0xFF10B981),
-                          size: 16,
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          'workout.completed'.tr(),
-                          style: TextStyle(
-                            color: Colors.grey[400],
-                            fontSize: 14,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Text(
-                          formattedDate,
-                          style: TextStyle(
-                            color: Colors.grey[400],
-                            fontSize: 14,
-                          ),
-                        ),
-                        if (_workout?.duration != null) ...[
-                          const SizedBox(width: 12),
-                          Icon(
-                            Icons.timer,
-                            color: const Color(0xFF10B981),
-                            size: 16,
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            _formatDuration(_workout!.duration!),
-                            style: TextStyle(
-                              color: Colors.grey[400],
-                              fontSize: 14,
-                            ),
-                          )
-                        ]
-                      ],
-                    ),
+                    Wrap(
+  spacing: 6,
+  runSpacing: 4,
+  crossAxisAlignment: WrapCrossAlignment.center,
+  children: [
+    Icon(
+      Icons.check_circle,
+      color: const Color(0xFF10B981),
+      size: 14,
+    ),
+    Text(
+      'workout.completed'.tr(),
+      style: TextStyle(color: Colors.grey[400], fontSize: 12),
+    ),
+    Text(
+      formattedDate,
+      style: TextStyle(color: Colors.grey[400], fontSize: 12),
+    ),
+    if (_workout?.duration != null) ...[
+      Icon(
+        Icons.timer,
+        color: const Color(0xFF10B981),
+        size: 14,
+      ),
+      Text(
+        _formatDuration(_workout!.duration!),
+        style: TextStyle(color: Colors.grey[400], fontSize: 12),
+      ),
+    ]
+  ],
+),
                   ],
                 ),
               ),

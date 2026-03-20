@@ -507,4 +507,50 @@ class WorkoutService {
     final now = DateTime.now();
     return '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
   }
+
+  // Получить объём (кг) по завершённым тренировкам за период
+  // Возвращает Map где ключ = дата, значение = суммарный объём
+  Future<Map<String, double>> getVolumeByDate({int? days}) async {
+    // Берём только завершённые тренировки
+    final workouts = await getCompletedWorkouts();
+
+    // Считаем границу периода если нужен фильтр
+    String? cutoffStr;
+    if (days != null) {
+      final cutoff = DateTime.now().subtract(Duration(days: days));
+      cutoffStr = '${cutoff.year}-'
+          '${cutoff.month.toString().padLeft(2, '0')}-'
+          '${cutoff.day.toString().padLeft(2, '0')}';
+    }
+
+    // Map который будем заполнять: { "2024-03-15": 2400.0, ... }
+    final Map<String, double> volumeByDate = {};
+
+    for (final workout in workouts) {
+      // Если есть фильтр по дате, пропускаем тренировки вне периода
+      if (cutoffStr != null && workout.date.compareTo(cutoffStr) < 0) {
+        continue; // тренировка старше границы, пропускаем
+      }
+
+      // Считаем объём тренировки: сумма (повторы * вес) по всем подходам
+      double totalVolume = 0;
+      for (final exercise in workout.exercises) {
+        for (final set in exercise.sets) {
+          // Объём одного сета = вес × повторения
+          totalVolume += set.reps * set.weight;
+        }
+      }
+
+      // Если на эту дату уже есть запись — прибавляем
+      // (на случай если в один день было две тренировки)
+      volumeByDate[workout.date] =
+          (volumeByDate[workout.date] ?? 0) + totalVolume;
+    }
+    return volumeByDate;
+  }
+
+  // Создать объект Workout из JSON Map (нужен для импорта)
+  Workout workoutFromJson(Map<String, dynamic> json) {
+    return Workout.fromJson(json);
+  }
 }

@@ -1683,148 +1683,131 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
 
     final result = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1F2937),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(
-            color: Color(0xFFF97316),
-            width: 2,
-          ),
+     builder: (context) => AlertDialog(
+  backgroundColor: const Color(0xFF1F2937),
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(16),
+    side: const BorderSide(color: Color(0xFFF97316), width: 2),
+  ),
+  titlePadding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
+  contentPadding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+  actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+  title: Text(
+    'workout.edit_set_dialog_title'.tr(),
+    style: const TextStyle(
+      color: Colors.white,
+      fontSize: 15,
+      fontWeight: FontWeight.bold,
+    ),
+  ),
+  content: Column(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        margin: const EdgeInsets.only(bottom: 10),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF97316).withOpacity(0.15),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: const Color(0xFFF97316), width: 1),
         ),
-        title: Text(
-          'workout.edit_set_dialog_title'.tr(),
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Показываем номер подхода
-            Container(
-              padding: const EdgeInsets.all(8),
-              margin: const EdgeInsets.only(bottom: 16),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF97316).withOpacity(0.2),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: const Color(0xFFF97316),
-                  width: 2,
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.fitness_center,
-                    color: Color(0xFFF97316),
-                    size: 20,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    '${'workout.add_set_button'.tr()} #$setNumber',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // Поле "Повторы"
-            TextField(
-              controller: _repsController,
-              autofocus: true,
-              keyboardType: TextInputType.number,
-              style: const TextStyle(color: Colors.white),
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: const Color(0xFF374151),
-                hintText: 'workout.reps_hint'.tr(),
-                hintStyle: TextStyle(color: Colors.grey[500]),
-                labelText: 'workout.reps'.tr(),
-                labelStyle: const TextStyle(color: Color(0xFFF97316)),
-                prefixIcon: const Icon(
-                  Icons.repeat,
-                  color: Color(0xFFF97316),
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            // Поле "Вес"
-            TextField(
-              controller: _weightController,
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
-              style: const TextStyle(color: Colors.white),
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: const Color(0xFF374151),
-                hintText: 'workout.weight_hint'.tr(),
-                hintStyle: TextStyle(color: Colors.grey[500]),
-                labelText: 'workout.weight'.tr() + ' (${'workout.kg'.tr()})',
-                labelStyle: const TextStyle(color: Color(0xFFF97316)),
-                prefixIcon: const Icon(
-                  Icons.fitness_center,
-                  color: Color(0xFFF97316),
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
+            const Icon(Icons.fitness_center, color: Color(0xFFF97316), size: 14),
+            const SizedBox(width: 6),
+            Text(
+              '${'workout.add_set_button'.tr()} #$setNumber',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
               ),
             ),
           ],
         ),
-        actions: [
-          // Кнопка "Отмена"
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(
-              'workout.cancel'.tr(),
-              style: TextStyle(color: Colors.grey[400]),
-            ),
-          ),
-          // Кнопка "Сохранить"
-          ElevatedButton(
-            onPressed: () {
-              // Проверка повторов
-              final reps = int.tryParse(_repsController.text.trim());
-              if (reps == null || reps <= 0) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('workout.reps_required'.tr()),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-                return;
-              }
-
-              // Проверка веса
-              final weight = double.tryParse(_weightController.text.trim());
-              if (weight == null || weight < 0) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('workout.weight_required'.tr()),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-                return;
-              }
-
-              Navigator.pop(context, true);
-            },
-            child: Text('workout.save'.tr()),
-          ),
-        ],
       ),
+      TextField(
+        controller: _repsController,
+        autofocus: true,
+        keyboardType: TextInputType.number,
+        style: const TextStyle(color: Colors.white, fontSize: 14),
+        decoration: InputDecoration(
+          filled: true,
+          fillColor: const Color(0xFF374151),
+          labelText: 'workout.reps'.tr(),
+          labelStyle: const TextStyle(color: Color(0xFFF97316), fontSize: 12),
+          prefixIcon: const Icon(Icons.repeat, color: Color(0xFFF97316), size: 16),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: BorderSide.none,
+          ),
+        ),
+      ),
+      const SizedBox(height: 8),
+      TextField(
+        controller: _weightController,
+        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+        style: const TextStyle(color: Colors.white, fontSize: 14),
+        decoration: InputDecoration(
+          filled: true,
+          fillColor: const Color(0xFF374151),
+          labelText: '${' workout.weight'.tr()} (${'workout.kg'.tr()})',
+          labelStyle: const TextStyle(color: Color(0xFFF97316), fontSize: 12),
+          prefixIcon: const Icon(Icons.fitness_center, color: Color(0xFFF97316), size: 16),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: BorderSide.none,
+          ),
+        ),
+      ),
+    ],
+  ),
+  actions: [
+    TextButton(
+      onPressed: () => Navigator.pop(context, false),
+      style: TextButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      ),
+      child: Text(
+        'workout.cancel'.tr(),
+        style: TextStyle(color: Colors.grey[400], fontSize: 13),
+      ),
+    ),
+    ElevatedButton(
+      onPressed: () {
+        final reps = int.tryParse(_repsController.text.trim());
+        if (reps == null || reps <= 0) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('workout.reps_required'.tr()),
+              backgroundColor: Colors.red,
+            ),
+          );
+          return;
+        }
+        final weight = double.tryParse(_weightController.text.trim());
+        if (weight == null || weight < 0) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('workout.weight_required'.tr()),
+              backgroundColor: Colors.red,
+            ),
+          );
+          return;
+        }
+        Navigator.pop(context, true);
+      },
+      style: ElevatedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        textStyle: const TextStyle(fontSize: 13),
+      ),
+      child: Text('workout.save'.tr()),
+    ),
+  ],
+),
     );
 
     // Если нажали "Сохранить"

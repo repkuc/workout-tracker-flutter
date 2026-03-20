@@ -144,6 +144,17 @@
   "filter_7d": "7d",
   "filter_30d": "30d",
   "filter_year": "Gads",
-  "filter_all": "Viss"
+  "filter_all": "Viss",
+  "volume_title": "KOPĒJAIS APJOMS",
+  "no_data": "Nav datu par šo periodu"
+},
+"backup": {
+  "export": "Eksportēt datus",
+  "import": "Importēt datus",
+  "export_error": "Eksporta kļūda",
+  "import_error": "Importa kļūda",
+  "imported_count": "Importētas treniņi: {count}",
+  "no_new_workouts": "Jaunu treniņu nav"
 }
+
 }

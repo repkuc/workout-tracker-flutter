@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../services/body_weight_service.dart';
 import '../models/body_weight_entry.dart';
+import '../widgets/volume_chart_card.dart';
 
 class ProgressPage extends StatefulWidget {
   const ProgressPage({super.key});
@@ -55,7 +56,7 @@ class _ProgressPageState extends State<ProgressPage> {
     return Scaffold(
         backgroundColor: const Color(0xFF111827),
         appBar: AppBar(
-          title: const Text('progress.title').tr(),
+          title: Text('progress.title').tr(),
         ),
         body: _isLoading
             // Пока грузим — показываем спиннер по центру
@@ -77,20 +78,8 @@ class _ProgressPageState extends State<ProgressPage> {
                           child: Column(
                             children: [
                               // Сюда будем добавлять карточки с графиками
-                              // Пока просто заглушка
-                              Container(
-                                height: 100,
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFF1F2937),
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
-                                child: Center(
-                                  child: const Text(
-                                    'progress.placeholder',
-                                    style: TextStyle(color: Colors.grey),
-                                  ).tr(),
-                                ),
-                              )
+
+                              VolumeChartCard(selectedDays: _selectedDays),
                             ],
                           )))
                 ],
