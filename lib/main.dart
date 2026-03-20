@@ -188,210 +188,224 @@ class _HomePageState extends State<HomePage> {
             children: [
               // Верхняя панель
               // Верхняя панель
-Padding(
-  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-  child: Row(
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    children: [
-      // Иконка штанги + название
-      Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(6),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF97316),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: const Icon(
-              Icons.fitness_center,
-              color: Colors.white,
-              size: 20,  // ← меньше
-            ),
-          ),
-          const SizedBox(width: 8),  // ← меньше отступ
-          Text(
-            'home.title'.tr(),
-            style: const TextStyle(
-              fontSize: 20,           // ← меньше
-              fontWeight: FontWeight.w600, // ← не такой жирный
-              color: Colors.white,
-              letterSpacing: 0.5,    // ← меньше
-            ),
-          ),
-        ],
-      ),
-      // Кнопки справа
-      Row(
-        children: [
-          IconButton(
-            icon: const Icon(Icons.trending_up, color: Colors.white, size: 22),
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
-            visualDensity: VisualDensity.compact,
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const ProgressPage(),
-                ),
-              );
-            },
-            tooltip: 'progress.title'.tr(),
-          ),
-          const SizedBox(width: 4),
-          IconButton(
-            icon: const Icon(Icons.bar_chart, color: Colors.white, size: 22),
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
-            visualDensity: VisualDensity.compact,
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const StatisticsPage(),
-                ),
-              );
-            },
-            tooltip: 'statistics.title'.tr(),
-          ),
-          const SizedBox(width: 4),
-          IconButton(
-            icon: const Icon(Icons.history, color: Colors.white, size: 22),
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
-            visualDensity: VisualDensity.compact,
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const HistoryPage(),
-                ),
-              ).then((_) {
-                _loadWorkoutCount();
-              });
-            },
-            tooltip: 'history.title'.tr(),
-          ),
-          const SizedBox(width: 4),
-          PopupMenuButton<String>(
-  icon: const Icon(Icons.more_vert, color: Colors.white, size: 22),
-  padding: EdgeInsets.zero,
-  onSelected: (value) async {
-    // Язык
-    if (value == 'ru' || value == 'lv' || value == 'en') {
-      context.setLocale(Locale(value));
-      return;
-    }
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Иконка штанги + название
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF97316),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(
+                            Icons.fitness_center,
+                            color: Colors.white,
+                            size: 20, // ← меньше
+                          ),
+                        ),
+                        const SizedBox(width: 8), // ← меньше отступ
+                        Text(
+                          'home.title'.tr(),
+                          style: const TextStyle(
+                            fontSize: 20, // ← меньше
+                            fontWeight: FontWeight.w600, // ← не такой жирный
+                            color: Colors.white,
+                            letterSpacing: 0.5, // ← меньше
+                          ),
+                        ),
+                      ],
+                    ),
+                    // Кнопки справа
+                    Row(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.trending_up,
+                              color: Colors.white, size: 22),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                          visualDensity: VisualDensity.compact,
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const ProgressPage(),
+                              ),
+                            );
+                          },
+                          tooltip: 'progress.title'.tr(),
+                        ),
+                        const SizedBox(width: 4),
+                        IconButton(
+                          icon: const Icon(Icons.bar_chart,
+                              color: Colors.white, size: 22),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                          visualDensity: VisualDensity.compact,
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const StatisticsPage(),
+                              ),
+                            );
+                          },
+                          tooltip: 'statistics.title'.tr(),
+                        ),
+                        const SizedBox(width: 4),
+                        IconButton(
+                          icon: const Icon(Icons.history,
+                              color: Colors.white, size: 22),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                          visualDensity: VisualDensity.compact,
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const HistoryPage(),
+                              ),
+                            ).then((_) {
+                              _loadWorkoutCount();
+                            });
+                          },
+                          tooltip: 'history.title'.tr(),
+                        ),
+                        const SizedBox(width: 4),
+                        PopupMenuButton<String>(
+                          icon: const Icon(Icons.more_vert,
+                              color: Colors.white, size: 22),
+                          padding: EdgeInsets.zero,
+                          onSelected: (value) async {
+                            // Язык
+                            if (value == 'ru' ||
+                                value == 'lv' ||
+                                value == 'en') {
+                              context.setLocale(Locale(value));
+                              return;
+                            }
 
-    // Экспорт
-    if (value == 'export') {
-      try {
-        await BackupService().exportData();
-      } catch (e) {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('${'backup.export_error'.tr()}: $e'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-      }
-    }
+                            // Экспорт
+                            if (value == 'export') {
+                              try {
+                                await BackupService().exportData();
+                              } catch (e) {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                          '${'backup.export_error'.tr()}: $e'),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                }
+                              }
+                            }
 
-    // Импорт
-    if (value == 'import') {
-      try {
-        final count = await BackupService().importData();
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                count > 0
-                    ? 'backup.imported_count'.tr(namedArgs: {'count': '$count'})
-      : 'backup.no_new_workouts'.tr(),
+                            // Импорт
+                            if (value == 'import') {
+                              try {
+                                final count =
+                                    await BackupService().importData();
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        count > 0
+                                            ? 'backup.imported_count'.tr(
+                                                namedArgs: {'count': '$count'})
+                                            : 'backup.no_new_workouts'.tr(),
+                                      ),
+                                      backgroundColor: count > 0
+                                          ? const Color(0xFF10B981)
+                                          : Colors.grey,
+                                    ),
+                                  );
+                                  if (count > 0) _loadWorkoutCount();
+                                }
+                              } catch (e) {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                          '${'backup.import_error'.tr()}: $e'),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                }
+                              }
+                            }
+                          },
+                          itemBuilder: (BuildContext context) => [
+                            // Языки
+                            const PopupMenuItem(
+                              value: 'ru',
+                              child: Row(
+                                children: [
+                                  Text('🇷🇺', style: TextStyle(fontSize: 16)),
+                                  SizedBox(width: 8),
+                                  Text('Русский'),
+                                ],
+                              ),
+                            ),
+                            const PopupMenuItem(
+                              value: 'lv',
+                              child: Row(
+                                children: [
+                                  Text('🇱🇻', style: TextStyle(fontSize: 16)),
+                                  SizedBox(width: 8),
+                                  Text('Latviešu'),
+                                ],
+                              ),
+                            ),
+                            const PopupMenuItem(
+                              value: 'en',
+                              child: Row(
+                                children: [
+                                  Text('🇬🇧', style: TextStyle(fontSize: 16)),
+                                  SizedBox(width: 8),
+                                  Text('English'),
+                                ],
+                              ),
+                            ),
+                            // Разделитель
+                            const PopupMenuDivider(),
+                            // Экспорт
+                            PopupMenuItem(
+                              value: 'export',
+                              child: Row(
+                                children: [
+                                  Icon(Icons.upload,
+                                      color: Color(0xFFF97316), size: 20),
+                                  SizedBox(width: 8),
+                                  Text('backup.export'.tr()),
+                                ],
+                              ),
+                            ),
+                            // Импорт
+                            PopupMenuItem(
+                              value: 'import',
+                              child: Row(
+                                children: [
+                                  Icon(Icons.download,
+                                      color: Color(0xFFF97316), size: 20),
+                                  SizedBox(width: 8),
+                                  Text('backup.import'.tr()),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-              backgroundColor:
-                  count > 0 ? const Color(0xFF10B981) : Colors.grey,
-            ),
-          );
-          if (count > 0) _loadWorkoutCount();
-        }
-      } catch (e) {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('${'backup.import_error'.tr()}: $e'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-      }
-    }
-  },
-  itemBuilder: (BuildContext context) => [
-    // Языки
-    const PopupMenuItem(
-      value: 'ru',
-      child: Row(
-        children: [
-          Text('🇷🇺', style: TextStyle(fontSize: 16)),
-          SizedBox(width: 8),
-          Text('Русский'),
-        ],
-      ),
-    ),
-    const PopupMenuItem(
-      value: 'lv',
-      child: Row(
-        children: [
-          Text('🇱🇻', style: TextStyle(fontSize: 16)),
-          SizedBox(width: 8),
-          Text('Latviešu'),
-        ],
-      ),
-    ),
-    const PopupMenuItem(
-      value: 'en',
-      child: Row(
-        children: [
-          Text('🇬🇧', style: TextStyle(fontSize: 16)),
-          SizedBox(width: 8),
-          Text('English'),
-        ],
-      ),
-    ),
-    // Разделитель
-    const PopupMenuDivider(),
-    // Экспорт
-     PopupMenuItem(
-      value: 'export',
-      child: Row(
-        children: [
-          Icon(Icons.upload, color: Color(0xFFF97316), size: 20),
-          SizedBox(width: 8),
-          Text('backup.export'.tr()),  
-        ],
-      ),
-    ),
-    // Импорт
-     PopupMenuItem(
-      value: 'import',
-      child: Row(
-        children: [
-          Icon(Icons.download, color: Color(0xFFF97316), size: 20),
-          SizedBox(width: 8),
-          Text('backup.import'.tr()),
-        ],
-      ),
-    ),
-  ],
-),
-        ],
-      ),
-    ],
-  ),
-),
 
               // Основной контент
               Flexible(
