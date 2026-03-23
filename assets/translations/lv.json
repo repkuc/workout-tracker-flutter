@@ -149,7 +149,17 @@
   "no_data": "Nav datu par šo periodu",
   "exercises_title": "VINGROJUMU PROGRESS",
   "show_more": "Vēl +{count}",
-  "show_less": "Aizvērt"
+  "show_less": "Aizvērt",
+  "add_weight_title": "Ierakstīt svaru",
+  "weight_kg": "Svars (kg)",
+  "weight_invalid": "Ievadiet pareizo svaru",
+  "save_weight": "Saglabāt",
+  "weight_saved": "Svars ierakstīts!",
+  "today": "šodien",
+  "no_weight_today": "Svars nav ierakstīts",
+  "edit_weight": "Mainīt",
+  "add_weight_short": "Ierakstīt",
+  "weight_title": "ĶERMEŅA SVARS"
 },
 "backup": {
   "export": "Eksportēt datus",

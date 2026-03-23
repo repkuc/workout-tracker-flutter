@@ -149,7 +149,17 @@
   "no_data": "Нет данных за этот период",
   "exercises_title": "ПРОГРЕСС УПРАЖНЕНИЙ",
   "show_more": "Ещё +{count}",
-  "show_less": "Свернуть"
+  "show_less": "Свернуть",
+  "add_weight_title": "Записать вес",
+  "weight_kg": "Вес (кг)",
+  "weight_invalid": "Введите корректный вес",
+  "save_weight": "Сохранить",
+  "weight_saved": "Вес записан!",
+  "today": "сегодня",
+  "no_weight_today": "Вес не записан",
+  "edit_weight": "Изменить",
+  "add_weight_short": "Записать",
+  "weight_title": "ВЕС ТЕЛА"
   },
   "backup": {
     "export": "Экспорт данных",

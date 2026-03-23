@@ -149,7 +149,17 @@
     "no_data": "No data for this period",
     "exercises_title": "EXERCISE PROGRESS",
     "show_more": "More +{count}",
-    "show_less": "Show less"
+    "show_less": "Show less",
+    "add_weight_title": "Log weight",
+    "weight_kg": "Weight (kg)",
+    "weight_invalid": "Please enter a valid weight",
+    "save_weight": "Save",
+    "weight_saved": "Weight saved!",
+    "today": "today",
+    "no_weight_today": "No weight logged",
+    "edit_weight": "Edit",
+    "add_weight_short": "Log",
+    "weight_title": "BODY WEIGHT"
   },
   "backup": {
     "export": "Export data",
