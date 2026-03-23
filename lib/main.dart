@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:workout_diary/services/body_weight_service.dart';
 import 'services/workout_service.dart';
 import 'pages/workout_editor_page.dart';
 import 'pages/history_page.dart';
@@ -7,6 +8,8 @@ import 'models/workout_models.dart';
 import 'pages/statistics_page.dart';
 import 'pages/progress_page.dart';
 import 'services/backup_service.dart';
+import 'services/body_weight_service.dart';
+import 'models/body_weight_entry.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -152,6 +155,7 @@ class _HomePageState extends State<HomePage> {
   bool _isLoading = true;
   int _draftCount = 0;
   Workout? _currentWorkout;
+  BodyWeightEntry? _todayWeight;
 
 // Контроллер для названия новой тренировки
   final _newWorkoutNameController = TextEditingController();
@@ -165,10 +169,12 @@ class _HomePageState extends State<HomePage> {
   Future<void> _loadWorkoutCount() async {
     final workouts = await _service.getCompletedWorkouts();
     final draft = await _service.getDraftWorkout();
+    final todayWeight = await BodyWeightService().getTodayEntry();
     setState(() {
       _workoutCount = workouts.length;
       _draftCount = draft != null ? 1 : 0;
       _currentWorkout = draft;
+      _todayWeight = todayWeight;
       _isLoading = false;
     });
   }
@@ -499,7 +505,82 @@ class _HomePageState extends State<HomePage> {
                                         height: 1,
                                       ),
                                     ),
-
+// Виджет веса тела
+                                    const SizedBox(height: 12),
+                                    GestureDetector(
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                const ProgressPage(),
+                                          ),
+                                        ).then((_) => _loadWorkoutCount());
+                                      },
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 16,
+                                          vertical: 10,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFF111827)
+                                              .withOpacity(0.5),
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                          border: Border.all(
+                                            color: _todayWeight != null
+                                                ? const Color(0xFFE879F9)
+                                                    .withOpacity(0.5)
+                                                : Colors.grey.withOpacity(0.3),
+                                            width: 1,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Icon(
+                                                  Icons.monitor_weight,
+                                                  color: _todayWeight != null
+                                                      ? const Color(0xFFE879F9)
+                                                      : Colors.grey[500],
+                                                  size: 18,
+                                                ),
+                                                const SizedBox(width: 8),
+                                                Text(
+                                                  _todayWeight != null
+                                                      ? '${_todayWeight!.weight} ${'workout.kg'.tr()}'
+                                                      : 'progress.no_weight_today'
+                                                          .tr(),
+                                                  style: TextStyle(
+                                                    color: _todayWeight != null
+                                                        ? Colors.white
+                                                        : Colors.grey[500],
+                                                    fontSize: 14,
+                                                    fontWeight:
+                                                        _todayWeight != null
+                                                            ? FontWeight.bold
+                                                            : FontWeight.normal,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            Text(
+                                              _todayWeight != null
+                                                  ? 'progress.edit_weight'.tr()
+                                                  : 'progress.add_weight_short'
+                                                      .tr(),
+                                              style: const TextStyle(
+                                                color: Color(0xFFE879F9),
+                                                fontSize: 12,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
                                     // Бейдж черновика
                                     if (_draftCount > 0) ...[
                                       const SizedBox(height: 12),
