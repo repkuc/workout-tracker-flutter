@@ -146,7 +146,10 @@
   "filter_year": "Год",
   "filter_all": "Всё",
   "volume_title": "ОБЩИЙ ОБЪЁМ",
-  "no_data": "Нет данных за этот период"
+  "no_data": "Нет данных за этот период",
+  "exercises_title": "ПРОГРЕСС УПРАЖНЕНИЙ",
+  "show_more": "Ещё +{count}",
+  "show_less": "Свернуть"
   },
   "backup": {
     "export": "Экспорт данных",

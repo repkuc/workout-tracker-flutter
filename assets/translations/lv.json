@@ -146,7 +146,10 @@
   "filter_year": "Gads",
   "filter_all": "Viss",
   "volume_title": "KOPĒJAIS APJOMS",
-  "no_data": "Nav datu par šo periodu"
+  "no_data": "Nav datu par šo periodu",
+  "exercises_title": "VINGROJUMU PROGRESS",
+  "show_more": "Vēl +{count}",
+  "show_less": "Aizvērt"
 },
 "backup": {
   "export": "Eksportēt datus",

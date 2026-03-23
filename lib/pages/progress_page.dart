@@ -3,6 +3,7 @@ import 'package:easy_localization/easy_localization.dart';
 import '../services/body_weight_service.dart';
 import '../models/body_weight_entry.dart';
 import '../widgets/volume_chart_card.dart';
+import '../widgets/exercise_progress_card.dart';
 
 class ProgressPage extends StatefulWidget {
   const ProgressPage({super.key});
@@ -80,6 +81,8 @@ class _ProgressPageState extends State<ProgressPage> {
                               // Сюда будем добавлять карточки с графиками
 
                               VolumeChartCard(selectedDays: _selectedDays),
+                              const SizedBox(height: 16),
+                              ExerciseProgressCard(selectedDays: _selectedDays),
                             ],
                           )))
                 ],
