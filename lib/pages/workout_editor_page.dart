@@ -995,7 +995,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                 fillColor: const Color(0xFF374151),
                 hintText: 'workout.weight_hint'.tr(),
                 hintStyle: TextStyle(color: Colors.grey[500]),
-                labelText: 'workout.weight'.tr() + ' (${'workout.kg'.tr()})',
+                labelText: '${'workout.weight'.tr()} (${'workout.kg'.tr()})',
                 labelStyle: const TextStyle(color: Color(0xFFF97316)),
                 prefixIcon: const Icon(
                   Icons.fitness_center,
@@ -1758,7 +1758,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
               decoration: InputDecoration(
                 filled: true,
                 fillColor: const Color(0xFF374151),
-                labelText: '${' workout.weight'.tr()} (${'workout.kg'.tr()})',
+                labelText: '${'workout.weight'.tr()} (${'workout.kg'.tr()})',
                 labelStyle:
                     const TextStyle(color: Color(0xFFF97316), fontSize: 12),
                 prefixIcon: const Icon(Icons.fitness_center,
