@@ -508,10 +508,61 @@ class WorkoutService {
     return '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
   }
 
-  // Получить объём (кг) по завершённым тренировкам за период
-  // Возвращает Map где ключ = дата, значение = суммарный объём
-  Future<Map<String, double>> getVolumeByDate({int? days}) async {
-    // Берём только завершённые тренировки
+// Получить объём по завершённым тренировкам за период
+// Теперь возвращает также название тренировки для цвета
+  Future<List<Map<String, dynamic>>> getVolumeByDateWithName(
+      {int? days}) async {
+    final workouts = await getCompletedWorkouts();
+
+    String? cutoffStr;
+    if (days != null) {
+      final cutoff = DateTime.now().subtract(Duration(days: days));
+      cutoffStr = '${cutoff.year}-'
+          '${cutoff.month.toString().padLeft(2, '0')}-'
+          '${cutoff.day.toString().padLeft(2, '0')}';
+    }
+
+    final List<Map<String, dynamic>> result = [];
+
+    for (final workout in workouts) {
+      if (cutoffStr != null && workout.date.compareTo(cutoffStr) < 0) {
+        continue;
+      }
+
+      double totalVolume = 0;
+      for (final exercise in workout.exercises) {
+        for (final set in exercise.sets) {
+          totalVolume += set.weight * set.reps;
+        }
+      }
+
+      if (totalVolume == 0) continue;
+
+      result.add({
+        'date': workout.date,
+        'volume': totalVolume,
+        'name': workout.name, // ← название тренировки для цвета
+      });
+    }
+
+    // Сортируем по дате (старые слева)
+    result.sort((a, b) => (a['date'] as String).compareTo(b['date'] as String));
+
+    return result;
+  }
+
+  // Создать объект Workout из JSON Map (нужен для импорта)
+  Workout workoutFromJson(Map<String, dynamic> json) {
+    return Workout.fromJson(json);
+  }
+
+  // Получить максимальный вес по каждому упражнению за период
+// Возвращает Map где ключ = название упражнения,
+// значение = список пар (дата, макс. вес)
+  Future<Map<String, List<MapEntry<String, double>>>>
+      getExerciseProgressByDate({
+    int? days,
+  }) async {
     final workouts = await getCompletedWorkouts();
 
     // Считаем границу периода если нужен фильтр
@@ -523,109 +574,65 @@ class WorkoutService {
           '${cutoff.day.toString().padLeft(2, '0')}';
     }
 
-    // Map который будем заполнять: { "2024-03-15": 2400.0, ... }
-    final Map<String, double> volumeByDate = {};
+    // Map: { "Жим лёжа": { "2024-03-15": 100.0, ... }, ... }
+    final Map<String, Map<String, double>> result = {};
 
     for (final workout in workouts) {
-      // Если есть фильтр по дате, пропускаем тренировки вне периода
+      // Пропускаем если тренировка старше выбранного периода
       if (cutoffStr != null && workout.date.compareTo(cutoffStr) < 0) {
-        continue; // тренировка старше границы, пропускаем
+        continue;
       }
-
-      // Считаем объём тренировки: сумма (повторы * вес) по всем подходам
-      double totalVolume = 0;
+      // Ищем максимальный вес по каждому упражнению в этой тренировке
       for (final exercise in workout.exercises) {
-        for (final set in exercise.sets) {
-          // Объём одного сета = вес × повторения
-          totalVolume += set.reps * set.weight;
+        if (exercise.sets.isEmpty) continue; // Если нет подходов, пропускаем
+
+        // Находим максимальный вес среди выполненных сетов
+        final maxWeight = exercise.sets
+            .where((s) =>
+                s.isDone &&
+                s.weight > 0) // Только выполненные подходы с весом > 0
+            .fold<double>(
+                0,
+                (max, s) => s.weight > max
+                    ? s.weight
+                    : max); // Если maxWeight остался 0, значит не было выполненных подходов с весом > 0, пропускаем
+
+        if (maxWeight == 0) continue;
+
+        // Добавляем в результат
+        result[exercise.name] ??= {};
+        // Если в этот день уже есть запись — берём максимум
+        final existing = result[exercise.name]![workout.date] ?? 0;
+        if (maxWeight > existing) {
+          result[exercise.name]![workout.date] = maxWeight;
         }
       }
-
-      // Если на эту дату уже есть запись — прибавляем
-      // (на случай если в один день было две тренировки)
-      volumeByDate[workout.date] =
-          (volumeByDate[workout.date] ?? 0) + totalVolume;
     }
-    return volumeByDate;
+
+    // Превращаем каждый Map в отсортированный список
+    return result.map((name, dateMap) {
+      final sorted = dateMap.entries.toList()
+        ..sort((a, b) => a.key.compareTo(b.key));
+      return MapEntry(name, sorted);
+    });
   }
-
-  // Создать объект Workout из JSON Map (нужен для импорта)
-  Workout workoutFromJson(Map<String, dynamic> json) {
-    return Workout.fromJson(json);
-  }
-
-
-  // Получить максимальный вес по каждому упражнению за период
-// Возвращает Map где ключ = название упражнения,
-// значение = список пар (дата, макс. вес)
-Future<Map<String, List<MapEntry<String, double>>>> getExerciseProgressByDate({
-  int? days,
-}) async {
-  final workouts = await getCompletedWorkouts();
-
-  // Считаем границу периода если нужен фильтр
-  String? cutoffStr;
-  if (days != null) {
-    final cutoff = DateTime.now().subtract(Duration(days: days));
-    cutoffStr = '${cutoff.year}-'
-        '${cutoff.month.toString().padLeft(2, '0')}-'
-        '${cutoff.day.toString().padLeft(2, '0')}';
-  }
-
-  // Map: { "Жим лёжа": { "2024-03-15": 100.0, ... }, ... }
-  final Map<String, Map<String, double>> result = {};
-
-  for (final workout in workouts) {
-    // Пропускаем если тренировка старше выбранного периода
-    if (cutoffStr != null && workout.date.compareTo(cutoffStr) < 0) {
-      continue;
-    }
-    // Ищем максимальный вес по каждому упражнению в этой тренировке
-    for (final exercise in workout.exercises) {
-      if (exercise.sets.isEmpty) continue; // Если нет подходов, пропускаем
-
-      // Находим максимальный вес среди выполненных сетов
-      final maxWeight = exercise.sets
-          .where((s) => s.isDone && s.weight > 0) // Только выполненные подходы с весом > 0
-          .fold<double>(0, (max, s) => s.weight > max ? s.weight : max); // Если maxWeight остался 0, значит не было выполненных подходов с весом > 0, пропускаем
-
-      if (maxWeight == 0) continue;
-
-      // Добавляем в результат
-      result[exercise.name] ??= {};
-      // Если в этот день уже есть запись — берём максимум
-      final existing = result[exercise.name]![workout.date] ?? 0;
-      if (maxWeight > existing) {
-        result[exercise.name]![workout.date] = maxWeight;
-      }
-    }
-  }
-
-  // Превращаем каждый Map в отсортированный список
-  return result.map((name, dateMap) {
-    final sorted = dateMap.entries.toList()
-      ..sort((a, b) => a.key.compareTo(b.key));
-    return MapEntry(name, sorted);
-  });
-}
 
 // Получить топ-N упражнений по количеству использований
-Future<List<String>> getTopExercises({int limit = 5}) async {
-  final workouts = await getCompletedWorkouts();
+  Future<List<String>> getTopExercises({int limit = 5}) async {
+    final workouts = await getCompletedWorkouts();
 
-  // Считаем сколько раз встречается каждое упражнение
-  final Map<String, int> counts = {};
-  for (final workout in workouts) {
-    for (final exercise in workout.exercises) {
-      counts[exercise.name] = (counts[exercise.name] ?? 0) + 1;
+    // Считаем сколько раз встречается каждое упражнение
+    final Map<String, int> counts = {};
+    for (final workout in workouts) {
+      for (final exercise in workout.exercises) {
+        counts[exercise.name] = (counts[exercise.name] ?? 0) + 1;
+      }
     }
+
+    // Сортируем по частоте и берём топ N
+    final sorted = counts.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+
+    return sorted.take(limit).map((e) => e.key).toList();
   }
-
-  // Сортируем по частоте и берём топ N
-  final sorted = counts.entries.toList()
-    ..sort((a, b) => b.value.compareTo(a.value));
-
-  return sorted.take(limit).map((e) => e.key).toList();
-}
-
 }

@@ -4,7 +4,6 @@ import 'package:fl_chart/fl_chart.dart';
 import '../services/workout_service.dart';
 
 class VolumeChartCard extends StatefulWidget {
-  // Принимаем выбранный период снаружи (из ProgressPage)
   final int? selectedDays;
 
   const VolumeChartCard({
@@ -19,10 +18,23 @@ class VolumeChartCard extends StatefulWidget {
 class _VolumeChartCardState extends State<VolumeChartCard> {
   final _workoutService = WorkoutService();
 
-  // Данные для графика: список пар (дата, объём)
-  List<MapEntry<String, double>> _volumeData = [];
+  // Список записей: [{date, volume, name}, ...]
+  List<Map<String, dynamic>> _data = [];
   double _totalVolume = 0;
   bool _isLoading = true;
+
+  // Цвета для разных тренировок
+  final List<Color> _colors = [
+    const Color(0xFFF97316), // оранжевый
+    const Color(0xFF34D399), // зелёный
+    const Color(0xFF60A5FA), // голубой
+    const Color(0xFFF472B6), // розовый
+    const Color(0xFFA78BFA), // фиолетовый
+    const Color(0xFFFBBF24), // жёлтый
+  ];
+
+  // Уникальные названия тренировок → цвет
+  Map<String, Color> _nameColors = {};
 
   @override
   void initState() {
@@ -30,7 +42,6 @@ class _VolumeChartCardState extends State<VolumeChartCard> {
     _loadData();
   }
 
-  // Когда родитель меняет фильтр — перезагружаем данные
   @override
   void didUpdateWidget(VolumeChartCard oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -42,21 +53,30 @@ class _VolumeChartCardState extends State<VolumeChartCard> {
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
 
-    // Получаем Map от сервиса и превращаем в отсортированный список
-    final volumeMap = await _workoutService.getVolumeByDate(
+    final data = await _workoutService.getVolumeByDateWithName(
       days: widget.selectedDays,
     );
 
-    // Сортируем по дате (старые слева, новые справа)
-    final sorted = volumeMap.entries.toList()
-      ..sort((a, b) => a.key.compareTo(b.key));
+    // Назначаем цвет каждому уникальному названию тренировки
+    final Map<String, Color> nameColors = {};
+    int colorIndex = 0;
+    for (final item in data) {
+      final name = item['name'] as String;
+      if (!nameColors.containsKey(name)) {
+        nameColors[name] = _colors[colorIndex % _colors.length];
+        colorIndex++;
+      }
+    }
 
-    // Считаем суммарный объём за период
-    final total = sorted.fold(0.0, (sum, e) => sum + e.value);
+    final total = data.fold<double>(
+      0,
+      (sum, item) => sum + (item['volume'] as double),
+    );
 
     setState(() {
-      _volumeData = sorted;
+      _data = data;
       _totalVolume = total;
+      _nameColors = nameColors;
       _isLoading = false;
     });
   }
@@ -103,22 +123,63 @@ class _VolumeChartCardState extends State<VolumeChartCard> {
             ],
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 10),
 
-          // График или заглушки
+          // Легенда — названия тренировок с цветами
+          if (!_isLoading && _nameColors.isNotEmpty)
+            Wrap(
+              spacing: 10,
+              runSpacing: 4,
+              children: _nameColors.entries.map((entry) {
+                return Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 10,
+                      height: 10,
+                      decoration: BoxDecoration(
+                        color: entry.value,
+                        borderRadius: BorderRadius.circular(3),
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxWidth: MediaQuery.of(context).size.width * 0.35,
+                      ),
+                      child: Text(
+                        entry.key,
+                        style: const TextStyle(
+                          color: Color(0xFF9CA3AF),
+                          fontSize: 11,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      ),
+                    ),
+                  ],
+                );
+              }).toList(),
+            ),
+
+          const SizedBox(height: 12),
+
+          // График
           SizedBox(
-            height: 130,
+            height: 150,
             child: _isLoading
                 ? const Center(
                     child: CircularProgressIndicator(
                       color: Color(0xFFF97316),
                     ),
                   )
-                : _volumeData.isEmpty
+                : _data.isEmpty
                     ? Center(
                         child: Text(
                           'progress.no_data'.tr(),
-                          style: const TextStyle(color: Color(0xFF6B7280)),
+                          style: const TextStyle(
+                            color: Color(0xFF6B7280),
+                          ),
                         ),
                       )
                     : _buildChart(),
@@ -131,39 +192,43 @@ class _VolumeChartCardState extends State<VolumeChartCard> {
   Widget _buildChart() {
     return BarChart(
       BarChartData(
-        // Убираем рамку вокруг графика
+        minY: _calcMinY(), // ← ДОБАВЬ
         borderData: FlBorderData(show: false),
-
-        // Настройки сетки
         gridData: FlGridData(
           show: true,
-          drawVerticalLine: false, // вертикальные линии не нужны
-          getDrawingHorizontalLine: (value) => FlLine(
-            color: const Color(0xFF374151),
-            strokeWidth: 1,
-          ),
+          drawVerticalLine: false,
+          // Больше горизонтальных линий — лучше видна прогрессия
+          horizontalInterval: _calcInterval(),
+          getDrawingHorizontalLine: (value) {
+            // Каждые 5т — яркая линия-рубеж
+            final is5t = value % 5000 == 0;
+            return FlLine(
+              color: is5t
+                  ? const Color(0xFF6B7280) // ярче
+                  : const Color(0xFF374151), // обычная тёмная
+              strokeWidth: is5t ? 1.5 : 0.8,
+            );
+          },
         ),
-
-        // Подписи осей
         titlesData: FlTitlesData(
-          // Убираем подписи сверху и справа
-          topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          // Подписи снизу — даты
+          topTitles: AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
+          rightTitles: AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
           bottomTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
               getTitlesWidget: (value, meta) {
                 final index = value.toInt();
-                if (index < 0 || index >= _volumeData.length) {
+                if (index < 0 || index >= _data.length) {
                   return const SizedBox();
                 }
-                // Показываем только каждую N-ю метку чтобы не толпились
-                final step = (_volumeData.length / 4).ceil();
+                final step = (_data.length / 4).ceil();
                 if (index % step != 0) return const SizedBox();
 
-                // Берём только день и месяц из даты "2024-03-15" → "03.15"
-                final date = _volumeData[index].key;
+                final date = _data[index]['date'] as String;
                 final parts = date.split('-');
                 return Text(
                   '${parts[2]}.${parts[1]}',
@@ -175,7 +240,6 @@ class _VolumeChartCardState extends State<VolumeChartCard> {
               },
             ),
           ),
-          // Подписи слева — объём
           leftTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
@@ -192,19 +256,20 @@ class _VolumeChartCardState extends State<VolumeChartCard> {
             ),
           ),
         ),
-
-        // Сами столбики
-        barGroups: _volumeData.asMap().entries.map((entry) {
+        barGroups: _data.asMap().entries.map((entry) {
           final index = entry.key;
-          final volume = entry.value.value;
+          final item = entry.value;
+          final name = item['name'] as String;
+          final volume = item['volume'] as double;
+          final color = _nameColors[name] ?? const Color(0xFFF97316);
 
           return BarChartGroupData(
             x: index,
             barRods: [
               BarChartRodData(
                 toY: volume,
-                color: const Color(0xFFF97316),
-                width: _volumeData.length > 20 ? 4 : 10,
+                color: color,
+                width: _data.length > 20 ? 4 : 8,
                 borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(4),
                   topRight: Radius.circular(4),
@@ -215,5 +280,25 @@ class _VolumeChartCardState extends State<VolumeChartCard> {
         }).toList(),
       ),
     );
+  }
+
+  // Считаем интервал для горизонтальных линий
+  // Чем меньше интервал — тем больше линий — тем лучше видна прогрессия
+  double _calcInterval() {
+    // if (_data.isEmpty) return 1000;
+    // final maxVolume =
+    //     _data.map((e) => e['volume'] as double).reduce((a, b) => a > b ? a : b);
+    // // Делим на 10 вместо 6 — больше горизонтальных линий
+    // return (maxVolume / 10).roundToDouble();
+    return 1000; // деление каждые 2т — много линий
+  }
+
+  double _calcMinY() {
+    // if (_data.isEmpty) return 0;
+    // final minVolume =
+    //     _data.map((e) => e['volume'] as double).reduce((a, b) => a < b ? a : b);
+    // // Начинаем чуть ниже минимума чтобы был отступ снизу
+    // return (minVolume * 0.7).roundToDouble();
+    return 0; // всегда от 0 — так лучше видно прогрессию, особенно если объёмы растут от 0 до нескольких тысяч
   }
 }
