@@ -90,8 +90,7 @@ class _BodyWeightChartCardState extends State<BodyWeightChartCard> {
                 ],
               ),
               // Дельта — разница между первой и последней записью
-              if (!_isLoading && _entries.length >= 2)
-                _buildDelta(),
+              if (!_isLoading && _entries.length >= 2) _buildDelta(),
             ],
           ),
 
@@ -160,29 +159,33 @@ class _BodyWeightChartCardState extends State<BodyWeightChartCard> {
   }
 
   Widget _buildChart() {
-    // Превращаем записи в точки графика
     final spots = _entries.asMap().entries.map((entry) {
       return FlSpot(entry.key.toDouble(), entry.value.weight);
     }).toList();
 
-    // Минимум и максимум для оси Y — добавляем отступ
     final weights = _entries.map((e) => e.weight).toList();
-    final minY = weights.reduce((a, b) => a < b ? a : b) - 1;
-    final maxY = weights.reduce((a, b) => a > b ? a : b) + 1;
+    final minY = (weights.reduce((a, b) => a < b ? a : b) - 0.5);
+    final maxY = (weights.reduce((a, b) => a > b ? a : b) + 0.5);
 
     return LineChart(
       LineChartData(
         borderData: FlBorderData(show: false),
+        minY: minY,
+        maxY: maxY,
         gridData: FlGridData(
           show: true,
           drawVerticalLine: false,
-          getDrawingHorizontalLine: (value) => FlLine(
-            color: const Color(0xFF374151),
-            strokeWidth: 1,
-          ),
+          horizontalInterval: 0.5, // деление каждые 0.5кг
+          getDrawingHorizontalLine: (value) {
+            // Целые кг — ярче и толще
+            final isWhole = value == value.roundToDouble();
+            return FlLine(
+              color:
+                  isWhole ? const Color(0xFF4B5563) : const Color(0xFF374151),
+              strokeWidth: isWhole ? 1.2 : 0.6,
+            );
+          },
         ),
-        minY: minY,
-        maxY: maxY,
         titlesData: FlTitlesData(
           topTitles: AxisTitles(
             sideTitles: SideTitles(showTitles: false),
@@ -198,16 +201,30 @@ class _BodyWeightChartCardState extends State<BodyWeightChartCard> {
                 if (index < 0 || index >= _entries.length) {
                   return const SizedBox();
                 }
-                final step = (_entries.length / 4).ceil();
+                // Если записей мало — показываем все даты
+                // Если много — каждые 3
+                int step;
+                if (_entries.length <= 10) {
+                  step = 1; // все даты
+                } else if (_entries.length <= 20) {
+                  step = 3; // каждая 3я
+                } else if (_entries.length <= 40) {
+                  step = 5; // каждая 5я
+                } else {
+                  step = 7; // каждая 7я (раз в неделю примерно)
+                }
                 if (index % step != 0) return const SizedBox();
 
                 final date = _entries[index].date;
                 final parts = date.split('-');
-                return Text(
-                  '${parts[2]}.${parts[1]}',
-                  style: const TextStyle(
-                    color: Color(0xFF6B7280),
-                    fontSize: 10,
+                return Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Text(
+                    '${parts[2]}.${parts[1]}',
+                    style: const TextStyle(
+                      color: Color(0xFF6B7280),
+                      fontSize: 9,
+                    ),
                   ),
                 );
               },
@@ -216,13 +233,16 @@ class _BodyWeightChartCardState extends State<BodyWeightChartCard> {
           leftTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
-              reservedSize: 36,
+              reservedSize: 40,
+              interval: 1, // подпись каждый 1кг
               getTitlesWidget: (value, meta) {
+                // Показываем только целые кг
+                if (value != value.roundToDouble()) return const SizedBox();
                 return Text(
-                  value.toStringAsFixed(1),
+                  value.toInt().toString(),
                   style: const TextStyle(
                     color: Color(0xFF6B7280),
-                    fontSize: 10,
+                    fontSize: 9,
                   ),
                 );
               },
@@ -232,22 +252,27 @@ class _BodyWeightChartCardState extends State<BodyWeightChartCard> {
         lineBarsData: [
           LineChartBarData(
             spots: spots,
-            color: const Color(0xFFE879F9), // фиолетовый — как чип веса
+            color: const Color(0xFFE879F9),
             barWidth: 2,
             isCurved: true,
             curveSmoothness: 0.3,
             dotData: FlDotData(
               show: true,
-              getDotPainter: (spot, percent, bar, index) =>
-                  FlDotCirclePainter(
-                    radius: 3,
-                    color: const Color(0xFFE879F9),
-                    strokeWidth: 0,
-                  ),
+              getDotPainter: (spot, percent, bar, index) {
+                // Каждые 3 точки — крупнее и ярче
+                final isBig = index % 3 == 0;
+                return FlDotCirclePainter(
+                  radius: isBig ? 4 : 2,
+                  color: isBig
+                      ? const Color(0xFFE879F9)
+                      : const Color(0xFFE879F9).withOpacity(0.4),
+                  strokeWidth: 0,
+                );
+              },
             ),
             belowBarData: BarAreaData(
               show: true,
-              color: const Color(0xFFE879F9).withOpacity(0.1),
+              color: const Color(0xFFE879F9).withOpacity(0.08),
             ),
           ),
         ],
