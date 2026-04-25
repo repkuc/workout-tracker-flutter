@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import '../main.dart';
+import 'home_page.dart';
 import 'history_page.dart';
 import 'statistics_page.dart';
 import 'progress_page.dart';
