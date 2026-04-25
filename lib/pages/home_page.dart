@@ -28,6 +28,22 @@ class _HomePageState extends State<HomePage> {
 
   final _newWorkoutNameController = TextEditingController();
 
+  // Цвета для тренировок — такие же как в графике объёма
+  final List<Color> _workoutColors = [
+    const Color(0xFFF97316), // оранжевый
+    const Color(0xFF34D399), // зелёный
+    const Color(0xFF60A5FA), // голубой
+    const Color(0xFFF472B6), // розовый
+    const Color(0xFFA78BFA), // фиолетовый
+    const Color(0xFFFBBF24), // жёлтый
+  ];
+
+// Map: название тренировки → цвет
+  Map<String, Color> _nameColors = {};
+
+// Map: дата → тренировка (для быстрого поиска)
+  Map<String, Workout> _workoutByDate = {};
+
   @override
   void initState() {
     super.initState();
@@ -45,10 +61,29 @@ class _HomePageState extends State<HomePage> {
     final workouts = await _service.getCompletedWorkouts();
     final draft = await _service.getDraftWorkout();
     final todayWeight = await _bodyWeightService.getTodayEntry();
+    // Назначаем цвета уникальным названиям тренировок
+    // Назначаем цвета уникальным названиям тренировок
+    final Map<String, Color> nameColors = {};
+    int colorIndex = 0;
+    for (final w in workouts) {
+      if (!nameColors.containsKey(w.name)) {
+        nameColors[w.name] = _workoutColors[colorIndex % _workoutColors.length];
+        colorIndex++;
+      }
+    }
+
+// Map дата → тренировка
+    final Map<String, Workout> workoutByDate = {};
+    for (final w in workouts) {
+      workoutByDate[w.date] = w;
+    }
+
     setState(() {
       _completedWorkouts = workouts;
       _currentWorkout = draft;
       _todayWeight = todayWeight;
+      _nameColors = nameColors; // ← добавь
+      _workoutByDate = workoutByDate; // ← добавь
       _isLoading = false;
     });
   }
@@ -328,37 +363,57 @@ class _HomePageState extends State<HomePage> {
                 final isToday = date.year == now.year &&
                     date.month == now.month &&
                     date.day == now.day;
-                final hasWorkout = _workoutDays.contains(dateStr);
 
-                return Container(
-                  margin: const EdgeInsets.all(1.5),
-                  decoration: BoxDecoration(
-                    color:
-                        isToday ? const Color(0xFFF97316) : Colors.transparent,
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        '$day',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 11,
-                          fontWeight:
-                              isToday ? FontWeight.bold : FontWeight.normal,
-                        ),
-                      ),
-                      if (hasWorkout && !isToday)
-                        Container(
-                          width: 4,
-                          height: 4,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFF97316),
-                            shape: BoxShape.circle,
+                final workout = _workoutByDate[dateStr];
+                final hasWorkout = workout != null;
+                final workoutColor = hasWorkout
+                    ? (_nameColors[workout.name] ?? const Color(0xFFF97316))
+                    : null;
+
+                return GestureDetector(
+                  onTap:
+                      hasWorkout ? () => _showWorkoutDaySheet(workout) : null,
+                  child: Container(
+                    margin: const EdgeInsets.all(1.5),
+                    decoration: BoxDecoration(
+                      color: isToday
+                          ? const Color(0xFFF97316)
+                          : hasWorkout
+                              ? workoutColor!.withOpacity(0.15)
+                              : Colors.transparent,
+                      borderRadius: BorderRadius.circular(6),
+                      border: hasWorkout && !isToday
+                          ? Border.all(color: workoutColor!, width: 1)
+                          : null,
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          '$day',
+                          style: TextStyle(
+                            color: isToday
+                                ? Colors.white
+                                : hasWorkout
+                                    ? workoutColor
+                                    : Colors.white,
+                            fontSize: 11,
+                            fontWeight: hasWorkout || isToday
+                                ? FontWeight.bold
+                                : FontWeight.normal,
                           ),
                         ),
-                    ],
+                        if (hasWorkout && !isToday)
+                          Container(
+                            width: 4,
+                            height: 4,
+                            decoration: BoxDecoration(
+                              color: workoutColor,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
                 );
               },
@@ -604,6 +659,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  // Диалог создания новой тренировки
   Future<String?> _showCreateWorkoutDialog() async {
     _newWorkoutNameController.text = 'workout.new_workout'.tr();
     return showDialog<String>(
@@ -679,5 +735,178 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
     );
+  }
+
+  // Лист с деталями тренировки при нажатии на день в календаре
+  void _showWorkoutDaySheet(Workout workout) {
+    final color = _nameColors[workout.name] ?? const Color(0xFFF97316);
+
+    // Считаем статистику
+    final totalSets =
+        workout.exercises.fold<int>(0, (sum, e) => sum + e.sets.length);
+    final totalVolume = workout.exercises.fold<double>(
+        0,
+        (sum, e) =>
+            sum + e.sets.fold(0, (s, set) => s + set.weight * set.reps));
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF1E293B),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
+        ),
+      ),
+      builder: (context) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Заголовок
+              Row(
+                children: [
+                  Container(
+                    width: 12,
+                    height: 12,
+                    decoration: BoxDecoration(
+                      color: color,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      workout.name,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Text(
+                workout.date,
+                style: const TextStyle(color: Color(0xFF64748B), fontSize: 12),
+              ),
+              const SizedBox(height: 16),
+
+              // Статистика
+              Row(
+                children: [
+                  _buildSheetStat(
+                      Icons.fitness_center,
+                      '${workout.exercises.length}',
+                      'history.exercises'.tr(),
+                      color),
+                  const SizedBox(width: 10),
+                  _buildSheetStat(
+                      Icons.repeat, '$totalSets', 'history.sets'.tr(), color),
+                  const SizedBox(width: 10),
+                  _buildSheetStat(
+                      Icons.monitor_weight,
+                      _formatVolume(totalVolume),
+                      'workout.total_volume_short'.tr(),
+                      color),
+                  if (workout.duration != null) ...[
+                    const SizedBox(width: 10),
+                    _buildSheetStat(
+                        Icons.timer,
+                        _formatDuration(workout.duration!),
+                        'workout.duration'.tr(),
+                        color),
+                  ],
+                ],
+              ),
+
+              const SizedBox(height: 20),
+
+              // Кнопка повторить
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () async {
+                    Navigator.pop(context);
+                    await _repeatWorkout(workout.id);
+                  },
+                  icon: const Icon(Icons.repeat, size: 18),
+                  label: Text('workout.repeat_workout'.tr()),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: color,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSheetStat(
+      IconData icon, String value, String label, Color color) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, color: color, size: 16),
+            const SizedBox(height: 4),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                value,
+                style: TextStyle(
+                  color: color,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            Text(
+              label,
+              style: const TextStyle(color: Color(0xFF64748B), fontSize: 9),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _repeatWorkout(String workoutId) async {
+    try {
+      final newWorkout = await _service.copyWorkout(workoutId);
+      if (mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => WorkoutEditorPage(workoutId: newWorkout.id),
+          ),
+        ).then((_) => _loadData());
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Ошибка: $e'), backgroundColor: Colors.red),
+        );
+      }
+    }
   }
 }
