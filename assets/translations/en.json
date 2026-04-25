@@ -136,7 +136,8 @@
   "last_7_days": "7 Days",
   "last_30_days": "30 Days",
   "all_time_short": "All Time",
-  "last_year": "Year"
+  "last_year": "Year",
+  "records": "RECORDS"
 },
  "progress": {
     "title": "Progress",
@@ -168,6 +169,16 @@
     "import_error": "Import error",
     "imported_count": "Workouts imported: {count}",
     "no_new_workouts": "No new workouts found"
-  }
+  },
+  "settings": {
+  "title": "Settings",
+  "language": "Language",
+  "data": "Data",
+  "about": "About",
+  "export_subtitle": "Save data to file",
+  "import_subtitle": "Load data from file",
+  "version": "Version",
+  "privacy": "Privacy Policy"
+}
 
 }

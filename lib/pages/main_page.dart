@@ -4,6 +4,7 @@ import 'home_page.dart';
 import 'history_page.dart';
 import 'statistics_page.dart';
 import 'progress_page.dart';
+import 'settings_page.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -22,6 +23,7 @@ class _MainPageState extends State<MainPage> {
     const HistoryPage(),
     const StatisticsPage(),
     const ProgressPage(),
+    const SettingsPage(),
   ];
 
   @override
@@ -61,6 +63,11 @@ class _MainPageState extends State<MainPage> {
           NavigationDestination(
             icon: Icon(Icons.trending_up_outlined, color: Colors.grey),
             selectedIcon: Icon(Icons.trending_up, color: Color(0xFFF97316)),
+            label: '',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.settings_outlined, color: Colors.grey),
+            selectedIcon: Icon(Icons.settings, color: Color(0xFFF97316)),
             label: '',
           ),
         ],

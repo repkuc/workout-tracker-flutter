@@ -635,4 +635,30 @@ class WorkoutService {
 
     return sorted.take(limit).map((e) => e.key).toList();
   }
+
+  // Получить максимальный вес по каждому упражнению (рекорды)
+Future<Map<String, double>> getPersonalRecords() async {
+  final workouts = await getCompletedWorkouts();
+  final Map<String, double> records = {};
+
+  for (final workout in workouts) {
+    for (final exercise in workout.exercises) {
+      for (final set in exercise.sets) {
+        if (set.isDone && set.weight > 0) {
+          final current = records[exercise.name] ?? 0;
+          if (set.weight > current) {
+            records[exercise.name] = set.weight;
+          }
+        }
+      }
+    }
+  }
+
+  // Сортируем по весу — самые тяжёлые сверху
+  final sorted = Map.fromEntries(
+    records.entries.toList()..sort((a, b) => b.value.compareTo(a.value)),
+  );
+
+  return sorted;
+}
 }

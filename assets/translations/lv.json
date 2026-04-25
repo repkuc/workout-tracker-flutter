@@ -136,7 +136,8 @@
   "last_7_days": "7 dienas",
   "last_30_days": "30 dienas",
   "all_time_short": "Viss laiks",
-  "last_year": "Gads"
+  "last_year": "Gads",
+  "records": "REKORDI"
 },
 "progress": {
   "title": "Progress",
@@ -168,6 +169,16 @@
   "import_error": "Importa kļūda",
   "imported_count": "Importētas treniņi: {count}",
   "no_new_workouts": "Jaunu treniņu nav"
+},
+"settings": {
+  "title": "Iestatījumi",
+  "language": "Valoda",
+  "data": "Dati",
+  "about": "Par lietotni",
+  "export_subtitle": "Saglabāt datus failā",
+  "import_subtitle": "Ielādēt datus no faila",
+  "version": "Versija",
+  "privacy": "Privātuma politika"
 }
 
 }

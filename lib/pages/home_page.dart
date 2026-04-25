@@ -200,7 +200,6 @@ class _HomePageState extends State<HomePage> {
             ),
           ],
         ),
-        _buildMenu(),
       ],
     );
   }
@@ -566,96 +565,6 @@ class _HomePageState extends State<HomePage> {
           elevation: 0,
         ),
       ),
-    );
-  }
-
-  // Меню
-  Widget _buildMenu() {
-    return PopupMenuButton<String>(
-      icon: const Icon(Icons.more_vert, color: Colors.white, size: 22),
-      onSelected: (value) async {
-        if (value == 'ru' || value == 'lv' || value == 'en') {
-          context.setLocale(Locale(value));
-          return;
-        }
-        if (value == 'export') {
-          try {
-            await BackupService().exportData();
-          } catch (e) {
-            if (context.mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                    content: Text('${'backup.export_error'.tr()}: $e'),
-                    backgroundColor: Colors.red),
-              );
-            }
-          }
-        }
-        if (value == 'import') {
-          try {
-            final count = await BackupService().importData();
-            if (context.mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(count > 0
-                      ? 'backup.imported_count'
-                          .tr(namedArgs: {'count': '$count'})
-                      : 'backup.no_new_workouts'.tr()),
-                  backgroundColor:
-                      count > 0 ? const Color(0xFF10B981) : Colors.grey,
-                ),
-              );
-              if (count > 0) _loadData();
-            }
-          } catch (e) {
-            if (context.mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                    content: Text('${'backup.import_error'.tr()}: $e'),
-                    backgroundColor: Colors.red),
-              );
-            }
-          }
-        }
-      },
-      itemBuilder: (context) => [
-        const PopupMenuItem(
-            value: 'ru',
-            child: Row(children: [
-              Text('🇷🇺', style: TextStyle(fontSize: 16)),
-              SizedBox(width: 8),
-              Text('Русский')
-            ])),
-        const PopupMenuItem(
-            value: 'lv',
-            child: Row(children: [
-              Text('🇱🇻', style: TextStyle(fontSize: 16)),
-              SizedBox(width: 8),
-              Text('Latviešu')
-            ])),
-        const PopupMenuItem(
-            value: 'en',
-            child: Row(children: [
-              Text('🇬🇧', style: TextStyle(fontSize: 16)),
-              SizedBox(width: 8),
-              Text('English')
-            ])),
-        const PopupMenuDivider(),
-        PopupMenuItem(
-            value: 'export',
-            child: Row(children: [
-              const Icon(Icons.upload, color: Color(0xFFF97316), size: 20),
-              const SizedBox(width: 8),
-              Text('backup.export'.tr())
-            ])),
-        PopupMenuItem(
-            value: 'import',
-            child: Row(children: [
-              const Icon(Icons.download, color: Color(0xFFF97316), size: 20),
-              const SizedBox(width: 8),
-              Text('backup.import'.tr())
-            ])),
-      ],
     );
   }
 

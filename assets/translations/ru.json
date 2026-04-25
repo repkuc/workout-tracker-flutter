@@ -136,7 +136,8 @@
   "last_7_days": "7 дней",
   "last_30_days": "30 дней",
   "all_time_short": "Всё время",
-  "last_year": "Год"
+  "last_year": "Год",
+  "records": "РЕКОРДЫ"
 },
 "progress": {
   "title": "Прогресс",
@@ -168,5 +169,15 @@
     "import_error": "Ошибка импорта",
     "imported_count": "Импортировано тренировок: {count}",
     "no_new_workouts": "Новых тренировок не найдено"
-  }
+  },
+  "settings": {
+  "title": "Настройки",
+  "language": "Язык",
+  "data": "Данные",
+  "about": "О приложении",
+  "export_subtitle": "Сохранить данные в файл",
+  "import_subtitle": "Загрузить данные из файла",
+  "version": "Версия",
+  "privacy": "Политика конфиденциальности"
+}
 }
