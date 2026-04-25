@@ -137,7 +137,9 @@
   "last_30_days": "30 дней",
   "all_time_short": "Всё время",
   "last_year": "Год",
-  "records": "РЕКОРДЫ"
+  "records": "РЕКОРДЫ",
+  "overview": "Обзор",
+  "charts": "Графики"
 },
 "progress": {
   "title": "Прогресс",

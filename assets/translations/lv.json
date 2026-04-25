@@ -137,7 +137,9 @@
   "last_30_days": "30 dienas",
   "all_time_short": "Viss laiks",
   "last_year": "Gads",
-  "records": "REKORDI"
+  "records": "REKORDI",
+  "overview": "Pārskats",
+  "charts": "Grafiki"
 },
 "progress": {
   "title": "Progress",

@@ -56,114 +56,92 @@ class _ProgressPageState extends State<ProgressPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        backgroundColor: const Color(0xFF111827),
-        appBar: AppBar(
-          title: Text('progress.title').tr(),
-        ),
-        body: _isLoading
-            // Пока грузим — показываем спиннер по центру
-            ? const Center(
-                child: CircularProgressIndicator(
-                  color: Color(0xFFF97316),
-                ),
-              )
-            // Загрузили — показываем контент
-            : Column(
-                children: [
-                  // Фильтры периода (7д / 30д / Год / Всё)
-                  _buildFilters(),
-
-                  // Основной контент — скроллируемый список с графиками
-                  Expanded(
-                      child: SingleChildScrollView(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
+    return Container(
+      color: const Color(0xFF0F172A),
+      child: _isLoading
+          ? const Center(
+              child: CircularProgressIndicator(color: Color(0xFFF97316)),
+            )
+          : Column(
+              children: [
+                _buildFilters(),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                    child: Column(
+                      children: [
+                        VolumeChartCard(selectedDays: _selectedDays),
+                        const SizedBox(height: 12),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF1E293B),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
                             children: [
-                              // Сюда будем добавлять карточки с графиками
-
-                              VolumeChartCard(selectedDays: _selectedDays),
-                              const SizedBox(height: 12),
-                              // Кнопка записать вес
-                              // Умная кнопка веса
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 12, vertical: 10),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFF1F2937),
-                                  borderRadius: BorderRadius.circular(12),
+                              const Icon(Icons.monitor_weight,
+                                  color: Color(0xFFE879F9), size: 20),
+                              const SizedBox(width: 10),
+                              if (_todayWeight != null) ...[
+                                Text(
+                                  '${_todayWeight!.weight} ${'workout.kg'.tr()}',
+                                  style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold),
                                 ),
-                                child: Row(
-                                  children: [
-                                    const Icon(
-                                      Icons.monitor_weight,
-                                      color: Color(0xFFF97316),
-                                      size: 20,
-                                    ),
-                                    const SizedBox(width: 10),
-                                    // Если сегодня записан — показываем вес
-                                    if (_todayWeight != null) ...[
-                                      Text(
-                                        '${_todayWeight!.weight} ${'workout.kg'.tr()}',
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 6),
-                                      Text(
-                                        'progress.today'.tr(),
-                                        style: const TextStyle(
-                                          color: Color(0xFF6B7280),
-                                          fontSize: 12,
-                                        ),
-                                      ),
-                                    ] else ...[
-                                      Text(
-                                        'progress.no_weight_today'.tr(),
-                                        style: const TextStyle(
-                                          color: Color(0xFF6B7280),
-                                          fontSize: 13,
-                                        ),
-                                      ),
-                                    ],
-                                    const Spacer(),
-                                    // Кнопка записать/изменить
-                                    GestureDetector(
-                                      onTap: _showAddWeightDialog,
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 12, vertical: 6),
-                                        decoration: BoxDecoration(
-                                          color: const Color(0xFFF97316),
-                                          borderRadius:
-                                              BorderRadius.circular(8),
-                                        ),
-                                        child: Text(
-                                          _todayWeight != null
-                                              ? 'progress.edit_weight'.tr()
-                                              : 'progress.add_weight_short'
-                                                  .tr(),
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
+                                const SizedBox(width: 6),
+                                Text('progress.today'.tr(),
+                                    style: const TextStyle(
+                                        color: Color(0xFF64748B),
+                                        fontSize: 12)),
+                              ] else ...[
+                                Text('progress.no_weight_today'.tr(),
+                                    style: const TextStyle(
+                                        color: Color(0xFF64748B),
+                                        fontSize: 13)),
+                              ],
+                              const Spacer(),
+                              GestureDetector(
+                                onTap: _showAddWeightDialog,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 6),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFE879F9)
+                                        .withOpacity(0.15),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                        color: const Color(0xFFE879F9)
+                                            .withOpacity(0.4)),
+                                  ),
+                                  child: Text(
+                                    _todayWeight != null
+                                        ? 'progress.edit_weight'.tr()
+                                        : 'progress.add_weight_short'.tr(),
+                                    style: const TextStyle(
+                                        color: Color(0xFFE879F9),
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold),
+                                  ),
                                 ),
                               ),
-                              const SizedBox(height: 12),
-                              BodyWeightChartCard(selectedDays: _selectedDays),
-                              const SizedBox(height: 12),
-                              ExerciseProgressCard(selectedDays: _selectedDays),
                             ],
-                          )))
-                ],
-              ));
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        BodyWeightChartCard(selectedDays: _selectedDays),
+                        const SizedBox(height: 12),
+                        ExerciseProgressCard(selectedDays: _selectedDays),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+    );
   }
 
 // Показать диалог для записи веса тела
@@ -276,9 +254,7 @@ class _ProgressPageState extends State<ProgressPage> {
     }
   }
 
-// Виджет с кнопками фильтра периода
   Widget _buildFilters() {
-    // Список вариантов: [название, значение в днях или null]
     final filters = [
       ('progress.filter_7d'.tr(), 7),
       ('progress.filter_30d'.tr(), 30),
@@ -286,39 +262,41 @@ class _ProgressPageState extends State<ProgressPage> {
       ('progress.filter_all'.tr(), null),
     ];
 
-    return Container(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
       child: Row(
         children: filters.map((filter) {
-          final label = filter.$1; // название кнопки
-          final days = filter.$2; // значение в днях
+          final label = filter.$1;
+          final days = filter.$2;
           final isActive = _selectedDays == days;
 
-          return Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: GestureDetector(
-              onTap: () {
-                // При нажатии меняем фильтр и перезагружаем данные
-                setState(() => _selectedDays = days);
-                _loadData();
-              },
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 7,
-                ),
-                decoration: BoxDecoration(
-                  color: isActive
-                      ? const Color(0xFFF97316) // оранжевый если активный
-                      : const Color(0xFF374151), // серый если неактивный
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  label,
-                  style: TextStyle(
-                    color: isActive ? Colors.white : Colors.grey[400],
-                    fontSize: 13,
-                    fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+          return Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(right: 6),
+              child: GestureDetector(
+                onTap: () {
+                  setState(() => _selectedDays = days);
+                  _loadData();
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 7),
+                  decoration: BoxDecoration(
+                    color: isActive
+                        ? const Color(0xFFF97316)
+                        : const Color(0xFF1E293B),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Center(
+                    child: Text(
+                      label,
+                      style: TextStyle(
+                        color:
+                            isActive ? Colors.white : const Color(0xFF64748B),
+                        fontSize: 11,
+                        fontWeight:
+                            isActive ? FontWeight.bold : FontWeight.normal,
+                      ),
+                    ),
                   ),
                 ),
               ),

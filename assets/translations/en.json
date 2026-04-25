@@ -137,7 +137,9 @@
   "last_30_days": "30 Days",
   "all_time_short": "All Time",
   "last_year": "Year",
-  "records": "RECORDS"
+  "records": "RECORDS",
+  "overview": "Overview",
+  "charts": "Charts"
 },
  "progress": {
     "title": "Progress",

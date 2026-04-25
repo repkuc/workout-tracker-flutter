@@ -22,7 +22,6 @@ class _MainPageState extends State<MainPage> {
     const HomePage(),
     const HistoryPage(),
     const StatisticsPage(),
-    const ProgressPage(),
     const SettingsPage(),
   ];
 
@@ -32,6 +31,7 @@ class _MainPageState extends State<MainPage> {
       // Показываем текущую страницу
       body: IndexedStack(
         index: _currentIndex,
+        key: ValueKey(context.locale),
         children: _pages,
       ),
 
@@ -58,11 +58,6 @@ class _MainPageState extends State<MainPage> {
           NavigationDestination(
             icon: Icon(Icons.bar_chart_outlined, color: Colors.grey),
             selectedIcon: Icon(Icons.bar_chart, color: Color(0xFFF97316)),
-            label: '',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.trending_up_outlined, color: Colors.grey),
-            selectedIcon: Icon(Icons.trending_up, color: Color(0xFFF97316)),
             label: '',
           ),
           NavigationDestination(
