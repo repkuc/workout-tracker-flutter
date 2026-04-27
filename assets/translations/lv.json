@@ -117,7 +117,9 @@
     "draft": "Melnraksts",
     "workout_started": "⏱️ Treniņš sākās!",
     "continue_workout": "Turpināt treniņu",
-    "add_one_more": "+1"
+    "add_one_more": "+1",
+    "hours_short": "h",
+    "minutes_short": "m"
   },
   "nav": {
     "home": "Sākums",

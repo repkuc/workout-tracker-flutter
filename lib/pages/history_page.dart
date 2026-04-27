@@ -841,9 +841,9 @@ class _HistoryPageState extends State<HistoryPage> {
     final minutes = (seconds % 3600) ~/ 60;
 
     if (hours > 0) {
-      return '${hours}ч ${minutes}м';
+      return '${hours}${'workout.hours_short'.tr()} ${minutes}${'workout.minutes_short'.tr()}';
     } else {
-      return '${minutes}м';
+      return '${minutes}${'workout.minutes_short'.tr()}';
     }
   }
 

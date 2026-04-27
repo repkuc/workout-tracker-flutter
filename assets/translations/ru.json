@@ -117,7 +117,9 @@
     "draft": "Черновик",
     "workout_started": "⏱️ Тренировка началась!",
     "continue_workout": "Продолжить тренировку",
-    "add_one_more": "+1"
+    "add_one_more": "+1",
+    "hours_short": "ч",
+    "minutes_short": "м"
   },
   "nav": {
     "home": "Главная",

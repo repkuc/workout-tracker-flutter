@@ -108,13 +108,13 @@ class _HomePageState extends State<HomePage> {
   String _formatDuration(int seconds) {
     final hours = seconds ~/ 3600;
     final minutes = (seconds % 3600) ~/ 60;
-    if (hours > 0) return '${hours}ч ${minutes}м';
-    return '${minutes}м';
+    if (hours > 0) return '${hours}${'workout.hours_short'.tr()} ${minutes}${'workout.minutes_short'.tr()}';
+    return '${minutes}${'workout.minutes_short'.tr()}';
   }
 
   String _formatVolume(double kg) {
-    if (kg >= 1000) return '${(kg / 1000).toStringAsFixed(1)}т';
-    return '${kg.toStringAsFixed(0)}кг';
+    if (kg >= 1000) return '${(kg / 1000).toStringAsFixed(1)}${'workout.t'.tr()}';
+    return '${kg.toStringAsFixed(0)}${'workout.kg'.tr()}';
   }
 
   @override
@@ -204,11 +204,120 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  Future<void> _showAddWeightDialog() async {
+    final controller = TextEditingController();
+
+    final result = await showDialog<double>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF1F2937),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: Color(0xFFF97316), width: 2),
+        ),
+        titlePadding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
+        contentPadding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+        actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+        title: Text(
+          'progress.add_weight_title'.tr(),
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 15,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 8),
+            TextField(
+              controller: controller,
+              autofocus: true,
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
+              style: const TextStyle(color: Colors.white, fontSize: 14),
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: const Color(0xFF374151),
+                labelText: 'progress.weight_kg'.tr(),
+                labelStyle: const TextStyle(
+                  color: Color(0xFFF97316),
+                  fontSize: 12,
+                ),
+                prefixIcon: const Icon(
+                  Icons.monitor_weight,
+                  color: Color(0xFFF97316),
+                  size: 18,
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, null),
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            ),
+            child: Text(
+              'workout.cancel'.tr(),
+              style: TextStyle(color: Colors.grey[400], fontSize: 13),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final weight = double.tryParse(controller.text.trim());
+              if (weight == null || weight <= 0) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('progress.weight_invalid'.tr()),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+                return;
+              }
+              Navigator.pop(context, weight);
+            },
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              textStyle: const TextStyle(fontSize: 13),
+            ),
+            child: Text('progress.save_weight'.tr()),
+          ),
+        ],
+      ),
+    );
+
+    // Если пользователь ввёл вес — сохраняем
+    if (result != null) {
+      await _bodyWeightService.saveEntry(result);
+      // Перезагружаем данные чтобы график обновился
+      await _loadData();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('progress.weight_saved'.tr()),
+            backgroundColor: const Color(0xFF10B981),
+          ),
+        );
+      }
+    }
+  }
+
   // Виджет веса тела
   Widget _buildWeightWidget() {
     return GestureDetector(
-      onTap: () {
-        // Переходим на страницу прогресса через навигацию
+      onTap: () async {
+        await _showAddWeightDialog();
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),

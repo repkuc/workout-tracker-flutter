@@ -1,9 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../services/backup_service.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
-class SettingsPage extends StatelessWidget {
+class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
+
+  @override
+  State<SettingsPage> createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
+
+    String _version = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadVersion();
+  }
+
+  Future<void> _loadVersion() async {
+    final info = await PackageInfo.fromPlatform();
+    setState(() => _version = '${info.version}+${info.buildNumber}');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -106,7 +126,7 @@ class SettingsPage extends StatelessWidget {
                         icon: Icons.info_outline,
                         color: const Color(0xFF818CF8),
                         title: 'settings.version'.tr(),
-                        value: '1.0.1',
+                        value: _version,
                       ),
                       _buildDivider(),
                       _buildActionItem(

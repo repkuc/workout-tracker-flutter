@@ -117,7 +117,9 @@
     "draft": "Draft",
     "workout_started": "⏱️ Workout started!",
     "continue_workout": "Continue workout",
-    "add_one_more": "+1"
+    "add_one_more": "+1",
+    "hours_short": "h",
+    "minutes_short": "m"
   },
   "nav": {
     "home": "Home",

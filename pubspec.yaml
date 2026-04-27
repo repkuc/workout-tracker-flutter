@@ -39,6 +39,7 @@ dependencies:
   path_provider: ^2.1.2     # для доступа к файловой системе
   share_plus: ^9.0.0        # для шаринга данных
   file_picker: ^8.0.0         # для выбора файлов
+  package_info_plus: ^8.0.0   # для получения информации о приложении
 
 dev_dependencies:
   flutter_test:

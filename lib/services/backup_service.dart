@@ -86,16 +86,10 @@ class BackupService {
 
   // Импорт веса тела
   Future<void> _importBodyWeight(List jsonList) async {
-    final existing = await _bodyWeightService.getAllEntries();
-    final existingDates = existing.map((e) => e.date).toSet();
-
     for (final item in jsonList) {
       final date = item['date'] as String;
-      if (!existingDates.contains(date)) {
-        await _bodyWeightService.saveEntry(
-          (item['weight'] as num).toDouble(),
-        );
-      }
+      final weight = (item['weight'] as num).toDouble();
+      await _bodyWeightService.saveEntryWithDate(date, weight);
     }
   }
 }

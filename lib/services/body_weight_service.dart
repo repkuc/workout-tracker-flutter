@@ -39,6 +39,25 @@ class BodyWeightService {
     await prefs.setStringList(_key, jsonList);
   }
 
+  // Сохранить запись с конкретной датой (для импорта)
+  Future<void> saveEntryWithDate(String date, double weight) async {
+    final newEntry = BodyWeightEntry(date: date, weight: weight);
+    final entries = await getAllEntries();
+
+    final index = entries.indexWhere((e) => e.date == date);
+    if (index >= 0) {
+      entries[index] = newEntry;
+    } else {
+      entries.add(newEntry);
+    }
+
+    entries.sort((a, b) => a.date.compareTo(b.date));
+
+    final prefs = await SharedPreferences.getInstance();
+    final jsonList = entries.map((e) => jsonEncode(e.toJson())).toList();
+    await prefs.setStringList(_key, jsonList);
+  }
+
   // Получение всех записей веса
   Future<List<BodyWeightEntry>> getAllEntries() async {
     final prefs = await SharedPreferences.getInstance();
@@ -60,7 +79,7 @@ class BodyWeightService {
         '${cutoff.month.toString().padLeft(2, '0')}-'
         '${cutoff.day.toString().padLeft(2, '0')}';
 
-  // Оставляем только те записи которые новее cutoff
+    // Оставляем только те записи которые новее cutoff
     return all.where((e) => e.date.compareTo(cutoffStr) >= 0).toList();
   }
 
@@ -78,6 +97,4 @@ class BodyWeightService {
       return null; // Если записи на сегодня нет, возвращаем null
     }
   }
-
- 
 }
