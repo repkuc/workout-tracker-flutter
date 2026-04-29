@@ -108,12 +108,14 @@ class _HomePageState extends State<HomePage> {
   String _formatDuration(int seconds) {
     final hours = seconds ~/ 3600;
     final minutes = (seconds % 3600) ~/ 60;
-    if (hours > 0) return '${hours}${'workout.hours_short'.tr()} ${minutes}${'workout.minutes_short'.tr()}';
+    if (hours > 0)
+      return '${hours}${'workout.hours_short'.tr()} ${minutes}${'workout.minutes_short'.tr()}';
     return '${minutes}${'workout.minutes_short'.tr()}';
   }
 
   String _formatVolume(double kg) {
-    if (kg >= 1000) return '${(kg / 1000).toStringAsFixed(1)}${'workout.t'.tr()}';
+    if (kg >= 1000)
+      return '${(kg / 1000).toStringAsFixed(1)}${'workout.t'.tr()}';
     return '${kg.toStringAsFixed(0)}${'workout.kg'.tr()}';
   }
 
@@ -434,7 +436,15 @@ class _HomePageState extends State<HomePage> {
 
           // Дни недели
           Row(
-            children: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
+            children: [
+              'calendar.mon'.tr(),
+              'calendar.tue'.tr(),
+              'calendar.wed'.tr(),
+              'calendar.thu'.tr(),
+              'calendar.fri'.tr(),
+              'calendar.sat'.tr(),
+              'calendar.sun'.tr(),
+            ]
                 .map(
                   (day) => Expanded(
                     child: Center(

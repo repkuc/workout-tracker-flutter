@@ -183,6 +183,15 @@
   "import_subtitle": "Ielādēt datus no faila",
   "version": "Versija",
   "privacy": "Privātuma politika"
+},
+"calendar": {
+  "mon": "P",
+  "tue": "O",
+  "wed": "T",
+  "thu": "C",
+  "fri": "Pk",
+  "sat": "S",
+  "sun": "Sv"
 }
 
 }

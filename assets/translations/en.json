@@ -183,6 +183,15 @@
   "import_subtitle": "Load data from file",
   "version": "Version",
   "privacy": "Privacy Policy"
+},
+"calendar": {
+  "mon": "Mo",
+  "tue": "Tu",
+  "wed": "We",
+  "thu": "Th",
+  "fri": "Fr",
+  "sat": "Sa",
+  "sun": "Su"
 }
 
 }
