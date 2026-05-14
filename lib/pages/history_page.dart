@@ -86,11 +86,7 @@ class _HistoryPageState extends State<HistoryPage> {
       ),
       child: Row(
         children: [
-          IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: () => Navigator.pop(context),
-          ),
-          const SizedBox(width: 8),
+        
           const Icon(
             Icons.history,
             color: Color(0xFFF97316),
