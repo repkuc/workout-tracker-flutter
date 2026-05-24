@@ -34,6 +34,12 @@ class _HistoryPageState extends State<HistoryPage> {
     _loadWorkouts();
   }
 
+  @override
+void didChangeDependencies() {
+  super.didChangeDependencies();
+  _loadWorkouts();
+}
+
   Future<void> _loadWorkouts() async {
     final completed = await _service.getCompletedWorkouts();
     final draft = await _service.getDraftWorkout();

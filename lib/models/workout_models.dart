@@ -96,6 +96,8 @@ class Workout {
   String? copiedFromWorkoutId; // Идентификатор тренировки, из которой была скопирована (если применимо)
   String? startedAt; // Время начала тренировки
   int? duration; // Длительность тренировки в секундах
+  String? color; // Цвет тренировки например "#F97316"
+  List<String> muscleGroups; // Группы мышц например ["chest", "back"]
   List<Exercise> exercises; // Упражнения в тренировке
 
   Workout({
@@ -108,8 +110,11 @@ class Workout {
     this.copiedFromWorkoutId,
     this.startedAt,
     this.duration,
+    this.color,
+    List<String>? muscleGroups,
     List<Exercise>? exercises,
-  }) : exercises = exercises ?? [];
+  }) : exercises = exercises ?? [], // Инициализация пустым списком, если не передан
+      muscleGroups = muscleGroups ?? []; // Инициализация пустым списком, если не передан
 
   // Конвертация в JSON для сохранения
   Map<String, dynamic> toJson() => {
@@ -123,6 +128,8 @@ class Workout {
     'finishedAt': finishedAt,
     'copiedFromWorkoutId': copiedFromWorkoutId,
     'exercises': exercises.map((e) => e.toJson()).toList(),
+    'color': color,
+    'muscleGroups': muscleGroups,
   };
 
   // Создание из JSON
@@ -136,6 +143,10 @@ class Workout {
     copiedFromWorkoutId: json['copiedFromWorkoutId'],
     startedAt: json['startedAt'],
     duration: json['duration'],
+    color: json['color'],
+    muscleGroups: (json['muscleGroups'] as List?)
+    ?.map((e) => e.toString())
+    .toList() ?? [],
     exercises: (json['exercises'] as List?)
         ?.map((e) => Exercise.fromJson(e))
         .toList() ??

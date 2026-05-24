@@ -21,6 +21,15 @@
     "in_progress": "In progress"
   },
   "workout": {
+    "color": "COLOR",
+"muscle_groups": "MUSCLE GROUPS",
+"muscle_chest": "Chest",
+"muscle_back": "Back",
+"muscle_legs": "Legs",
+"muscle_shoulders": "Shoulders",
+"muscle_arms": "Arms",
+"muscle_abs": "Abs",
+"muscle_full_body": "Full Body",
     "title": "Workout",
     "new_workout": "New Workout",
     "add_exercise": "Add Exercise",

@@ -81,6 +81,8 @@ class WorkoutService {
     required String date,
     String name = 'Тренировка',
     String notes = '',
+    String? color,                    // ← добавь
+  List<String>? muscleGroups,       // ← добавь
   }) async {
     final workout = Workout(
       id: _uuid.v4(),
@@ -88,6 +90,8 @@ class WorkoutService {
       name: name,
       notes: notes,
       status: 'draft',
+      color: color,                   // ← добавь
+    muscleGroups: muscleGroups ?? [], // ← добавь
     );
 
     final workouts = await loadAllWorkouts();

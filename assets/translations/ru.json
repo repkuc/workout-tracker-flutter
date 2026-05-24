@@ -21,6 +21,15 @@
     "in_progress": "В процессе"
   },
   "workout": {
+    "color": "ЦВЕТ",
+"muscle_groups": "ГРУППЫ МЫШЦ",
+"muscle_chest": "Грудь",
+"muscle_back": "Спина",
+"muscle_legs": "Ноги",
+"muscle_shoulders": "Плечи",
+"muscle_arms": "Руки",
+"muscle_abs": "Пресс",
+"muscle_full_body": "Всё тело",
     "title": "Тренировка",
     "new_workout": "Новая тренировка",
     "add_exercise": "Добавить упражнение",

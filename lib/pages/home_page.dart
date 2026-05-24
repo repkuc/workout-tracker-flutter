@@ -25,6 +25,8 @@ class _HomePageState extends State<HomePage> {
 
   // Текущий месяц на календаре
   DateTime _calendarMonth = DateTime.now();
+  String _selectedColor = '#F97316'; // оранжевый по умолчанию
+  List<String> _selectedMuscleGroups = [];
 
   final _newWorkoutNameController = TextEditingController();
 
@@ -649,11 +651,13 @@ class _HomePageState extends State<HomePage> {
               ).then((_) => _loadData());
             }
           } else {
-            final name = await _showCreateWorkoutDialog();
-            if (name == null) return;
+            final result = await _showCreateWorkoutDialog();
+            if (result == null) return;
             final workout = await _service.createWorkout(
               date: _service.getTodayDate(),
-              name: name,
+              name: result['name'] as String,
+              color: result['color'] as String,
+              muscleGroups: result['muscleGroups'] as List<String>,
             );
             if (context.mounted) {
               Navigator.push(
@@ -688,79 +692,221 @@ class _HomePageState extends State<HomePage> {
   }
 
   // Диалог создания новой тренировки
-  Future<String?> _showCreateWorkoutDialog() async {
+  Future<Map<String, dynamic>?> _showCreateWorkoutDialog() async {
     _newWorkoutNameController.text = 'workout.new_workout'.tr();
-    return showDialog<String>(
+    _selectedColor = '#F97316';
+    _selectedMuscleGroups = [];
+
+    return showDialog<Map<String, dynamic>>(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1F2937),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: Color(0xFFF97316), width: 2),
-        ),
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                  color: const Color(0xFFF97316).withOpacity(0.2),
-                  shape: BoxShape.circle),
-              child: const Icon(Icons.add_circle,
-                  color: Color(0xFFF97316), size: 24),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          backgroundColor: const Color(0xFF1E293B),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: const BorderSide(color: Color(0xFFF97316), width: 1),
+          ),
+          titlePadding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          contentPadding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+          actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+          title: Text(
+            'workout.create_workout_dialog_title'.tr(),
+            style: const TextStyle(
+                color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 8),
+
+                // Название
+                TextField(
+                  controller: _newWorkoutNameController,
+                  autofocus: true,
+                  style: const TextStyle(color: Colors.white, fontSize: 14),
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: const Color(0xFF0F172A),
+                    hintText: 'workout.workout_name_hint'.tr(),
+                    hintStyle: const TextStyle(color: Color(0xFF64748B)),
+                    prefixIcon: const Icon(Icons.fitness_center,
+                        color: Color(0xFFF97316), size: 18),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 10),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide.none),
+                  ),
+                ),
+
+                const SizedBox(height: 14),
+
+                // Цвет
+                Text(
+                  'workout.color'.tr(),
+                  style: const TextStyle(
+                      color: Color(0xFF64748B), fontSize: 11, letterSpacing: 1),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    '#F97316',
+                    '#34D399',
+                    '#60A5FA',
+                    '#F472B6',
+                    '#A78BFA',
+                    '#FBBF24',
+                  ].map((color) {
+                    final c = Color(int.parse('0xFF${color.substring(1)}'));
+                    final isSelected = _selectedColor == color;
+                    return GestureDetector(
+                      onTap: () => setDialogState(() => _selectedColor = color),
+                      child: Container(
+                        margin: const EdgeInsets.only(right: 8),
+                        width: 30,
+                        height: 30,
+                        decoration: BoxDecoration(
+                          color: c,
+                          shape: BoxShape.circle,
+                          border: isSelected
+                              ? Border.all(color: Colors.white, width: 2.5)
+                              : null,
+                        ),
+                        child: isSelected
+                            ? const Icon(Icons.check,
+                                color: Colors.white, size: 16)
+                            : null,
+                      ),
+                    );
+                  }).toList(),
+                ),
+
+                const SizedBox(height: 14),
+
+                // Группы мышц
+                Text(
+                  'workout.muscle_groups'.tr(),
+                  style: const TextStyle(
+                      color: Color(0xFF64748B), fontSize: 11, letterSpacing: 1),
+                ),
+                const SizedBox(height: 8),
+                GridView.count(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  crossAxisCount: 3,
+                  childAspectRatio: 1.1,
+                  crossAxisSpacing: 6,
+                  mainAxisSpacing: 6,
+                  children: [
+                    ('chest', 'workout.muscle_chest'.tr()),
+                    ('back', 'workout.muscle_back'.tr()),
+                    ('legs', 'workout.muscle_legs'.tr()),
+                    ('shoulders', 'workout.muscle_shoulders'.tr()),
+                    ('arms', 'workout.muscle_arms'.tr()),
+                    ('abs', 'workout.muscle_abs'.tr()),
+                    ('full_body', 'workout.muscle_full_body'.tr()),
+                  ].map((item) {
+                    final key = item.$1;
+                    final label = item.$2;
+                    final isSelected = _selectedMuscleGroups.contains(key);
+                    final accentColor =
+                        Color(int.parse('0xFF${_selectedColor.substring(1)}'));
+
+                    return GestureDetector(
+                      onTap: () => setDialogState(() {
+                        if (isSelected) {
+                          _selectedMuscleGroups.remove(key);
+                        } else {
+                          _selectedMuscleGroups.add(key);
+                        }
+                      }),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? accentColor.withOpacity(0.15)
+                              : const Color(0xFF0F172A),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color:
+                                isSelected ? accentColor : Colors.transparent,
+                            width: 1.5,
+                          ),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            if (key != 'full_body')
+                              Image.asset(
+                                'assets/images/muscles/$key.png',
+                                width: 36,
+                                height: 36,
+                                errorBuilder: (_, __, ___) => Icon(
+                                    Icons.fitness_center,
+                                    color: isSelected
+                                        ? accentColor
+                                        : const Color(0xFF64748B),
+                                    size: 24),
+                              )
+                            else
+                              Icon(Icons.accessibility_new,
+                                  color: isSelected
+                                      ? accentColor
+                                      : const Color(0xFF64748B),
+                                  size: 28),
+                            const SizedBox(height: 3),
+                            Text(
+                              label,
+                              style: TextStyle(
+                                color: isSelected
+                                    ? accentColor
+                                    : const Color(0xFF64748B),
+                                fontSize: 9,
+                                fontWeight: isSelected
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
+                              ),
+                              textAlign: TextAlign.center,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ],
             ),
-            const SizedBox(width: 12),
-            Expanded(
-                child: Text('workout.create_workout_dialog_title'.tr(),
-                    style: const TextStyle(
-                        color: Colors.white, fontWeight: FontWeight.bold))),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, null),
+              child: Text('workout.cancel'.tr(),
+                  style: const TextStyle(color: Color(0xFF64748B))),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final name = _newWorkoutNameController.text.trim();
+                if (name.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                        content: Text('workout.workout_name_required'.tr()),
+                        backgroundColor: Colors.red),
+                  );
+                  return;
+                }
+                Navigator.pop(context, {
+                  'name': name,
+                  'color': _selectedColor,
+                  'muscleGroups': _selectedMuscleGroups,
+                });
+              },
+              child: Text('workout.create'.tr()),
+            ),
           ],
         ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('workout.create_workout_message'.tr(),
-                style: TextStyle(color: Colors.grey[400], fontSize: 14)),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _newWorkoutNameController,
-              autofocus: true,
-              style: const TextStyle(color: Colors.white),
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: const Color(0xFF374151),
-                hintText: 'workout.workout_name_hint'.tr(),
-                hintStyle: TextStyle(color: Colors.grey[500]),
-                prefixIcon:
-                    const Icon(Icons.fitness_center, color: Color(0xFFF97316)),
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, null),
-            child: Text('workout.cancel'.tr(),
-                style: TextStyle(color: Colors.grey[400])),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              final name = _newWorkoutNameController.text.trim();
-              if (name.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                      content: Text('workout.workout_name_required'.tr()),
-                      backgroundColor: Colors.red),
-                );
-                return;
-              }
-              Navigator.pop(context, name);
-            },
-            child: Text('workout.create'.tr()),
-          ),
-        ],
       ),
     );
   }

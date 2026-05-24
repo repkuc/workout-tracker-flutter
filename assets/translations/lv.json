@@ -21,6 +21,15 @@
     "in_progress": "Procesā"
   },
   "workout": {
+    "color": "KRĀSA",
+"muscle_groups": "MUSKUĻU GRUPAS",
+"muscle_chest": "Krūtis",
+"muscle_back": "Mugura",
+"muscle_legs": "Kājas",
+"muscle_shoulders": "Pleci",
+"muscle_arms": "Rokas",
+"muscle_abs": "Vēders",
+"muscle_full_body": "Viss ķermenis",
     "title": "Treniņš",
     "new_workout": "Jauns treniņš",
     "add_exercise": "Pievienot vingrinājumu",
