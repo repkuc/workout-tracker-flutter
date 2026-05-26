@@ -252,57 +252,31 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
           // ← НОВОЕ: Таймер или кнопка запуска
           // ← НОВОЕ: Таймер + объём в одну строку
           const SizedBox(height: 4), // Отступ между названием и таймером
-          if (_workout?.startedAt == null)
-            // Кнопка "Начать тренировку" (на всю ширину)
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: _startTimer,
-                icon: const Icon(Icons.play_arrow, size: 20),
-                label: Text(
-                  'workout.start_timer'.tr(),
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF10B981),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                ),
-              ),
-            )
-          else
-            // Таймер + Объём (50/50)
+          if (_workout?.startedAt != null)
             Column(
               children: [
-                // Таймер (сверху)
+                const SizedBox(height: 4),
+                // Таймер
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 12, vertical: 6), // ← Уменьшили с 8
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
                     color: const Color(0xFF10B981).withOpacity(0.2),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: const Color(0xFF10B981),
-                      width: 1, // ← Уменьшили с 2
-                    ),
+                    border:
+                        Border.all(color: const Color(0xFF10B981), width: 1),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(
-                        Icons.timer,
-                        color: Color(0xFF10B981),
-                        size: 16, // ← Уменьшили с 18
-                      ),
+                      const Icon(Icons.timer,
+                          color: Color(0xFF10B981), size: 16),
                       const SizedBox(width: 8),
                       Text(
                         _formatDuration(_elapsedSeconds),
                         style: const TextStyle(
                           color: Colors.white,
-                          fontSize: 16, // ← Уменьшили с 18
+                          fontSize: 16,
                           fontWeight: FontWeight.bold,
                           fontFeatures: [FontFeature.tabularFigures()],
                         ),
@@ -310,13 +284,10 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                     ],
                   ),
                 ),
-
                 const SizedBox(height: 6),
-
-                // Объём (снизу)
+                // Объём
                 Builder(
                   builder: (context) {
-                    // Текущий объём всей тренировки (только выполненные подходы!)
                     final currentVolume = _workout!.exercises.fold<double>(
                       0,
                       (sum, ex) =>
@@ -327,8 +298,6 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                                 s + (set.isDone ? set.weight * set.reps : 0),
                           ),
                     );
-
-                    // Прошлый объём (если тренировка скопирована)
                     final previousVolume = _workout!.copiedFromWorkoutId != null
                         ? _originalExercises.values.fold<double>(
                             0,
@@ -340,7 +309,6 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                                 ),
                           )
                         : null;
-
                     final difference = previousVolume != null
                         ? currentVolume - previousVolume
                         : 0;
@@ -348,67 +316,51 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
 
                     return Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 6), // ← Уменьшили
+                          horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
                         color: const Color(0xFFF97316).withOpacity(0.2),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color: const Color(0xFFF97316),
-                          width: 1, // ← Уменьшили с 2
-                        ),
+                            color: const Color(0xFFF97316), width: 1),
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(
-                            Icons.monitor_weight,
-                            color: Color(0xFFF97316),
-                            size: 16, // ← Уменьшили
-                          ),
+                          const Icon(Icons.monitor_weight,
+                              color: Color(0xFFF97316), size: 16),
                           const SizedBox(width: 8),
-                          // Если есть прошлый объём - показываем сравнение
                           if (previousVolume != null) ...[
-                            Text(
-                              _formatVolume(previousVolume),
-                              style: TextStyle(
-                                color: Colors.grey[500],
-                                fontSize: 12, // ← Уменьшили
-                                decoration: TextDecoration.lineThrough,
-                              ),
-                            ),
+                            Text(_formatVolume(previousVolume),
+                                style: TextStyle(
+                                    color: Colors.grey[500],
+                                    fontSize: 12,
+                                    decoration: TextDecoration.lineThrough)),
                             const Icon(Icons.arrow_forward,
                                 color: Color(0xFFF97316), size: 12),
                             const SizedBox(width: 4),
                           ],
-                          Text(
-                            _formatVolume(currentVolume),
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 14, // ← Уменьшили с 16
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                          Text(_formatVolume(currentVolume),
+                              style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold)),
                           if (difference != 0) ...[
                             const SizedBox(width: 4),
                             Icon(
-                              isIncrease
-                                  ? Icons.arrow_upward
-                                  : Icons.arrow_downward,
-                              color: isIncrease
-                                  ? const Color(0xFF10B981)
-                                  : Colors.red,
-                              size: 12,
-                            ),
-                            Text(
-                              _formatVolume(difference.abs().toDouble()),
-                              style: TextStyle(
+                                isIncrease
+                                    ? Icons.arrow_upward
+                                    : Icons.arrow_downward,
                                 color: isIncrease
                                     ? const Color(0xFF10B981)
                                     : Colors.red,
-                                fontSize: 11, // ← Уменьшили
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                                size: 12),
+                            Text(_formatVolume(difference.abs().toDouble()),
+                                style: TextStyle(
+                                    color: isIncrease
+                                        ? const Color(0xFF10B981)
+                                        : Colors.red,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold)),
                           ],
                         ],
                       ),
@@ -2679,61 +2631,77 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
 
   // Нижние кнопки (Добавить упражнение + Завершить тренировку)
   Widget _buildBottomButtons() {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isStarted = _workout?.startedAt != null;
 
     return Container(
-      padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1F2937) : const Color(0xFF374151),
+        color: const Color(0xFF0F172A),
         border: Border(
           top: BorderSide(
-            color: const Color(0xFFF97316).withOpacity(0.3),
-            width: 2,
+            color: const Color(0xFFF97316).withOpacity(0.2),
+            width: 1,
           ),
         ),
       ),
       child: SafeArea(
         top: false,
-        child: Row(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            // Кнопка "Добавить упражнение" (оранжевая)
-            Expanded(
-              child: ElevatedButton.icon(
+            // Кнопка "Добавить упражнение"
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
                 onPressed: _showAddExerciseDialog,
-                icon: const Icon(Icons.add_circle, size: 18), // ← Еще меньше
+                icon: const Icon(Icons.add_circle,
+                    size: 18, color: Color(0xFFF97316)),
                 label: Text(
                   'workout.add_exercise'.tr(),
                   style: const TextStyle(
-                    fontSize: 13, // ← Еще меньше
+                    fontSize: 13,
                     fontWeight: FontWeight.bold,
+                    color: Color(0xFFF97316),
                   ),
                 ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFF97316),
-                  padding: const EdgeInsets.symmetric(vertical: 12),
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: Color(0xFFF97316), width: 1),
+                  padding: const EdgeInsets.symmetric(vertical: 11),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10)),
                 ),
               ),
             ),
 
-            const SizedBox(
-                width: 8), // ← Отступ между кнопками (горизонтальный!)
+            const SizedBox(height: 8),
 
-            // Кнопка "Завершить тренировку" (зелёная)
-            Expanded(
+            // Кнопка "Начать" → "Завершить"
+            SizedBox(
+              width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: _showFinishWorkoutDialog,
-                icon: const Icon(Icons.check_circle, size: 18),
+                onPressed: isStarted ? _showFinishWorkoutDialog : _startTimer,
+                icon: Icon(
+                  isStarted ? Icons.check_circle : Icons.play_arrow,
+                  size: 20,
+                ),
                 label: Text(
-                  'workout.finish_workout'.tr(),
+                  isStarted
+                      ? 'workout.finish_workout'.tr()
+                      : 'workout.start_timer'.tr(),
                   style: const TextStyle(
-                    fontSize: 13,
+                    fontSize: 14,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF10B981),
+                  backgroundColor: isStarted
+                      ? const Color(0xFFF97316)
+                      : const Color(0xFF10B981),
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  padding: const EdgeInsets.symmetric(vertical: 13),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10)),
+                  elevation: 0,
                 ),
               ),
             ),

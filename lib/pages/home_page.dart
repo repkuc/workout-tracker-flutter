@@ -806,7 +806,6 @@ class _HomePageState extends State<HomePage> {
                     ('shoulders', 'workout.muscle_shoulders'.tr()),
                     ('arms', 'workout.muscle_arms'.tr()),
                     ('abs', 'workout.muscle_abs'.tr()),
-                    ('full_body', 'workout.muscle_full_body'.tr()),
                   ].map((item) {
                     final key = item.$1;
                     final label = item.$2;
