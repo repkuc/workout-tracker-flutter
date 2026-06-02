@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'services/workout_service.dart';
 import 'pages/main_page.dart';
+import 'services/exercise_library_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -10,6 +11,9 @@ void main() async {
   // Инициализируем сервис работы с тренировками
   final workoutService = WorkoutService();
   await workoutService.init();
+
+  final exerciseLibrary = ExerciseLibraryService(); // Получаем доступ к сервису библиотеки упражнений
+  await exerciseLibrary.migrateExistingExercises(); // Выполняем миграцию упражнений из истории в библиотеку
 
   runApp(
     EasyLocalization(
