@@ -154,7 +154,7 @@ void didChangeDependencies() {
 
   Widget _buildWorkoutCard(Workout workout) {
     final isDraft = workout.finishedAt == null;
-    final color = isDraft ? const Color(0xFFF97316) : (_nameColors[workout.name] ?? const Color(0xFFF97316));
+    final color = isDraft ? const Color(0xFFF97316) : _getWorkoutColor(workout);
 
     final totalSets = workout.exercises.fold<int>(0, (s, e) => s + e.sets.length);
     final completedSets = workout.exercises.fold<int>(0, (s, e) => s + e.sets.where((set) => set.isDone).length);
@@ -441,6 +441,13 @@ void didChangeDependencies() {
     );
     if (result == true) await _deleteWorkout(workout.id);
   }
+
+  Color _getWorkoutColor(Workout workout) {
+  if (workout.color != null && workout.color!.isNotEmpty) {
+    return Color(int.parse('0xFF${workout.color!.substring(1)}'));
+  }
+  return _nameColors[workout.name] ?? const Color(0xFFF97316);
+}
 
   Future<void> _deleteWorkout(String workoutId) async {
     final success = await _service.deleteWorkout(workoutId);

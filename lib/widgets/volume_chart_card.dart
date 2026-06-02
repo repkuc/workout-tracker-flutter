@@ -63,8 +63,13 @@ class _VolumeChartCardState extends State<VolumeChartCard> {
     for (final item in data) {
       final name = item['name'] as String;
       if (!nameColors.containsKey(name)) {
-        nameColors[name] = _colors[colorIndex % _colors.length];
-        colorIndex++;
+        final colorStr = item['color'] as String?;
+        if (colorStr != null && colorStr.isNotEmpty) {
+          nameColors[name] = Color(int.parse('0xFF${colorStr.substring(1)}'));
+        } else {
+          nameColors[name] = _colors[colorIndex % _colors.length];
+          colorIndex++;
+        }
       }
     }
 

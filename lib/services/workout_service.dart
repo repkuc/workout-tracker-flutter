@@ -546,6 +546,7 @@ class WorkoutService {
         'date': workout.date,
         'volume': totalVolume,
         'name': workout.name, // ← название тренировки для цвета
+        'color': workout.color,
       });
     }
 

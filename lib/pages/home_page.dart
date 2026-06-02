@@ -385,6 +385,15 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  // Получить цвет тренировки — из модели или автоматически
+Color _getWorkoutColor(Workout workout) {
+  if (workout.color != null && workout.color!.isNotEmpty) {
+    return Color(int.parse('0xFF${workout.color!.substring(1)}'));
+  }
+  // Запасной вариант для старых тренировок без цвета
+  return _nameColors[workout.name] ?? const Color(0xFFF97316);
+}
+
   // Календарь с днями тренировок
   Widget _buildCalendar() {
     final now = DateTime.now();
@@ -487,7 +496,7 @@ class _HomePageState extends State<HomePage> {
                 final workout = _workoutByDate[dateStr];
                 final hasWorkout = workout != null;
                 final workoutColor = hasWorkout
-                    ? (_nameColors[workout.name] ?? const Color(0xFFF97316))
+                    ? _getWorkoutColor(workout)
                     : null;
 
                 return GestureDetector(
@@ -912,7 +921,7 @@ class _HomePageState extends State<HomePage> {
 
   // Лист с деталями тренировки при нажатии на день в календаре
   void _showWorkoutDaySheet(Workout workout) {
-    final color = _nameColors[workout.name] ?? const Color(0xFFF97316);
+    final color = _getWorkoutColor(workout);
 
     // Считаем статистику
     final totalSets =
