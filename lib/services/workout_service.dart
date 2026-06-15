@@ -2,6 +2,7 @@ import 'dart:convert'; // для json
 import 'package:shared_preferences/shared_preferences.dart'; // для сохранения данных
 import 'package:uuid/uuid.dart'; // для генерации уникальных ID
 import '../models/workout_models.dart'; // импорт моделей
+import 'package:flutter/foundation.dart';
 
 // Сервис для работы с тренировками (аналог workouts.js)
 class WorkoutService {
@@ -11,6 +12,8 @@ class WorkoutService {
 
   // Генератор уникальных ID
   final _uuid = const Uuid();
+  // Уведомление об изменении данных — слушают Home и History страницы
+  final ValueNotifier<int> dataChanged = ValueNotifier<int>(0);
 
   // Singleton паттерн (один экземпляр на всё приложение)
   static final WorkoutService _instance = WorkoutService._internal();
@@ -56,6 +59,7 @@ class WorkoutService {
     final prefs = await _preferences;
     final jsonString = json.encode(workouts.map((w) => w.toJson()).toList());
     await prefs.setString(_workoutsKey, jsonString);
+    dataChanged.value++; 
   }
 
   // Получить ID текущей тренировки (черновик)

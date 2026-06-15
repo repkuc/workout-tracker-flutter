@@ -58,9 +58,7 @@ class _ExercisePickerPageState extends State<ExercisePickerPage> {
 
     setState(() {
       _filtered = _exercises.where((e) {
-        final matchGroup = _selectedGroup == 'all' ||
-            e.muscleGroup == _selectedGroup ||
-            (_selectedGroup != 'all' && e.muscleGroup.isEmpty);
+        final matchGroup = _selectedGroup == 'all' || e.muscleGroup == _selectedGroup;
         final matchQuery =
             query.isEmpty || e.getName(lang).toLowerCase().contains(query);
         return matchGroup && matchQuery;
@@ -110,6 +108,8 @@ class _ExercisePickerPageState extends State<ExercisePickerPage> {
                   controller: _searchController,
                   style: const TextStyle(color: Colors.white, fontSize: 14),
                   decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.transparent,
                     hintText: 'workout.exercise_search_hint'.tr(),
                     hintStyle: const TextStyle(color: Color(0xFF64748B)),
                     prefixIcon: const Icon(Icons.search,

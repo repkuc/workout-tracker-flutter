@@ -50,10 +50,12 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _loadData();
+    _service.dataChanged.addListener(_loadData);
   }
 
   @override
   void dispose() {
+    _service.dataChanged.removeListener(_loadData);
     _newWorkoutNameController.dispose();
     super.dispose();
   }

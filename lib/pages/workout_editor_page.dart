@@ -3,6 +3,8 @@ import 'package:easy_localization/easy_localization.dart';
 import '../services/workout_service.dart';
 import '../models/workout_models.dart';
 import 'dart:async';
+import '../models/exercise_template.dart';
+import 'exercise_picker_page.dart';
 
 class WorkoutEditorPage extends StatefulWidget {
   final String workoutId;
@@ -1197,6 +1199,45 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
       }
     }
   }
+
+  // Открыть библиотеку упражнений
+Future<void> _openExercisePicker() async {
+  final result = await Navigator.push<ExerciseTemplate>(
+    context,
+    MaterialPageRoute(builder: (context) => const ExercisePickerPage()),
+  );
+
+  if (result != null) {
+    await _addExerciseFromTemplate(result);
+  }
+}
+
+// Добавить упражнение из шаблона библиотеки
+Future<void> _addExerciseFromTemplate(ExerciseTemplate template) async {
+  final lang = context.locale.languageCode;
+  final name = template.getName(lang);
+  final targetMuscle = template.muscleGroup.isNotEmpty
+      ? 'workout.muscle_${template.muscleGroup}'.tr()
+      : '';
+
+  final success = await _service.addExercise(
+    widget.workoutId,
+    name: name,
+    targetMuscle: targetMuscle,
+  );
+
+  if (success) {
+    await _loadWorkout();
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('$name - ${'workout.add_exercise'.tr().toLowerCase()}!'),
+          backgroundColor: const Color(0xFF10B981),
+        ),
+      );
+    }
+  }
+}
 
   // Показать диалог редактирования упражнения
   Future<void> _showEditExerciseDialog(Exercise exercise) async {
@@ -2653,7 +2694,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
             SizedBox(
               width: double.infinity,
               child: OutlinedButton.icon(
-                onPressed: _showAddExerciseDialog,
+                onPressed: _openExercisePicker,
                 icon: const Icon(Icons.add_circle,
                     size: 18, color: Color(0xFFF97316)),
                 label: Text(

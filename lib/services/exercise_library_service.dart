@@ -10,6 +10,7 @@ import 'workout_service.dart';
 // Этот файл содержит логику работы с базой упражнений: чтение встроенных упражнений,
 // работу с пользовательскими упражнениями, поиск и перенос упражнений из истории.
 class ExerciseLibraryService {
+  static const List<String> _validGroups = ['chest', 'back', 'legs', 'shoulders', 'arms', 'abs'];
   // Ключ для хранения списка пользовательских упражнений в SharedPreferences.
   static const String _customKey = 'wt.custom_exercises.v1';
   // Ключ, по которому запоминается, была ли выполнена однажды миграция упражнений из истории.
@@ -53,7 +54,20 @@ class ExerciseLibraryService {
     final List<dynamic> jsonList = json.decode(jsonStr);
 
     // Преобразуем каждый элемент в объект ExerciseTemplate.
-    return jsonList.map((e) => ExerciseTemplate.fromJson(e)).toList();
+    return jsonList.map((e) {
+  final template = ExerciseTemplate.fromJson(e);
+  if (!_validGroups.contains(template.muscleGroup)) {
+    return ExerciseTemplate(
+      id: template.id,
+      nameRu: template.nameRu,
+      nameLv: template.nameLv,
+      nameEn: template.nameEn,
+      muscleGroup: '',
+      isCustom: template.isCustom,
+    );
+  }
+  return template;
+}).toList();
   }
 
   // Получить все упражнения: сначала встроенные, потом пользовательские.

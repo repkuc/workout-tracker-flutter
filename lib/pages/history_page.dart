@@ -32,13 +32,14 @@ class _HistoryPageState extends State<HistoryPage> {
   void initState() {
     super.initState();
     _loadWorkouts();
+    _service.dataChanged.addListener(_loadWorkouts);
   }
 
   @override
-void didChangeDependencies() {
-  super.didChangeDependencies();
-  _loadWorkouts();
-}
+  void dispose() {
+  _service.dataChanged.removeListener(_loadWorkouts);
+  super.dispose();
+  }
 
   Future<void> _loadWorkouts() async {
     final completed = await _service.getCompletedWorkouts();
