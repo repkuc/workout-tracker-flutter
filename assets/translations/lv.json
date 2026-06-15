@@ -21,6 +21,7 @@
     "in_progress": "Procesā"
   },
   "workout": {
+    "new_record": "Jauns rekords!",
     "exercise_search_hint": "Meklēt vingrojumu...",
     "all_exercises": "Visi",
     "no_exercises_found": "Vingrojumi nav atrasti",

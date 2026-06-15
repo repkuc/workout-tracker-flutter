@@ -25,6 +25,9 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
 
   Map<String, Exercise> _originalExercises =
       {}; // Храним оригинальные упражнения для сравнения
+  Map<String, double> _personalRecords =
+      {}; // Храним личные рекорды для каждого упражнения
+  bool _recordsLoaded = false; // Флаг, что рекорды загружены
 
   Timer? _timer; // Таймер для отслеживания длительности тренировки
   int _elapsedSeconds = 0; // Прошедшее время в секундах
@@ -59,6 +62,12 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
 
   // Загрузка тренировки и оригинальных упражнений для сравнения
   Future<void> _loadWorkout() async {
+    // Загрузка личных рекордов (если ещё не загружены)
+    if (!_recordsLoaded) {
+      _personalRecords = await _service.getPersonalRecords();
+      _recordsLoaded = true;
+    }
+
     final workout = await _service.getWorkout(widget.workoutId);
 
     // Загружаем оригинальные упражнения для сравнения
@@ -795,7 +804,14 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
 
 // Элемент списка подходов
   Widget _buildSetItem(Exercise exercise, WorkoutSet set, int index) {
-    // Если упражнение завершено - все подходы серые и зачёркнутые
+    // ← НОВОЕ: проверяем является ли этот подход новым рекордом
+    double maxBefore = _personalRecords[exercise.name] ?? 0;
+    for (int i = 0; i < index; i++) {
+      final s = exercise.sets[i];
+      if (s.isDone && s.weight > maxBefore) maxBefore = s.weight;
+    }
+    final isPR = set.isDone && set.weight > 0 && set.weight > maxBefore;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 4),
       padding: const EdgeInsets.all(8),
@@ -817,7 +833,6 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
         onLongPress: () => _showSetActionsMenu(exercise, set, index + 1),
         child: Row(
           children: [
-            // Номер подхода
             Container(
               width: 28,
               height: 28,
@@ -839,7 +854,6 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
               ),
             ),
             const SizedBox(width: 6),
-            // Повторы и вес
             Expanded(
               child: Text(
                 '${set.reps} ${'workout.reps'.tr().toLowerCase()} × ${set.weight} ${'workout.kg'.tr()}',
@@ -850,7 +864,34 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                 ),
               ),
             ),
-            // Иконка галочки
+            // ← НОВОЕ: значок PR
+            if (isPR) ...[
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                margin: const EdgeInsets.only(right: 6),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFBBF24).withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(color: const Color(0xFFFBBF24), width: 1),
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.emoji_events,
+                        color: Color(0xFFFBBF24), size: 13),
+                    SizedBox(width: 3),
+                    Text(
+                      'PR',
+                      style: TextStyle(
+                        color: Color(0xFFFBBF24),
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
             Icon(
               set.isDone ? Icons.check_circle : Icons.radio_button_unchecked,
               color: set.isDone ? const Color(0xFF10B981) : Colors.grey,
@@ -865,14 +906,53 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
 // Отметить/снять отметку "выполнен"
   Future<void> _toggleSetDone(
       String exerciseId, String setId, bool isDone) async {
+    // ← НОВОЕ: Проверка на новый личный рекорд (только при отметке "выполнено")
+    if (isDone && _workout != null) {
+      final exIndex = _workout!.exercises.indexWhere((e) => e.id == exerciseId);
+      if (exIndex != -1) {
+        final exercise = _workout!.exercises[exIndex];
+        final setIndex = exercise.sets.indexWhere((s) => s.id == setId);
+        if (setIndex != -1) {
+          final set = exercise.sets[setIndex];
+
+          // Максимальный вес ДО этого подхода (рекорд из истории + предыдущие подходы этой тренировки)
+          double maxBefore = _personalRecords[exercise.name] ?? 0;
+          for (int i = 0; i < setIndex; i++) {
+            final s = exercise.sets[i];
+            if (s.isDone && s.weight > maxBefore) maxBefore = s.weight;
+          }
+
+          if (set.weight > 0 && set.weight > maxBefore) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Row(
+                    children: [
+                      const Icon(Icons.emoji_events, color: Color(0xFFFBBF24)),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          '${'workout.new_record'.tr()} ${exercise.name} — ${set.weight} ${'workout.kg'.tr()}',
+                        ),
+                      ),
+                    ],
+                  ),
+                  backgroundColor: const Color(0xFF1E293B),
+                  behavior: SnackBarBehavior.floating,
+                  duration: const Duration(seconds: 3),
+                ),
+              );
+            }
+          }
+        }
+      }
+    }
+
     await _service.toggleSetDone(widget.workoutId, exerciseId, setId, isDone);
 
-    // ← НОВОЕ: Автостарт таймера при первой отметке
+    // Автостарт таймера при первой отметке
     if (isDone && _workout?.startedAt == null) {
-      // Это первый выполненный подход - запускаем таймер!
       await _startTimer();
-
-      // Показываем уведомление
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -1201,43 +1281,44 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
   }
 
   // Открыть библиотеку упражнений
-Future<void> _openExercisePicker() async {
-  final result = await Navigator.push<ExerciseTemplate>(
-    context,
-    MaterialPageRoute(builder: (context) => const ExercisePickerPage()),
-  );
+  Future<void> _openExercisePicker() async {
+    final result = await Navigator.push<ExerciseTemplate>(
+      context,
+      MaterialPageRoute(builder: (context) => const ExercisePickerPage()),
+    );
 
-  if (result != null) {
-    await _addExerciseFromTemplate(result);
-  }
-}
-
-// Добавить упражнение из шаблона библиотеки
-Future<void> _addExerciseFromTemplate(ExerciseTemplate template) async {
-  final lang = context.locale.languageCode;
-  final name = template.getName(lang);
-  final targetMuscle = template.muscleGroup.isNotEmpty
-      ? 'workout.muscle_${template.muscleGroup}'.tr()
-      : '';
-
-  final success = await _service.addExercise(
-    widget.workoutId,
-    name: name,
-    targetMuscle: targetMuscle,
-  );
-
-  if (success) {
-    await _loadWorkout();
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('$name - ${'workout.add_exercise'.tr().toLowerCase()}!'),
-          backgroundColor: const Color(0xFF10B981),
-        ),
-      );
+    if (result != null) {
+      await _addExerciseFromTemplate(result);
     }
   }
-}
+
+// Добавить упражнение из шаблона библиотеки
+  Future<void> _addExerciseFromTemplate(ExerciseTemplate template) async {
+    final lang = context.locale.languageCode;
+    final name = template.getName(lang);
+    final targetMuscle = template.muscleGroup.isNotEmpty
+        ? 'workout.muscle_${template.muscleGroup}'.tr()
+        : '';
+
+    final success = await _service.addExercise(
+      widget.workoutId,
+      name: name,
+      targetMuscle: targetMuscle,
+    );
+
+    if (success) {
+      await _loadWorkout();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content:
+                Text('$name - ${'workout.add_exercise'.tr().toLowerCase()}!'),
+            backgroundColor: const Color(0xFF10B981),
+          ),
+        );
+      }
+    }
+  }
 
   // Показать диалог редактирования упражнения
   Future<void> _showEditExerciseDialog(Exercise exercise) async {

@@ -21,6 +21,7 @@
     "in_progress": "In progress"
   },
   "workout": {
+    "new_record": "New record!",
     "exercise_search_hint": "Search exercise...",
     "all_exercises": "All",
     "no_exercises_found": "No exercises found",

@@ -21,6 +21,7 @@
     "in_progress": "В процессе"
   },
   "workout": {
+    "new_record": "Новый рекорд!",
     "exercise_search_hint": "Поиск упражнения...",
     "all_exercises": "Все",
     "no_exercises_found": "Упражнения не найдены",
