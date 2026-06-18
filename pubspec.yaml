@@ -40,6 +40,8 @@ dependencies:
   share_plus: ^9.0.0        # для шаринга данных
   file_picker: ^8.0.0         # для выбора файлов
   package_info_plus: ^8.0.0   # для получения информации о приложении
+  vibration: ^2.0.0      # для вибрации при завершении отдыха
+  audioplayers: ^6.0.0     # для звуковых уведомлений при завершении отдыха
 
 dev_dependencies:
   flutter_test:
@@ -67,6 +69,7 @@ flutter:
     - assets/translations/
     - assets/images/muscles/
     - assets/exercises/
+    - assets/sounds/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

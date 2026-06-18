@@ -21,6 +21,8 @@
     "in_progress": "В процессе"
   },
   "workout": {
+    "rest_timer": "ОТДЫХ",
+    "rest_off": "выкл",
     "new_record": "Новый рекорд!",
     "exercise_search_hint": "Поиск упражнения...",
     "all_exercises": "Все",

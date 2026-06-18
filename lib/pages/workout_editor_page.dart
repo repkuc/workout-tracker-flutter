@@ -5,6 +5,9 @@ import '../models/workout_models.dart';
 import 'dart:async';
 import '../models/exercise_template.dart';
 import 'exercise_picker_page.dart';
+import 'package:flutter/services.dart';
+import 'package:vibration/vibration.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 class WorkoutEditorPage extends StatefulWidget {
   final String workoutId;
@@ -19,6 +22,7 @@ class WorkoutEditorPage extends StatefulWidget {
 }
 
 class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
+  final _audioPlayer = AudioPlayer();
   final _service = WorkoutService();
   Workout? _workout;
   bool _isLoading = true;
@@ -31,6 +35,10 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
 
   Timer? _timer; // Таймер для отслеживания длительности тренировки
   int _elapsedSeconds = 0; // Прошедшее время в секундах
+  bool _isPaused = false; // Флаг, что тренировка на паузе
+  int _restSeconds = 0; // Сколько секунд уже на паузе
+  int _restDuration = 120; // Длительность паузы в секундах (например, 2 минуты)
+  Timer? _restTimer; // Таймер для паузы
 
   // Контроллеры для формы добавления упражнения
   final _exerciseNameController = TextEditingController();
@@ -57,6 +65,8 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
     _weightController.dispose();
     _workoutNameController.dispose();
     _timer?.cancel(); // Останавливаем таймер при уничтожении страницы
+    _restTimer?.cancel();
+    _audioPlayer.dispose();
     super.dispose();
   }
 
@@ -101,9 +111,11 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
       // Запускаем таймер для обновления UI
       _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
         if (!mounted) return;
+        if (_isPaused) return;
         if (_workout?.startedAt != null) {
           final startTime = DateTime.parse(_workout!.startedAt!);
-          final elapsed = DateTime.now().difference(startTime).inSeconds;
+          final elapsed = DateTime.now().difference(startTime).inSeconds -
+              (_workout!.totalPausedSeconds);
           setState(() {
             _elapsedSeconds = elapsed;
           });
@@ -114,21 +126,72 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
 
   // Запустить таймер тренировки
   Future<void> _startTimer() async {
-    // Сохраняем время начала в базу
     await _service.startWorkoutTimer(widget.workoutId);
-    await _loadWorkout(); // Перезагружаем тренировку
+    await _loadWorkout();
+    _isPaused = false;
 
-    // Запускаем таймер UI
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (!mounted) return;
+      if (_isPaused) return; // ← не считаем если пауза
       if (_workout?.startedAt != null) {
         final startTime = DateTime.parse(_workout!.startedAt!);
-        final elapsed = DateTime.now().difference(startTime).inSeconds;
-        setState(() {
-          _elapsedSeconds = elapsed;
-        });
+        final elapsed = DateTime.now().difference(startTime).inSeconds -
+            (_workout!.totalPausedSeconds);
+        setState(() => _elapsedSeconds = elapsed);
       }
     });
+  }
+
+// Пауза/продолжение
+  Future<void> _togglePause() async {
+    if (_isPaused) {
+      // Продолжаем
+      await _service.resumeWorkout(widget.workoutId);
+      await _loadWorkout();
+      setState(() => _isPaused = false);
+    } else {
+      // Пауза
+      await _service.pauseWorkout(widget.workoutId);
+      setState(() => _isPaused = true);
+    }
+  }
+
+// Запустить таймер отдыха
+  void _startRestTimer() {
+    _restTimer?.cancel();
+    setState(() => _restSeconds = _restDuration);
+
+    if (_restDuration == 0) return; // отдых выключен
+
+    _restTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+      setState(() {
+        _restSeconds--;
+        if (_restSeconds <= 0) {
+          _restSeconds = 0;
+          timer.cancel();
+        }
+      });
+
+      // Вибрация после setState — чище
+      if (_restSeconds <= 0) {
+        // 0 — длинная вибрация + звук
+        Vibration.vibrate(pattern: [0, 500, 100, 500, 100, 500]);
+        _audioPlayer.play(AssetSource('sounds/timer_end_long.mp3')); // ← длинный
+      } else if (_restSeconds <= 3) {
+        // 3-2-1 — короткая вибрация + звук
+        Vibration.vibrate(duration: 80);
+        _audioPlayer.play(AssetSource('sounds/timer_end.mp3')); // ← короткий
+      }
+    });
+  }
+
+  void _stopRestTimer() {
+    _restTimer?.cancel();
+    setState(() => _restSeconds = 0);
   }
 
 // Форматировать время (секунды → ЧЧ:ММ:СС или ММ:СС)
@@ -263,123 +326,276 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
           // ← НОВОЕ: Таймер или кнопка запуска
           // ← НОВОЕ: Таймер + объём в одну строку
           const SizedBox(height: 4), // Отступ между названием и таймером
-          if (_workout?.startedAt != null)
-            Column(
+          if (_workout?.startedAt != null) ...[
+            const SizedBox(height: 6),
+            // Строка 1: таймер + пауза + объём
+            Row(
               children: [
-                const SizedBox(height: 4),
                 // Таймер
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF10B981).withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(8),
-                    border:
-                        Border.all(color: const Color(0xFF10B981), width: 1),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.timer,
-                          color: Color(0xFF10B981), size: 16),
-                      const SizedBox(width: 8),
-                      Text(
-                        _formatDuration(_elapsedSeconds),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          fontFeatures: [FontFeature.tabularFigures()],
-                        ),
+                Expanded(
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: _isPaused
+                          ? const Color(0xFFF97316).withOpacity(0.15)
+                          : const Color(0xFF10B981).withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: _isPaused
+                            ? const Color(0xFFF97316)
+                            : const Color(0xFF10B981),
+                        width: 1,
                       ),
-                    ],
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          _isPaused ? Icons.pause : Icons.play_arrow,
+                          color: _isPaused
+                              ? const Color(0xFFF97316)
+                              : const Color(0xFF10B981),
+                          size: 14,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          _formatDuration(_elapsedSeconds),
+                          style: TextStyle(
+                            color: _isPaused
+                                ? const Color(0xFFF97316)
+                                : Colors.white,
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            fontFeatures: const [FontFeature.tabularFigures()],
+                          ),
+                        ),
+                        if (_isPaused) ...[
+                          const SizedBox(width: 4),
+                          const Text(
+                            'ПАУЗА',
+                            style: TextStyle(
+                              color: Color(0xFFF97316),
+                              fontSize: 9,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
                   ),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(width: 6),
+                // Кнопка паузы
+                GestureDetector(
+                  onTap: _togglePause,
+                  child: Container(
+                    width: 34,
+                    height: 34,
+                    decoration: BoxDecoration(
+                      color: _isPaused
+                          ? const Color(0xFF10B981).withOpacity(0.15)
+                          : const Color(0xFFF97316).withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: _isPaused
+                            ? const Color(0xFF10B981)
+                            : const Color(0xFFF97316),
+                        width: 1,
+                      ),
+                    ),
+                    child: Icon(
+                      _isPaused ? Icons.play_arrow : Icons.pause,
+                      color: _isPaused
+                          ? const Color(0xFF10B981)
+                          : const Color(0xFFF97316),
+                      size: 18,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 6),
                 // Объём
-                Builder(
-                  builder: (context) {
-                    final currentVolume = _workout!.exercises.fold<double>(
-                      0,
-                      (sum, ex) =>
-                          sum +
-                          ex.sets.fold<double>(
-                            0,
-                            (s, set) =>
-                                s + (set.isDone ? set.weight * set.reps : 0),
-                          ),
-                    );
-                    final previousVolume = _workout!.copiedFromWorkoutId != null
-                        ? _originalExercises.values.fold<double>(
-                            0,
-                            (sum, ex) =>
-                                sum +
-                                ex.sets.fold<double>(
+                Expanded(
+                  flex: 2,
+                  child: Builder(
+                    builder: (context) {
+                      final currentVolume = _workout!.exercises.fold<double>(
+                        0,
+                        (sum, ex) =>
+                            sum +
+                            ex.sets.fold<double>(
+                              0,
+                              (s, set) =>
+                                  s + (set.isDone ? set.weight * set.reps : 0),
+                            ),
+                      );
+                      final previousVolume =
+                          _workout!.copiedFromWorkoutId != null
+                              ? _originalExercises.values.fold<double>(
                                   0,
-                                  (s, set) => s + (set.weight * set.reps),
-                                ),
-                          )
-                        : null;
-                    final difference = previousVolume != null
-                        ? currentVolume - previousVolume
-                        : 0;
-                    final isIncrease = difference > 0;
+                                  (sum, ex) =>
+                                      sum +
+                                      ex.sets.fold<double>(
+                                        0,
+                                        (s, set) => s + (set.weight * set.reps),
+                                      ),
+                                )
+                              : null;
+                      final difference = previousVolume != null
+                          ? currentVolume - previousVolume
+                          : null;
+                      final isIncrease = difference != null && difference > 0;
 
-                    return Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF97316).withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                            color: const Color(0xFFF97316), width: 1),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(Icons.monitor_weight,
-                              color: Color(0xFFF97316), size: 16),
-                          const SizedBox(width: 8),
-                          if (previousVolume != null) ...[
-                            Text(_formatVolume(previousVolume),
-                                style: TextStyle(
-                                    color: Colors.grey[500],
-                                    fontSize: 12,
-                                    decoration: TextDecoration.lineThrough)),
-                            const Icon(Icons.arrow_forward,
-                                color: Color(0xFFF97316), size: 12),
+                      return Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF97316).withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                              color: const Color(0xFFF97316), width: 1),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.monitor_weight,
+                                color: Color(0xFFF97316), size: 13),
                             const SizedBox(width: 4),
+                            Flexible(
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  if (previousVolume != null) ...[
+                                    Flexible(
+                                      child: Text(
+                                        _formatVolume(previousVolume),
+                                        style: TextStyle(
+                                          color: Colors.grey[500],
+                                          fontSize: 10,
+                                          decoration:
+                                              TextDecoration.lineThrough,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                    const Icon(Icons.arrow_forward,
+                                        color: Color(0xFFF97316), size: 10),
+                                  ],
+                                  Flexible(
+                                    child: Text(
+                                      _formatVolume(currentVolume),
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  if (difference != null &&
+                                      difference != 0) ...[
+                                    const SizedBox(width: 3),
+                                    Text(
+                                      '${isIncrease ? '+' : ''}${_formatVolume(difference.abs())}',
+                                      style: TextStyle(
+                                        color: isIncrease
+                                            ? const Color(0xFF10B981)
+                                            : Colors.red,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ),
                           ],
-                          Text(_formatVolume(currentVolume),
-                              style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold)),
-                          if (difference != 0) ...[
-                            const SizedBox(width: 4),
-                            Icon(
-                                isIncrease
-                                    ? Icons.arrow_upward
-                                    : Icons.arrow_downward,
-                                color: isIncrease
-                                    ? const Color(0xFF10B981)
-                                    : Colors.red,
-                                size: 12),
-                            Text(_formatVolume(difference.abs().toDouble()),
-                                style: TextStyle(
-                                    color: isIncrease
-                                        ? const Color(0xFF10B981)
-                                        : Colors.red,
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.bold)),
-                          ],
-                        ],
-                      ),
-                    );
-                  },
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ],
-            ), // ← Отступ между таймером и объёмом
+            ),
+
+            // Строка 2: таймер отдыха (всегда видна)
+            const SizedBox(height: 6),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: _restSeconds > 0
+                    ? const Color(0xFF818CF8).withOpacity(0.1)
+                    : const Color(0xFF818CF8).withOpacity(0.05),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: _restSeconds > 0
+                      ? const Color(0xFF818CF8)
+                      : const Color(0xFF818CF8).withOpacity(0.2),
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.bedtime,
+                      color: _restSeconds > 0
+                          ? const Color(0xFF818CF8)
+                          : const Color(0xFF818CF8).withOpacity(0.4),
+                      size: 14),
+                  const SizedBox(width: 4),
+                  Text(
+                    'workout.rest_timer'.tr(),
+                    style: TextStyle(
+                      color: _restSeconds > 0
+                          ? const Color(0xFF818CF8)
+                          : const Color(0xFF818CF8).withOpacity(0.4),
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1,
+                    ),
+                  ),
+                  if (_restSeconds > 0) ...[
+                    const SizedBox(width: 6),
+                    Text(
+                      _formatDuration(_restSeconds),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        fontFeatures: [FontFeature.tabularFigures()],
+                      ),
+                    ),
+                  ],
+                  const SizedBox(width: 6),
+                  // Чипсы
+                  Expanded(
+                    child: Row(
+                      children: [
+                        _buildRestChip(30, '30с'),
+                        const SizedBox(width: 3),
+                        _buildRestChip(60, '1м'),
+                        const SizedBox(width: 3),
+                        _buildRestChip(120, '2м'),
+                        const SizedBox(width: 3),
+                        _buildRestChip(180, '3м'),
+                        const SizedBox(width: 3),
+                        _buildRestChip(0, 'workout.rest_off'.tr()),
+                      ],
+                    ),
+                  ),
+                  if (_restSeconds > 0) ...[
+                    const SizedBox(width: 6),
+                    GestureDetector(
+                      onTap: _stopRestTimer,
+                      child: const Icon(Icons.close,
+                          color: Color(0xFF64748B), size: 16),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ], // ← Отступ между таймером и объёмом
         ],
       ),
     );
@@ -440,7 +656,6 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
   Widget _buildExercisesList() {
     return Column(
       children: [
-        // Скроллящийся список
         Expanded(
           child: ListView.builder(
             padding: const EdgeInsets.all(16),
@@ -903,6 +1118,42 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
     );
   }
 
+  Widget _buildRestChip(int seconds, String label) {
+    final isSelected = _restDuration == seconds;
+    return GestureDetector(
+      onTap: () {
+        setState(() => _restDuration = seconds);
+        if (seconds == 0) {
+          _stopRestTimer();
+        } else {
+          _startRestTimer();
+        }
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? const Color(0xFF818CF8).withOpacity(0.2)
+              : const Color(0xFF0F172A),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color:
+                isSelected ? const Color(0xFF818CF8) : const Color(0xFF374151),
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color:
+                isSelected ? const Color(0xFF818CF8) : const Color(0xFF64748B),
+            fontSize: 10,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          ),
+        ),
+      ),
+    );
+  }
+
 // Отметить/снять отметку "выполнен"
   Future<void> _toggleSetDone(
       String exerciseId, String setId, bool isDone) async {
@@ -962,6 +1213,13 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
           ),
         );
       }
+    }
+
+    // Запускаем таймер отдыха если подход выполнен
+    if (isDone) {
+      _startRestTimer();
+    } else {
+      _stopRestTimer();
     }
 
     await _loadWorkout();

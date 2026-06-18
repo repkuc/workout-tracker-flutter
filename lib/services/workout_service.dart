@@ -157,8 +157,10 @@ class WorkoutService {
     // ← НОВОЕ: Рассчитываем длительность
     if (workouts[index].startedAt != null) {
       final startTime = DateTime.parse(workouts[index].startedAt!);
-      final duration = now.difference(startTime).inSeconds;
-      workouts[index].duration = duration;
+      final totalSeconds = now.difference(startTime).inSeconds;
+      // Вычитаем время паузы
+      workouts[index].duration =
+          totalSeconds - workouts[index].totalPausedSeconds;
     }
 
     await saveAllWorkouts(workouts);
@@ -185,6 +187,36 @@ class WorkoutService {
     await saveAllWorkouts(workouts);
     return true;
   }
+
+  // Поставить тренировку на паузу
+Future<bool> pauseWorkout(String workoutId) async {
+  final workouts = await loadAllWorkouts();
+  final index = workouts.indexWhere((w) => w.id == workoutId);
+  if (index == -1) return false;
+
+  // Сохраняем время начала паузы
+  workouts[index].pausedAt = DateTime.now().toIso8601String();
+  await saveAllWorkouts(workouts);
+  return true;
+}
+
+// Продолжить тренировку после паузы
+Future<bool> resumeWorkout(String workoutId) async {
+  final workouts = await loadAllWorkouts();
+  final index = workouts.indexWhere((w) => w.id == workoutId);
+  if (index == -1) return false;
+
+  // Считаем сколько секунд была пауза и добавляем к общему времени паузы
+  if (workouts[index].pausedAt != null) {
+    final pauseStart = DateTime.parse(workouts[index].pausedAt!);
+    final pausedSeconds = DateTime.now().difference(pauseStart).inSeconds;
+    workouts[index].totalPausedSeconds += pausedSeconds;
+    workouts[index].pausedAt = null;
+  }
+
+  await saveAllWorkouts(workouts);
+  return true;
+}
 
   // Удалить тренировку
   Future<bool> deleteWorkout(String id) async {

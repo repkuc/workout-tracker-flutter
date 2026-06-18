@@ -21,6 +21,8 @@
     "in_progress": "In progress"
   },
   "workout": {
+    "rest_timer": "REST",
+    "rest_off": "off",
     "new_record": "New record!",
     "exercise_search_hint": "Search exercise...",
     "all_exercises": "All",

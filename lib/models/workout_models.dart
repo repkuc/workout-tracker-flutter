@@ -97,6 +97,8 @@ class Workout {
   String? startedAt; // Время начала тренировки
   int? duration; // Длительность тренировки в секундах
   String? color; // Цвет тренировки например "#F97316"
+  String? pausedAt; // Время паузы тренировки
+  int totalPausedSeconds; // Общее количество секунд, проведенных на паузе
   List<String> muscleGroups; // Группы мышц например ["chest", "back"]
   List<Exercise> exercises; // Упражнения в тренировке
 
@@ -111,6 +113,8 @@ class Workout {
     this.startedAt,
     this.duration,
     this.color,
+    this.pausedAt,
+    this.totalPausedSeconds = 0,
     List<String>? muscleGroups,
     List<Exercise>? exercises,
   }) : exercises = exercises ?? [], // Инициализация пустым списком, если не передан
@@ -129,6 +133,8 @@ class Workout {
     'copiedFromWorkoutId': copiedFromWorkoutId,
     'exercises': exercises.map((e) => e.toJson()).toList(),
     'color': color,
+    'pausedAt': pausedAt,
+    'totalPausedSeconds': totalPausedSeconds,
     'muscleGroups': muscleGroups,
   };
 
@@ -144,6 +150,8 @@ class Workout {
     startedAt: json['startedAt'],
     duration: json['duration'],
     color: json['color'],
+    pausedAt: json['pausedAt'],
+    totalPausedSeconds: json['totalPausedSeconds'] ?? 0,
     muscleGroups: (json['muscleGroups'] as List?)
     ?.map((e) => e.toString())
     .toList() ?? [],
@@ -151,6 +159,7 @@ class Workout {
         ?.map((e) => Exercise.fromJson(e))
         .toList() ??
         [],
+   
   );
 
 
