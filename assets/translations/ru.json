@@ -21,6 +21,7 @@
     "in_progress": "В процессе"
   },
   "workout": {
+    "open": "Открыть",
     "rest_timer": "ОТДЫХ",
     "rest_off": "выкл",
     "new_record": "Новый рекорд!",

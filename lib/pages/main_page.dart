@@ -5,6 +5,7 @@ import 'history_page.dart';
 import 'statistics_page.dart';
 import 'progress_page.dart';
 import 'settings_page.dart';
+import '../widgets/active_workout_banner.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -28,42 +29,50 @@ class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Показываем текущую страницу
       body: IndexedStack(
         index: _currentIndex,
         key: ValueKey(context.locale),
         children: _pages,
       ),
 
-      // Нижняя навигация
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _currentIndex,
-        onDestinationSelected: (index) {
-          setState(() => _currentIndex = index);
-        },
-        backgroundColor: const Color(0xFF0F172A),
-        indicatorColor: const Color(0xFFF97316).withOpacity(0.2),
-        surfaceTintColor: Colors.transparent,
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home_outlined, color: Colors.grey),
-            selectedIcon: Icon(Icons.home, color: Color(0xFFF97316)),
-            label: '',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.history_outlined, color: Colors.grey),
-            selectedIcon: Icon(Icons.history, color: Color(0xFFF97316)),
-            label: '',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.bar_chart_outlined, color: Colors.grey),
-            selectedIcon: Icon(Icons.bar_chart, color: Color(0xFFF97316)),
-            label: '',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.settings_outlined, color: Colors.grey),
-            selectedIcon: Icon(Icons.settings, color: Color(0xFFF97316)),
-            label: '',
+      // Баннер + навигация внизу
+      bottomNavigationBar: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Баннер активной тренировки
+          const ActiveWorkoutBanner(),
+
+          // Нижняя навигация
+          NavigationBar(
+            selectedIndex: _currentIndex,
+            onDestinationSelected: (index) {
+              setState(() => _currentIndex = index);
+            },
+            backgroundColor: const Color(0xFF0F172A),
+            indicatorColor: const Color(0xFFF97316).withOpacity(0.2),
+            surfaceTintColor: Colors.transparent,
+            destinations: const [
+              NavigationDestination(
+                icon: Icon(Icons.home_outlined, color: Colors.grey),
+                selectedIcon: Icon(Icons.home, color: Color(0xFFF97316)),
+                label: '',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.history_outlined, color: Colors.grey),
+                selectedIcon: Icon(Icons.history, color: Color(0xFFF97316)),
+                label: '',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.bar_chart_outlined, color: Colors.grey),
+                selectedIcon: Icon(Icons.bar_chart, color: Color(0xFFF97316)),
+                label: '',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.settings_outlined, color: Colors.grey),
+                selectedIcon: Icon(Icons.settings, color: Color(0xFFF97316)),
+                label: '',
+              ),
+            ],
           ),
         ],
       ),

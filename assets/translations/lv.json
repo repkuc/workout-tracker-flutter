@@ -21,6 +21,7 @@
     "in_progress": "Procesā"
   },
   "workout": {
+    "open": "Atvērt",
     "rest_timer": "ATPŪTA",
     "rest_off": "izsl",
     "new_record": "Jauns rekords!",
