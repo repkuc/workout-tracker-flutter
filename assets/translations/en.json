@@ -199,7 +199,10 @@
   "export_subtitle": "Save data to file",
   "import_subtitle": "Load data from file",
   "version": "Version",
-  "privacy": "Privacy Policy"
+  "privacy": "Privacy Policy",
+  "support": "Support",
+  "donate_title": "Buy me a coffee ☕",
+  "donate_subtitle": "Support app development"
 },
 "calendar": {
   "mon": "Mo",

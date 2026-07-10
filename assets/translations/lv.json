@@ -199,7 +199,10 @@
   "export_subtitle": "Saglabāt datus failā",
   "import_subtitle": "Ielādēt datus no faila",
   "version": "Versija",
-  "privacy": "Privātuma politika"
+  "privacy": "Privātuma politika",
+  "support": "Atbalsts",
+  "donate_title": "Iecienīt kafiju ☕",
+  "donate_subtitle": "Atbalstīt lietotnes izstrādi"
 },
 "calendar": {
   "mon": "P",

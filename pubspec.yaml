@@ -42,6 +42,7 @@ dependencies:
   package_info_plus: ^8.0.0   # для получения информации о приложении
   vibration: ^2.0.0      # для вибрации при завершении отдыха
   audioplayers: ^6.0.0     # для звуковых уведомлений при завершении отдыха
+  url_launcher: ^6.2.5    # для открытия ссылок в браузере
 
 dev_dependencies:
   flutter_test:
