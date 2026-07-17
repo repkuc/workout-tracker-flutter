@@ -231,7 +231,8 @@
   "day_name_hint": "e.g. Day 1: Chest",
   "exercises": "EXERCISES",
   "sets_short": "sets",
-  "day_name_required": "Enter a day name"
+  "day_name_required": "Enter a day name",
+  "not_found": "Program not found"
 }
 
 }

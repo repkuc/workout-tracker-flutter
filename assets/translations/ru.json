@@ -231,6 +231,7 @@
   "day_name_hint": "Например: День 1: Грудь",
   "exercises": "УПРАЖНЕНИЯ",
   "sets_short": "подх.",
-  "day_name_required": "Введите название дня"
+  "day_name_required": "Введите название дня",
+  "not_found": "Программа не найдена"
 }
 }

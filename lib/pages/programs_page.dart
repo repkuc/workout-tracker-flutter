@@ -12,6 +12,8 @@ import '../services/program_service.dart';
 
 // Подключаем экран создания программы, чтобы можно было на него перейти.
 import 'create_program_page.dart';
+// Подключаем экран деталей программы, чтобы можно было на него перейти.
+import 'program_details_page.dart';
 
 // StatefulWidget — потому что страница должна загружать данные асинхронно
 // и обновлять экран когда данные придут (в отличие от StatelessWidget).
@@ -159,7 +161,16 @@ class _ProgramsPageState extends State<ProgramsPage> {
   Widget _buildProgramCard(TrainingProgram program) {
     return GestureDetector(
       // Пока просто заглушка — переход на детали программы добавим следующим шагом.
-      onTap: () {},
+      onTap: () async {
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ProgramDetailsPage(programId: program.id),
+          ),
+        );
+        // Перезагружаем список на случай изменений
+        _loadPrograms();
+      },
       child: Container(
         margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.all(14),

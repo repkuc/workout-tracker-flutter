@@ -231,7 +231,8 @@
   "day_name_hint": "Piemēram: 1. diena: Krūtis",
   "exercises": "VINGROJUMI",
   "sets_short": "pieej.",
-  "day_name_required": "Ievadiet dienas nosaukumu"
+  "day_name_required": "Ievadiet dienas nosaukumu",
+  "not_found": "Programma nav atrasta"
 }
 
 }
