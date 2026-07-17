@@ -218,7 +218,20 @@
   "no_programs": "No programs yet",
   "create_first": "Create your first training program!",
   "create_program": "Create program",
-  "custom_badge": "CUSTOM"
+  "custom_badge": "CUSTOM",
+  "program_name": "PROGRAM NAME",
+  "program_name_hint": "e.g. 3-day split",
+  "schedule": "SCHEDULE",
+  "schedule_hint": "e.g. Mon/Wed/Fri",
+  "workouts_in_program": "WORKOUTS IN PROGRAM",
+  "add_workout_day": "Add workout day",
+  "exercises_count": "exercises",
+  "name_required": "Enter a program name",
+  "new_workout_day": "New workout day",
+  "day_name_hint": "e.g. Day 1: Chest",
+  "exercises": "EXERCISES",
+  "sets_short": "sets",
+  "day_name_required": "Enter a day name"
 }
 
 }

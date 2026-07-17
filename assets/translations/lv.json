@@ -218,7 +218,20 @@
   "no_programs": "Vēl nav programmu",
   "create_first": "Izveido savu pirmo treniņu programmu!",
   "create_program": "Izveidot programmu",
-  "custom_badge": "SAVA"
+  "custom_badge": "SAVA",
+  "program_name": "PROGRAMMAS NOSAUKUMS",
+  "program_name_hint": "Piemēram: Split 3 dienas",
+  "schedule": "GRAFIKS",
+  "schedule_hint": "Piemēram: P/T/Pk",
+  "workouts_in_program": "TRENIŅI PROGRAMMĀ",
+  "add_workout_day": "Pievienot treniņa dienu",
+  "exercises_count": "vingrojumi",
+  "name_required": "Ievadiet programmas nosaukumu",
+  "new_workout_day": "Jauna treniņa diena",
+  "day_name_hint": "Piemēram: 1. diena: Krūtis",
+  "exercises": "VINGROJUMI",
+  "sets_short": "pieej.",
+  "day_name_required": "Ievadiet dienas nosaukumu"
 }
 
 }

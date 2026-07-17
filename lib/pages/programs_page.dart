@@ -10,6 +10,9 @@ import '../models/program_models.dart';
 // Подключаем сервис для загрузки/сохранения программ.
 import '../services/program_service.dart';
 
+// Подключаем экран создания программы, чтобы можно было на него перейти.
+import 'create_program_page.dart';
+
 // StatefulWidget — потому что страница должна загружать данные асинхронно
 // и обновлять экран когда данные придут (в отличие от StatelessWidget).
 class ProgramsPage extends StatefulWidget {
@@ -69,7 +72,8 @@ class _ProgramsPageState extends State<ProgramsPage> {
             Expanded(
               child: _isLoading
                   ? const Center(
-                      child: CircularProgressIndicator(color: Color(0xFFF97316)),
+                      child:
+                          CircularProgressIndicator(color: Color(0xFFF97316)),
                     )
                   : _programs.isEmpty
                       ? _buildEmptyState()
@@ -124,7 +128,8 @@ class _ProgramsPageState extends State<ProgramsPage> {
               color: const Color(0xFFF97316).withOpacity(0.1),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.assignment, size: 56, color: Color(0xFFF97316)),
+            child: const Icon(Icons.assignment,
+                size: 56, color: Color(0xFFF97316)),
           ),
           const SizedBox(height: 16),
           Text(
@@ -184,7 +189,8 @@ class _ProgramsPageState extends State<ProgramsPage> {
                 ),
                 if (program.isCustom)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
                       color: const Color(0xFF818CF8).withOpacity(0.15),
                       border: Border.all(color: const Color(0xFF818CF8)),
@@ -207,11 +213,13 @@ class _ProgramsPageState extends State<ProgramsPage> {
               const SizedBox(height: 4),
               Row(
                 children: [
-                  const Icon(Icons.calendar_today, color: Color(0xFF64748B), size: 12),
+                  const Icon(Icons.calendar_today,
+                      color: Color(0xFF64748B), size: 12),
                   const SizedBox(width: 4),
                   Text(
                     program.schedule,
-                    style: const TextStyle(color: Color(0xFF64748B), fontSize: 11),
+                    style:
+                        const TextStyle(color: Color(0xFF64748B), fontSize: 11),
                   ),
                 ],
               ),
@@ -226,10 +234,12 @@ class _ProgramsPageState extends State<ProgramsPage> {
               runSpacing: 6,
               children: program.workouts.map((w) {
                 return Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
                     color: const Color(0xFFF97316).withOpacity(0.12),
-                    border: Border.all(color: const Color(0xFFF97316).withOpacity(0.3)),
+                    border: Border.all(
+                        color: const Color(0xFFF97316).withOpacity(0.3)),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
@@ -256,8 +266,17 @@ class _ProgramsPageState extends State<ProgramsPage> {
       child: SizedBox(
         width: double.infinity,
         child: ElevatedButton.icon(
-          // Пока заглушка — экран создания программы сделаем следующим шагом.
-          onPressed: () {},
+          //
+          onPressed: () async {
+            await Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => const CreateProgramPage()),
+            );
+            // После возврата с экрана создания — перезагружаем список,
+            // чтобы новая программа сразу появилась.
+            _loadPrograms();
+          },
           icon: const Icon(Icons.add, size: 20),
           label: Text(
             'programs.create_program'.tr(),
@@ -267,7 +286,8 @@ class _ProgramsPageState extends State<ProgramsPage> {
             backgroundColor: const Color(0xFFF97316),
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(vertical: 14),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
         ),
       ),
