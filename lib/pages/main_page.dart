@@ -6,6 +6,7 @@ import 'statistics_page.dart';
 import 'progress_page.dart';
 import 'settings_page.dart';
 import '../widgets/active_workout_banner.dart';
+import 'programs_page.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -21,6 +22,7 @@ class _MainPageState extends State<MainPage> {
   // Страницы — порядок совпадает с иконками навигации
   final List<Widget> _pages = [
     const HomePage(),
+    const ProgramsPage(),
     const HistoryPage(),
     const StatisticsPage(),
     const SettingsPage(),
@@ -55,6 +57,11 @@ class _MainPageState extends State<MainPage> {
               NavigationDestination(
                 icon: Icon(Icons.home_outlined, color: Colors.grey),
                 selectedIcon: Icon(Icons.home, color: Color(0xFFF97316)),
+                label: '',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.assignment_outlined, color: Colors.grey),
+                selectedIcon: Icon(Icons.assignment, color: Color(0xFFF97316)),
                 label: '',
               ),
               NavigationDestination(

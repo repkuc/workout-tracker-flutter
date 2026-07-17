@@ -212,6 +212,13 @@
   "fri": "Pk",
   "sat": "S",
   "sun": "Sv"
+},
+"programs": {
+  "title": "Programmas",
+  "no_programs": "Vēl nav programmu",
+  "create_first": "Izveido savu pirmo treniņu programmu!",
+  "create_program": "Izveidot programmu",
+  "custom_badge": "SAVA"
 }
 
 }

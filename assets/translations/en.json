@@ -212,6 +212,13 @@
   "fri": "Fr",
   "sat": "Sa",
   "sun": "Su"
+},
+"programs": {
+  "title": "Programs",
+  "no_programs": "No programs yet",
+  "create_first": "Create your first training program!",
+  "create_program": "Create program",
+  "custom_badge": "CUSTOM"
 }
 
 }
