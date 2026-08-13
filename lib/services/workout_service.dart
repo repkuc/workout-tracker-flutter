@@ -59,7 +59,7 @@ class WorkoutService {
     final prefs = await _preferences;
     final jsonString = json.encode(workouts.map((w) => w.toJson()).toList());
     await prefs.setString(_workoutsKey, jsonString);
-    dataChanged.value++; 
+    dataChanged.value++;
   }
 
   // Получить ID текущей тренировки (черновик)
@@ -85,8 +85,16 @@ class WorkoutService {
     required String date,
     String name = 'Тренировка',
     String notes = '',
-    String? color,                    // ← добавь
-  List<String>? muscleGroups,       // ← добавь
+    String? color,
+    List<String>? muscleGroups,
+    // Новые необязательные параметры — если тренировка создаётся
+    // из шаблона программы, сюда передадут её ID и название дня.
+    // Если тренировка обычная (не из программы) — оба останутся null,
+    // и это никак не повлияет на существующий функционал.
+    String? programId,
+    String? programWorkoutName,
+    String? programName,
+    String? copiedFromWorkoutId,
   }) async {
     final workout = Workout(
       id: _uuid.v4(),
@@ -94,8 +102,14 @@ class WorkoutService {
       name: name,
       notes: notes,
       status: 'draft',
-      color: color,                   // ← добавь
-    muscleGroups: muscleGroups ?? [], // ← добавь
+      color: color,
+      muscleGroups: muscleGroups ?? [],
+      // Передаём новые поля в конструктор Workout — если они null,
+      // Workout просто сохранит null, как и раньше.
+      programId: programId,
+      programWorkoutName: programWorkoutName,
+      programName: programName,
+      copiedFromWorkoutId: copiedFromWorkoutId,
     );
 
     final workouts = await loadAllWorkouts();
@@ -189,34 +203,34 @@ class WorkoutService {
   }
 
   // Поставить тренировку на паузу
-Future<bool> pauseWorkout(String workoutId) async {
-  final workouts = await loadAllWorkouts();
-  final index = workouts.indexWhere((w) => w.id == workoutId);
-  if (index == -1) return false;
+  Future<bool> pauseWorkout(String workoutId) async {
+    final workouts = await loadAllWorkouts();
+    final index = workouts.indexWhere((w) => w.id == workoutId);
+    if (index == -1) return false;
 
-  // Сохраняем время начала паузы
-  workouts[index].pausedAt = DateTime.now().toIso8601String();
-  await saveAllWorkouts(workouts);
-  return true;
-}
-
-// Продолжить тренировку после паузы
-Future<bool> resumeWorkout(String workoutId) async {
-  final workouts = await loadAllWorkouts();
-  final index = workouts.indexWhere((w) => w.id == workoutId);
-  if (index == -1) return false;
-
-  // Считаем сколько секунд была пауза и добавляем к общему времени паузы
-  if (workouts[index].pausedAt != null) {
-    final pauseStart = DateTime.parse(workouts[index].pausedAt!);
-    final pausedSeconds = DateTime.now().difference(pauseStart).inSeconds;
-    workouts[index].totalPausedSeconds += pausedSeconds;
-    workouts[index].pausedAt = null;
+    // Сохраняем время начала паузы
+    workouts[index].pausedAt = DateTime.now().toIso8601String();
+    await saveAllWorkouts(workouts);
+    return true;
   }
 
-  await saveAllWorkouts(workouts);
-  return true;
-}
+// Продолжить тренировку после паузы
+  Future<bool> resumeWorkout(String workoutId) async {
+    final workouts = await loadAllWorkouts();
+    final index = workouts.indexWhere((w) => w.id == workoutId);
+    if (index == -1) return false;
+
+    // Считаем сколько секунд была пауза и добавляем к общему времени паузы
+    if (workouts[index].pausedAt != null) {
+      final pauseStart = DateTime.parse(workouts[index].pausedAt!);
+      final pausedSeconds = DateTime.now().difference(pauseStart).inSeconds;
+      workouts[index].totalPausedSeconds += pausedSeconds;
+      workouts[index].pausedAt = null;
+    }
+
+    await saveAllWorkouts(workouts);
+    return true;
+  }
 
   // Удалить тренировку
   Future<bool> deleteWorkout(String id) async {
@@ -678,28 +692,51 @@ Future<bool> resumeWorkout(String workoutId) async {
   }
 
   // Получить максимальный вес по каждому упражнению (рекорды)
-Future<Map<String, double>> getPersonalRecords() async {
-  final workouts = await getCompletedWorkouts();
-  final Map<String, double> records = {};
+  Future<Map<String, double>> getPersonalRecords() async {
+    final workouts = await getCompletedWorkouts();
+    final Map<String, double> records = {};
 
-  for (final workout in workouts) {
-    for (final exercise in workout.exercises) {
-      for (final set in exercise.sets) {
-        if (set.isDone && set.weight > 0) {
-          final current = records[exercise.name] ?? 0;
-          if (set.weight > current) {
-            records[exercise.name] = set.weight;
+    for (final workout in workouts) {
+      for (final exercise in workout.exercises) {
+        for (final set in exercise.sets) {
+          if (set.isDone && set.weight > 0) {
+            final current = records[exercise.name] ?? 0;
+            if (set.weight > current) {
+              records[exercise.name] = set.weight;
+            }
           }
         }
       }
     }
+
+    // Сортируем по весу — самые тяжёлые сверху
+    final sorted = Map.fromEntries(
+      records.entries.toList()..sort((a, b) => b.value.compareTo(a.value)),
+    );
+
+    return sorted;
   }
 
-  // Сортируем по весу — самые тяжёлые сверху
-  final sorted = Map.fromEntries(
-    records.entries.toList()..sort((a, b) => b.value.compareTo(a.value)),
-  );
+  // Найти последнюю завершённую тренировку конкретного дня программы.
+  // Используем programId + programWorkoutName вместе, потому что
+  // одна программа может иметь несколько разных дней с разными названиями —
+  // нам нужно найти именно тот день, а не любую тренировку этой программы.
+  Future<Workout?> getLastWorkoutForProgramDay(
+    String programId,
+    String programWorkoutName,
+  ) async {
+    // getCompletedWorkouts() уже возвращает список отсортированный
+    // от новых к старым, поэтому первое совпадение и будет последним по времени.
+    final completed = await getCompletedWorkouts();
 
-  return sorted;
-}
+    try {
+      return completed.firstWhere(
+        (w) => w.programId == programId && w.programWorkoutName == programWorkoutName,
+      );
+    } catch (e) {
+      // Если ни одна тренировка не подошла под условие — значит этот день
+      // программы ещё ни разу не выполнялся.
+      return null;
+    }
+  }
 }

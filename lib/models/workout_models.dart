@@ -99,6 +99,12 @@ class Workout {
   String? color; // Цвет тренировки например "#F97316"
   String? pausedAt; // Время паузы тренировки
   int totalPausedSeconds; // Общее количество секунд, проведенных на паузе
+  String? programId; // Идентификатор программы, если тренировка связана с программой
+  String? programWorkoutName; // Название тренировки в программе, если применимо
+  // Название самой программы на момент создания тренировки — сохраняем "снимок",
+  // а не ищем программу заново по ID каждый раз. Так бейдж в истории останется
+  // корректным даже если позже программу переименуют или удалят.
+  String? programName;
   List<String> muscleGroups; // Группы мышц например ["chest", "back"]
   List<Exercise> exercises; // Упражнения в тренировке
 
@@ -117,6 +123,9 @@ class Workout {
     this.totalPausedSeconds = 0,
     List<String>? muscleGroups,
     List<Exercise>? exercises,
+    this.programId,
+    this.programWorkoutName,
+    this.programName,
   }) : exercises = exercises ?? [], // Инициализация пустым списком, если не передан
       muscleGroups = muscleGroups ?? []; // Инициализация пустым списком, если не передан
 
@@ -135,6 +144,9 @@ class Workout {
     'color': color,
     'pausedAt': pausedAt,
     'totalPausedSeconds': totalPausedSeconds,
+    'programId': programId,
+    'programWorkoutName': programWorkoutName,
+    'programName': programName,
     'muscleGroups': muscleGroups,
   };
 
@@ -152,6 +164,9 @@ class Workout {
     color: json['color'],
     pausedAt: json['pausedAt'],
     totalPausedSeconds: json['totalPausedSeconds'] ?? 0,
+    programId: json['programId'],
+    programWorkoutName: json['programWorkoutName'],
+    programName: json['programName'],
     muscleGroups: (json['muscleGroups'] as List?)
     ?.map((e) => e.toString())
     .toList() ?? [],

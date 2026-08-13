@@ -232,7 +232,8 @@
   "exercises": "EXERCISES",
   "sets_short": "sets",
   "day_name_required": "Enter a day name",
-  "not_found": "Program not found"
+  "not_found": "Program not found",
+  "last_done": "Last done"
 }
 
 }

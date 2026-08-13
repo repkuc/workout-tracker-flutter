@@ -232,7 +232,8 @@
   "exercises": "VINGROJUMI",
   "sets_short": "pieej.",
   "day_name_required": "Ievadiet dienas nosaukumu",
-  "not_found": "Programma nav atrasta"
+  "not_found": "Programma nav atrasta",
+  "last_done": "Pēdējoreiz"
 }
 
 }

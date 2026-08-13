@@ -37,8 +37,8 @@ class _HistoryPageState extends State<HistoryPage> {
 
   @override
   void dispose() {
-  _service.dataChanged.removeListener(_loadWorkouts);
-  super.dispose();
+    _service.dataChanged.removeListener(_loadWorkouts);
+    super.dispose();
   }
 
   Future<void> _loadWorkouts() async {
@@ -69,12 +69,14 @@ class _HistoryPageState extends State<HistoryPage> {
   String _formatDuration(int seconds) {
     final h = seconds ~/ 3600;
     final m = (seconds % 3600) ~/ 60;
-    if (h > 0) return '$h${'workout.hours_short'.tr()} $m${'workout.minutes_short'.tr()}';
+    if (h > 0)
+      return '$h${'workout.hours_short'.tr()} $m${'workout.minutes_short'.tr()}';
     return '$m${'workout.minutes_short'.tr()}';
   }
 
   String _formatVolume(double kg) {
-    if (kg >= 10000) return '${(kg / 1000).toStringAsFixed(1)}${'workout.t'.tr()}';
+    if (kg >= 10000)
+      return '${(kg / 1000).toStringAsFixed(1)}${'workout.t'.tr()}';
     if (kg >= 1000) return '${kg.toStringAsFixed(0)}${'workout.kg'.tr()}';
     return '${kg.toStringAsFixed(1)}${'workout.kg'.tr()}';
   }
@@ -89,7 +91,9 @@ class _HistoryPageState extends State<HistoryPage> {
             _buildHeader(),
             Expanded(
               child: _isLoading
-                  ? const Center(child: CircularProgressIndicator(color: Color(0xFFF97316)))
+                  ? const Center(
+                      child:
+                          CircularProgressIndicator(color: Color(0xFFF97316)))
                   : _workouts.isEmpty
                       ? _buildEmptyState()
                       : _buildWorkoutsList(),
@@ -116,7 +120,8 @@ class _HistoryPageState extends State<HistoryPage> {
           const SizedBox(width: 10),
           Text(
             'history.title'.tr(),
-            style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+            style: const TextStyle(
+                color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
           ),
         ],
       ),
@@ -134,12 +139,15 @@ class _HistoryPageState extends State<HistoryPage> {
               color: const Color(0xFFF97316).withOpacity(0.1),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.history, size: 56, color: Color(0xFFF97316)),
+            child:
+                const Icon(Icons.history, size: 56, color: Color(0xFFF97316)),
           ),
           const SizedBox(height: 16),
-          Text('history.no_workouts'.tr(), style: const TextStyle(color: Color(0xFF64748B), fontSize: 16)),
+          Text('history.no_workouts'.tr(),
+              style: const TextStyle(color: Color(0xFF64748B), fontSize: 16)),
           const SizedBox(height: 4),
-          Text('history.start_first'.tr(), style: const TextStyle(color: Color(0xFF374151), fontSize: 13)),
+          Text('history.start_first'.tr(),
+              style: const TextStyle(color: Color(0xFF374151), fontSize: 13)),
         ],
       ),
     );
@@ -157,26 +165,47 @@ class _HistoryPageState extends State<HistoryPage> {
     final isDraft = workout.finishedAt == null;
     final color = isDraft ? const Color(0xFFF97316) : _getWorkoutColor(workout);
 
-    final totalSets = workout.exercises.fold<int>(0, (s, e) => s + e.sets.length);
-    final completedSets = workout.exercises.fold<int>(0, (s, e) => s + e.sets.where((set) => set.isDone).length);
-    final totalReps = workout.exercises.fold<int>(0, (s, e) => s + e.sets.where((set) => set.isDone).fold(0, (r, set) => r + set.reps));
-    final totalVolume = workout.exercises.fold<double>(0, (s, e) => s + e.sets.where((set) => set.isDone).fold(0.0, (v, set) => v + set.weight * set.reps));
+    final totalSets =
+        workout.exercises.fold<int>(0, (s, e) => s + e.sets.length);
+    final completedSets = workout.exercises
+        .fold<int>(0, (s, e) => s + e.sets.where((set) => set.isDone).length);
+    final totalReps = workout.exercises.fold<int>(
+        0,
+        (s, e) =>
+            s +
+            e.sets
+                .where((set) => set.isDone)
+                .fold(0, (r, set) => r + set.reps));
+    final totalVolume = workout.exercises.fold<double>(
+        0,
+        (s, e) =>
+            s +
+            e.sets
+                .where((set) => set.isDone)
+                .fold(0.0, (v, set) => v + set.weight * set.reps));
 
     final dateTime = DateTime.tryParse(workout.finishedAt ?? workout.date);
-    final formattedDate = dateTime != null ? DateFormat('dd.MM.yyyy').format(dateTime) : workout.date;
-    final formattedTime = dateTime != null && workout.finishedAt != null ? DateFormat('HH:mm').format(dateTime) : '';
+    final formattedDate = dateTime != null
+        ? DateFormat('dd.MM.yyyy').format(dateTime)
+        : workout.date;
+    final formattedTime = dateTime != null && workout.finishedAt != null
+        ? DateFormat('HH:mm').format(dateTime)
+        : '';
 
     return GestureDetector(
       onTap: () {
         if (isDraft) {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => WorkoutEditorPage(workoutId: workout.id)),
+            MaterialPageRoute(
+                builder: (context) => WorkoutEditorPage(workoutId: workout.id)),
           ).then((_) => _loadWorkouts());
         } else {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => WorkoutDetailsPage(workoutId: workout.id)),
+            MaterialPageRoute(
+                builder: (context) =>
+                    WorkoutDetailsPage(workoutId: workout.id)),
           );
         }
       },
@@ -208,19 +237,26 @@ class _HistoryPageState extends State<HistoryPage> {
                             Expanded(
                               child: Text(
                                 workout.name,
-                                style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w600),
+                                style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600),
                               ),
                             ),
                             if (isDraft)
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 3),
                                 decoration: BoxDecoration(
                                   color: const Color(0xFFF97316),
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: Text(
                                   'workout.draft'.tr().toUpperCase(),
-                                  style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold),
+                                  style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.bold),
                                 ),
                               )
                             else ...[
@@ -232,17 +268,20 @@ class _HistoryPageState extends State<HistoryPage> {
                                     color: color.withOpacity(0.15),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
-                                  child: Icon(Icons.repeat, color: color, size: 16),
+                                  child: Icon(Icons.repeat,
+                                      color: color, size: 16),
                                 ),
                               ),
                               const SizedBox(width: 6),
                               Container(
                                 padding: const EdgeInsets.all(6),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF10B981).withOpacity(0.15),
+                                  color:
+                                      const Color(0xFF10B981).withOpacity(0.15),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
-                                child: const Icon(Icons.check, color: Color(0xFF10B981), size: 16),
+                                child: const Icon(Icons.check,
+                                    color: Color(0xFF10B981), size: 16),
                               ),
                             ],
                           ],
@@ -253,24 +292,78 @@ class _HistoryPageState extends State<HistoryPage> {
                         // Дата и время
                         Row(
                           children: [
-                            Icon(Icons.calendar_today, color: const Color(0xFF64748B), size: 12),
+                            Icon(Icons.calendar_today,
+                                color: const Color(0xFF64748B), size: 12),
                             const SizedBox(width: 4),
                             Text(
-                              isDraft ? 'history.in_progress'.tr() : formattedDate,
+                              isDraft
+                                  ? 'history.in_progress'.tr()
+                                  : formattedDate,
                               style: TextStyle(
-                                color: isDraft ? color : const Color(0xFF64748B),
+                                color:
+                                    isDraft ? color : const Color(0xFF64748B),
                                 fontSize: 11,
-                                fontWeight: isDraft ? FontWeight.bold : FontWeight.normal,
+                                fontWeight: isDraft
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
                               ),
                             ),
                             if (formattedTime.isNotEmpty && !isDraft) ...[
                               const SizedBox(width: 8),
-                              Icon(Icons.access_time, color: const Color(0xFF64748B), size: 12),
+                              Icon(Icons.access_time,
+                                  color: const Color(0xFF64748B), size: 12),
                               const SizedBox(width: 4),
-                              Text(formattedTime, style: const TextStyle(color: Color(0xFF64748B), fontSize: 11)),
+                              Text(formattedTime,
+                                  style: const TextStyle(
+                                      color: Color(0xFF64748B), fontSize: 11)),
                             ],
                           ],
                         ),
+
+                        // Бейдж "из программы" — показываем только если у тренировки
+                        // есть programId (значит она была создана из шаблона программы).
+                        // Это чисто информационный бейдж — не кликабельный, просто
+                        // показывает контекст откуда взялась эта тренировка.
+                        if (workout.programId != null) ...[
+                          const SizedBox(height: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF818CF8).withOpacity(0.12),
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(
+                                  color:
+                                      const Color(0xFF818CF8).withOpacity(0.4)),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.assignment,
+                                    color: Color(0xFF818CF8), size: 10),
+                                const SizedBox(width: 4),
+                                // Показываем "Название программы · Название дня".
+                                // Если по какой-то причине programName не сохранился
+                                // (например очень старая тренировка) — используем
+                                // только название дня, чтобы не показывать пустоту.
+                                Flexible(
+                                  child: Text(
+                                    workout.programName != null
+                                        ? '${workout.programName} · ${workout.programWorkoutName ?? ''}'
+                                        : workout.programWorkoutName ??
+                                            'programs.title'.tr(),
+                                    style: const TextStyle(
+                                      color: Color(0xFF818CF8),
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
 
                         const SizedBox(height: 10),
                         Divider(height: 1, color: color.withOpacity(0.2)),
@@ -280,12 +373,23 @@ class _HistoryPageState extends State<HistoryPage> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
-                            _buildStat('${workout.exercises.length}', 'history.exercises'.tr(), const Color(0xFFF97316)),
-                            _buildStat('$completedSets/$totalSets', 'history.completed_sets'.tr(), const Color(0xFF10B981)),
-                            _buildStat('$totalReps', 'history.reps'.tr(), const Color(0xFF818CF8)),
-                            _buildStat(_formatVolume(totalVolume), 'history.volume'.tr(), const Color(0xFF34D399)),
+                            _buildStat(
+                                '${workout.exercises.length}',
+                                'history.exercises'.tr(),
+                                const Color(0xFFF97316)),
+                            _buildStat(
+                                '$completedSets/$totalSets',
+                                'history.completed_sets'.tr(),
+                                const Color(0xFF10B981)),
+                            _buildStat('$totalReps', 'history.reps'.tr(),
+                                const Color(0xFF818CF8)),
+                            _buildStat(_formatVolume(totalVolume),
+                                'history.volume'.tr(), const Color(0xFF34D399)),
                             if (workout.duration != null)
-                              _buildStat(_formatDuration(workout.duration!), 'workout.duration'.tr(), const Color(0xFF60A5FA)),
+                              _buildStat(
+                                  _formatDuration(workout.duration!),
+                                  'workout.duration'.tr(),
+                                  const Color(0xFF60A5FA)),
                           ],
                         ),
                       ],
@@ -306,9 +410,15 @@ class _HistoryPageState extends State<HistoryPage> {
         children: [
           FittedBox(
             fit: BoxFit.scaleDown,
-            child: Text(value, style: TextStyle(color: color, fontSize: 13, fontWeight: FontWeight.bold)),
+            child: Text(value,
+                style: TextStyle(
+                    color: color, fontSize: 13, fontWeight: FontWeight.bold)),
           ),
-          Text(label, style: const TextStyle(color: Color(0xFF64748B), fontSize: 9), maxLines: 1, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center),
+          Text(label,
+              style: const TextStyle(color: Color(0xFF64748B), fontSize: 9),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center),
         ],
       ),
     );
@@ -327,13 +437,17 @@ class _HistoryPageState extends State<HistoryPage> {
         contentPadding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
         actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
         title: Text('workout.repeat_workout_confirm'.tr(),
-            style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+            style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.bold)),
         content: Text('workout.repeat_workout_message'.tr(),
             style: const TextStyle(color: Color(0xFF64748B), fontSize: 13)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text('workout.cancel'.tr(), style: const TextStyle(color: Color(0xFF64748B))),
+            child: Text('workout.cancel'.tr(),
+                style: const TextStyle(color: Color(0xFF64748B))),
           ),
           ElevatedButton.icon(
             onPressed: () => Navigator.pop(context, true),
@@ -356,11 +470,15 @@ class _HistoryPageState extends State<HistoryPage> {
       final newWorkout = await _service.copyWorkout(workoutId);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('workout.workout_copied'.tr()), backgroundColor: const Color(0xFF10B981)),
+          SnackBar(
+              content: Text('workout.workout_copied'.tr()),
+              backgroundColor: const Color(0xFF10B981)),
         );
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => WorkoutEditorPage(workoutId: newWorkout.id)),
+          MaterialPageRoute(
+              builder: (context) =>
+                  WorkoutEditorPage(workoutId: newWorkout.id)),
         ).then((_) => _loadWorkouts());
       }
     } catch (e) {
@@ -377,7 +495,8 @@ class _HistoryPageState extends State<HistoryPage> {
       context: context,
       backgroundColor: const Color(0xFF1E293B),
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+        borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(20), topRight: Radius.circular(20)),
       ),
       builder: (context) => SafeArea(
         child: Column(
@@ -387,22 +506,36 @@ class _HistoryPageState extends State<HistoryPage> {
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-                  const Icon(Icons.fitness_center, color: Color(0xFFF97316), size: 20),
+                  const Icon(Icons.fitness_center,
+                      color: Color(0xFFF97316), size: 20),
                   const SizedBox(width: 12),
-                  Expanded(child: Text(workout.name, style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold))),
+                  Expanded(
+                      child: Text(workout.name,
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold))),
                 ],
               ),
             ),
             const Divider(height: 1, color: Color(0xFF0F172A)),
             ListTile(
               leading: const Icon(Icons.repeat, color: Color(0xFFF97316)),
-              title: Text('history.repeat'.tr(), style: const TextStyle(color: Colors.white)),
-              onTap: () { Navigator.pop(context); _showRepeatWorkoutDialog(workout); },
+              title: Text('history.repeat'.tr(),
+                  style: const TextStyle(color: Colors.white)),
+              onTap: () {
+                Navigator.pop(context);
+                _showRepeatWorkoutDialog(workout);
+              },
             ),
             ListTile(
               leading: const Icon(Icons.delete, color: Colors.red),
-              title: Text('workout.delete_workout'.tr(), style: const TextStyle(color: Colors.white)),
-              onTap: () { Navigator.pop(context); _showDeleteWorkoutDialog(workout); },
+              title: Text('workout.delete_workout'.tr(),
+                  style: const TextStyle(color: Colors.white)),
+              onTap: () {
+                Navigator.pop(context);
+                _showDeleteWorkoutDialog(workout);
+              },
             ),
             const SizedBox(height: 8),
           ],
@@ -424,17 +557,22 @@ class _HistoryPageState extends State<HistoryPage> {
         contentPadding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
         actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
         title: Text('workout.delete_workout_confirm'.tr(),
-            style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+            style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.bold)),
         content: Text('workout.delete_workout_message'.tr(),
             style: const TextStyle(color: Color(0xFF64748B), fontSize: 13)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text('workout.cancel'.tr(), style: const TextStyle(color: Color(0xFF64748B))),
+            child: Text('workout.cancel'.tr(),
+                style: const TextStyle(color: Color(0xFF64748B))),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
+            style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red, foregroundColor: Colors.white),
             child: Text('workout.delete'.tr()),
           ),
         ],
@@ -444,11 +582,11 @@ class _HistoryPageState extends State<HistoryPage> {
   }
 
   Color _getWorkoutColor(Workout workout) {
-  if (workout.color != null && workout.color!.isNotEmpty) {
-    return Color(int.parse('0xFF${workout.color!.substring(1)}'));
+    if (workout.color != null && workout.color!.isNotEmpty) {
+      return Color(int.parse('0xFF${workout.color!.substring(1)}'));
+    }
+    return _nameColors[workout.name] ?? const Color(0xFFF97316);
   }
-  return _nameColors[workout.name] ?? const Color(0xFFF97316);
-}
 
   Future<void> _deleteWorkout(String workoutId) async {
     final success = await _service.deleteWorkout(workoutId);
@@ -456,7 +594,9 @@ class _HistoryPageState extends State<HistoryPage> {
       await _loadWorkouts();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('workout.workout_deleted'.tr()), backgroundColor: Colors.red),
+          SnackBar(
+              content: Text('workout.workout_deleted'.tr()),
+              backgroundColor: Colors.red),
         );
       }
     }

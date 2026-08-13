@@ -388,13 +388,13 @@ class _HomePageState extends State<HomePage> {
   }
 
   // Получить цвет тренировки — из модели или автоматически
-Color _getWorkoutColor(Workout workout) {
-  if (workout.color != null && workout.color!.isNotEmpty) {
-    return Color(int.parse('0xFF${workout.color!.substring(1)}'));
+  Color _getWorkoutColor(Workout workout) {
+    if (workout.color != null && workout.color!.isNotEmpty) {
+      return Color(int.parse('0xFF${workout.color!.substring(1)}'));
+    }
+    // Запасной вариант для старых тренировок без цвета
+    return _nameColors[workout.name] ?? const Color(0xFFF97316);
   }
-  // Запасной вариант для старых тренировок без цвета
-  return _nameColors[workout.name] ?? const Color(0xFFF97316);
-}
 
   // Календарь с днями тренировок
   Widget _buildCalendar() {
@@ -497,9 +497,8 @@ Color _getWorkoutColor(Workout workout) {
 
                 final workout = _workoutByDate[dateStr];
                 final hasWorkout = workout != null;
-                final workoutColor = hasWorkout
-                    ? _getWorkoutColor(workout)
-                    : null;
+                final workoutColor =
+                    hasWorkout ? _getWorkoutColor(workout) : null;
 
                 return GestureDetector(
                   onTap:
@@ -978,6 +977,48 @@ Color _getWorkoutColor(Workout workout) {
                 workout.date,
                 style: const TextStyle(color: Color(0xFF64748B), fontSize: 12),
               ),
+
+              // Бейдж "из программы" — такой же как в истории.
+              if (workout.programId != null) ...[
+                const SizedBox(height: 6),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF818CF8).withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(
+                        color: const Color(0xFF818CF8).withOpacity(0.4)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.assignment,
+                          color: Color(0xFF818CF8), size: 10),
+                      const SizedBox(width: 4),
+                      // Показываем "Название программы · Название дня".
+                      // Если по какой-то причине programName не сохранился
+                      // (например очень старая тренировка) — используем
+                      // только название дня, чтобы не показывать пустоту.
+                      Flexible(
+                        child: Text(
+                          workout.programName != null
+                              ? '${workout.programName} · ${workout.programWorkoutName ?? ''}'
+                              : workout.programWorkoutName ??
+                                  'programs.title'.tr(),
+                          style: const TextStyle(
+                            color: Color(0xFF818CF8),
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+
               const SizedBox(height: 16),
 
               // Статистика
