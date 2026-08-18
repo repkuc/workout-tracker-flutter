@@ -21,6 +21,7 @@
     "in_progress": "In progress"
   },
   "workout": {
+    "close": "Close",
     "open": "Open",
     "rest_timer": "REST",
     "rest_off": "off",

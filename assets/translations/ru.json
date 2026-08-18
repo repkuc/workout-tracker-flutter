@@ -21,6 +21,7 @@
     "in_progress": "В процессе"
   },
   "workout": {
+    "close": "Закрыть",
     "open": "Открыть",
     "rest_timer": "ОТДЫХ",
     "rest_off": "выкл",

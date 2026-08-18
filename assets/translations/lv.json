@@ -21,6 +21,7 @@
     "in_progress": "Procesā"
   },
   "workout": {
+    "close": "Aizvērt",
     "open": "Atvērt",
     "rest_timer": "ATPŪTA",
     "rest_off": "izsl",

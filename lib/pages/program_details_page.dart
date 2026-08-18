@@ -303,9 +303,14 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
         context,
         MaterialPageRoute(
             builder: (context) => WorkoutEditorPage(workoutId: workout.id)),
-      );
+      ).then((_) => _loadProgram());
+      // .then() гарантированно сработает когда мы вернёмся с экрана
+      // редактора тренировки — надёжнее чем полагаться на didChangeDependencies,
+      // которое не всегда переигрывается при обычном Navigator.pop().
     }
   }
+
+  // Повторить тренировку: берём АКТУАЛЬНЫЙ список упражнений из шаблона программы
 
   // Повторить тренировку: берём АКТУАЛЬНЫЙ список упражнений из шаблона программы
   // (а не из старой тренировки), но для каждого упражнения — если оно
@@ -377,7 +382,7 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
         context,
         MaterialPageRoute(
             builder: (context) => WorkoutEditorPage(workoutId: workout.id)),
-      );
+      ).then((_) => _loadProgram());
     }
   }
 }
