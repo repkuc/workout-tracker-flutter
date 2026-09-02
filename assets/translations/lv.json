@@ -215,6 +215,11 @@
   "sun": "Sv"
 },
 "programs": {
+  "delete_day_confirm": "Dzēst šo dienu?",
+  "edit_program": "Rediģēt programmu",
+  "delete_program": "Dzēst programmu",
+  "delete_confirm": "Dzēst šo programmu?",
+  "delete_message": "Programma tiks neatgriezeniski dzēsta. Jau pabeigtie treniņi paliks vēsturē.",
   "title": "Programmas",
   "no_programs": "Vēl nav programmu",
   "create_first": "Izveido savu pirmo treniņu programmu!",
@@ -235,6 +240,24 @@
   "day_name_required": "Ievadiet dienas nosaukumu",
   "not_found": "Programma nav atrasta",
   "last_done": "Pēdējoreiz"
+},
+"measurements": {
+  "edit_measurement": "Rediģēt mērījumu",
+  "add_measurement": "Pievienot mērījumu",
+  "history": "MĒRĪJUMU VĒSTURE",
+  "no_entries": "Vēl nav mērījumu ierakstu",
+  "neck": "Kakls",
+  "shoulders": "Pleci",
+  "chest": "Krūtis",
+  "waist": "Viduklis",
+  "hips": "Gurni",
+  "bicep": "Bicepss",
+  "forearm": "Apakšdelms",
+  "thigh": "Augšstilbs",
+  "calf": "Ikri",
+  "fill_hint": "Aizpildi tikai tos mērījumus, kurus vēlies saglabāt", 
+  "saved": "Mērījumi saglabāti",
+  "need_more_data": "Nepieciešami vismaz 2 ieraksti diagrammai"
 }
 
 }

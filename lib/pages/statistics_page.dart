@@ -3,6 +3,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'progress_page.dart';
 import '../services/workout_service.dart';
 import '../models/workout_models.dart';
+import 'body_measurements_page.dart'; // Импортируем страницу замеров тела
 
 class StatisticsPage extends StatefulWidget {
   const StatisticsPage({super.key});
@@ -18,7 +19,7 @@ class _StatisticsPageState extends State<StatisticsPage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
   }
 
   @override
@@ -79,13 +80,10 @@ class _StatisticsPageState extends State<StatisticsPage>
                   dividerColor: Colors.transparent,
                   labelColor: Colors.white,
                   unselectedLabelColor: const Color(0xFF64748B),
-                  labelStyle: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  tabs: [
-                    Tab(text: 'statistics.overview'.tr()),
-                    Tab(text: 'statistics.charts'.tr()),
+                  tabs: const [
+                    Tab(icon: Icon(Icons.dashboard, size: 20)),
+                    Tab(icon: Icon(Icons.show_chart, size: 20)),
+                    Tab(icon: Icon(Icons.straighten, size: 20)),
                   ],
                 ),
               ),
@@ -97,11 +95,13 @@ class _StatisticsPageState extends State<StatisticsPage>
             Expanded(
               child: TabBarView(
                 controller: _tabController,
-                children: [
+                children: const [
                   // Таб 1 — Обзор (бывшая статистика)
-                  const _OverviewTab(),
+                   _OverviewTab(),
                   // Таб 2 — Графики (бывший прогресс)
-                  const ProgressPage(),
+                   ProgressPage(),
+                  // Таб 3 — Замеры тела
+                   BodyMeasurementsPage(),
                 ],
               ),
             ),

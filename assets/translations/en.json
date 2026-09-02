@@ -215,6 +215,11 @@
   "sun": "Su"
 },
 "programs": {
+  "delete_day_confirm": "Delete this day?",
+  "edit_program": "Edit program",
+  "delete_program": "Delete program",
+  "delete_confirm": "Delete this program?",
+  "delete_message": "The program will be permanently deleted. Already completed workouts will remain in history.",
   "title": "Programs",
   "no_programs": "No programs yet",
   "create_first": "Create your first training program!",
@@ -235,6 +240,24 @@
   "day_name_required": "Enter a day name",
   "not_found": "Program not found",
   "last_done": "Last done"
+},
+"measurements": {
+  "edit_measurement": "Edit measurement",
+  "add_measurement": "Add measurement",
+  "history": "MEASUREMENT HISTORY",
+  "no_entries": "No measurement entries yet",
+  "neck": "Neck",
+  "shoulders": "Shoulders",
+  "chest": "Chest",
+  "waist": "Waist",
+  "hips": "Hips",
+  "bicep": "Bicep",
+  "forearm": "Forearm",
+  "thigh": "Thigh",
+  "calf": "Calf",
+  "fill_hint": "Fill in only the measurements you want to record", 
+  "saved": "Measurements saved",
+  "need_more_data": "Need at least 2 entries for the chart"
 }
 
 }

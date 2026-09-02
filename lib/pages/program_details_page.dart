@@ -21,6 +21,10 @@ import 'workout_editor_page.dart';
 // Подключаем модели тренировок, чтобы создать Workout и Exercise.
 import '../models/workout_models.dart';
 
+import 'package:uuid/uuid.dart';
+import '../models/exercise_template.dart';
+import 'exercise_picker_page.dart';
+
 class ProgramDetailsPage extends StatefulWidget {
   // Экран получает не саму программу, а только её ID.
   // Это правильный подход — если данные программы изменятся пока
@@ -156,6 +160,14 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
               overflow: TextOverflow.ellipsis,
             ),
           ),
+          // Кнопка меню действий — только для своих программ.
+          // Для готовых программ от нас (isCustom == false) её не будет,
+          // как и планировали заранее.
+          if (_program!.isCustom)
+            GestureDetector(
+              onTap: _showProgramActionsMenu,
+              child: const Icon(Icons.more_vert, color: Colors.white, size: 22),
+            ),
         ],
       ),
     );
@@ -191,9 +203,422 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
     );
   }
 
+  // Показать нижнее меню с действиями над программой: редактировать / удалить.
+  Future<void> _showProgramActionsMenu() async {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF1E293B),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+      ),
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.edit, color: Color(0xFFF97316)),
+              title: Text('programs.edit_program'.tr(),
+                  style: const TextStyle(color: Colors.white)),
+              onTap: () {
+                Navigator.pop(context);
+                _showEditProgramMetaDialog();
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.add, color: Color(0xFFF97316)),
+              title: Text('programs.add_workout_day'.tr(),
+                  style: const TextStyle(color: Colors.white)),
+              onTap: () {
+                Navigator.pop(context);
+                _showAddWorkoutDayToSavedProgram();
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.delete, color: Colors.red),
+              title: Text('programs.delete_program'.tr(),
+                  style: const TextStyle(color: Colors.white)),
+              onTap: () {
+                Navigator.pop(context);
+                _showDeleteProgramDialog();
+              },
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Диалог редактирования названия и расписания программы.
+  Future<void> _showEditProgramMetaDialog() async {
+    final nameController = TextEditingController(text: _program!.name);
+    final scheduleController = TextEditingController(text: _program!.schedule);
+
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF1E293B),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: Color(0xFFF97316), width: 1),
+        ),
+        title: Text(
+          'programs.edit_program'.tr(),
+          style: const TextStyle(
+              color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nameController,
+              autofocus: true,
+              style: const TextStyle(color: Colors.white, fontSize: 14),
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: const Color(0xFF0F172A),
+                hintText: 'programs.program_name_hint'.tr(),
+                hintStyle: const TextStyle(color: Color(0xFF64748B)),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: scheduleController,
+              style: const TextStyle(color: Colors.white, fontSize: 14),
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: const Color(0xFF0F172A),
+                hintText: 'programs.schedule_hint'.tr(),
+                hintStyle: const TextStyle(color: Color(0xFF64748B)),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text('workout.cancel'.tr(),
+                style: const TextStyle(color: Color(0xFF64748B))),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (nameController.text.trim().isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                      content: Text('programs.name_required'.tr()),
+                      backgroundColor: Colors.red),
+                );
+                return;
+              }
+              Navigator.pop(context, true);
+            },
+            child: Text('workout.save'.tr()),
+          ),
+        ],
+      ),
+    );
+
+    if (result == true) {
+      await _programService.updateProgramMeta(
+        widget.programId,
+        name: nameController.text.trim(),
+        schedule: scheduleController.text.trim(),
+      );
+      await _loadProgram();
+    }
+  }
+
+  // Диалог подтверждения удаления программы целиком.
+  Future<void> _showDeleteProgramDialog() async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF1E293B),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: Colors.red, width: 1),
+        ),
+        title: Text(
+          'programs.delete_confirm'.tr(),
+          style: const TextStyle(
+              color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        content: Text(
+          'programs.delete_message'.tr(),
+          style: const TextStyle(color: Color(0xFF64748B), fontSize: 13),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text('workout.cancel'.tr(),
+                style: const TextStyle(color: Color(0xFF64748B))),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red, foregroundColor: Colors.white),
+            child: Text('workout.delete'.tr()),
+          ),
+        ],
+      ),
+    );
+
+    if (result == true) {
+      await _programService.deleteProgram(widget.programId);
+      // После удаления возвращаемся на список программ —
+      // на этом экране больше нечего показывать.
+      if (mounted) Navigator.pop(context);
+    }
+  }
+
+  // Показать диалог добавления нового дня в уже сохранённую программу.
+  // По структуре похож на диалог в create_program_page.dart, но здесь
+  // результат сразу сохраняется через ProgramService, а не держится
+  // в памяти до общего сохранения.
+  Future<void> _showAddWorkoutDayToSavedProgram(
+      {ProgramWorkout? existingWorkout}) async {
+    final dayNameController =
+        TextEditingController(text: existingWorkout?.name ?? '');
+    final List<ProgramExercise> dayExercises =
+        existingWorkout != null ? List.from(existingWorkout.exercises) : [];
+
+    final result = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (dialogContext, setDialogState) => AlertDialog(
+          backgroundColor: const Color(0xFF1E293B),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: const BorderSide(color: Color(0xFFF97316), width: 1),
+          ),
+          title: Text(
+            'programs.new_workout_day'.tr(),
+            style: const TextStyle(
+                color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextField(
+                    controller: dayNameController,
+                    autofocus: true,
+                    style: const TextStyle(color: Colors.white, fontSize: 14),
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: const Color(0xFF0F172A),
+                      hintText: 'programs.day_name_hint'.tr(),
+                      hintStyle: const TextStyle(color: Color(0xFF64748B)),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 10),
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide.none),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  Text(
+                    'programs.exercises'.tr(),
+                    style: const TextStyle(
+                        color: Color(0xFF64748B),
+                        fontSize: 11,
+                        letterSpacing: 1),
+                  ),
+                  const SizedBox(height: 8),
+                  ...dayExercises.map((ex) {
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 6),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 8),
+                      decoration: BoxDecoration(
+                          color: const Color(0xFF0F172A),
+                          borderRadius: BorderRadius.circular(8)),
+                      child: Row(
+                        children: [
+                          Expanded(
+                              child: Text(ex.name,
+                                  style: const TextStyle(
+                                      color: Colors.white, fontSize: 13))),
+                          Text(
+                            '${ex.targetSets} ${'programs.sets_short'.tr()}',
+                            style: const TextStyle(
+                                color: Color(0xFFF97316),
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(width: 8),
+                          GestureDetector(
+                            onTap: () =>
+                                setDialogState(() => dayExercises.remove(ex)),
+                            child: const Icon(Icons.close,
+                                color: Colors.red, size: 16),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                  const SizedBox(height: 8),
+                  GestureDetector(
+                    onTap: () async {
+                      final template = await Navigator.push<ExerciseTemplate>(
+                        dialogContext,
+                        MaterialPageRoute(
+                            builder: (context) => const ExercisePickerPage()),
+                      );
+                      if (template != null) {
+                        final lang = dialogContext.locale.languageCode;
+                        setDialogState(() {
+                          dayExercises.add(ProgramExercise(
+                            name: template.getName(lang),
+                            targetMuscle: template.muscleGroup,
+                            targetSets: 3,
+                          ));
+                        });
+                      }
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF97316).withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                            color: const Color(0xFFF97316).withOpacity(0.4)),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.add,
+                              color: Color(0xFFF97316), size: 16),
+                          const SizedBox(width: 4),
+                          Text('workout.add_exercise'.tr(),
+                              style: const TextStyle(
+                                  color: Color(0xFFF97316),
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold)),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: Text('workout.cancel'.tr(),
+                  style: const TextStyle(color: Color(0xFF64748B))),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (dayNameController.text.trim().isEmpty) {
+                  ScaffoldMessenger.of(dialogContext).showSnackBar(
+                    SnackBar(
+                        content: Text('programs.day_name_required'.tr()),
+                        backgroundColor: Colors.red),
+                  );
+                  return;
+                }
+                Navigator.pop(dialogContext, true);
+              },
+              child: Text('workout.save'.tr()),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (result == true) {
+      if (existingWorkout != null) {
+        // Редактирование существующего дня — сначала удаляем старую версию,
+        // затем добавляем обновлённую. ProgramService не имеет отдельного
+        // метода "обновить день", поэтому используем комбинацию удалить+добавить,
+        // сохраняя тот же id чтобы связь с историей (programWorkoutName)
+        // осталась корректной, если имя дня не поменяли.
+        await _programService.removeWorkoutFromProgram(
+            widget.programId, existingWorkout.id);
+        await _programService.addWorkoutToProgram(
+          widget.programId,
+          ProgramWorkout(
+            id: existingWorkout.id,
+            name: dayNameController.text.trim(),
+            exercises: dayExercises,
+          ),
+        );
+      } else {
+        // Новый день — просто добавляем с новым сгенерированным id.
+        await _programService.addWorkoutToProgram(
+          widget.programId,
+          ProgramWorkout(
+            id: const Uuid().v4(),
+            name: dayNameController.text.trim(),
+            exercises: dayExercises,
+          ),
+        );
+      }
+      await _loadProgram();
+    }
+  }
+
+  // Диалог подтверждения удаления одного дня из программы.
+  Future<void> _showDeleteWorkoutDayDialog(ProgramWorkout workout) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF1E293B),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: Colors.red, width: 1),
+        ),
+        title: Text(
+          'programs.delete_day_confirm'.tr(),
+          style: const TextStyle(
+              color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        content: Text(
+          workout.name,
+          style: const TextStyle(color: Color(0xFF64748B), fontSize: 13),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text('workout.cancel'.tr(),
+                style: const TextStyle(color: Color(0xFF64748B))),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red, foregroundColor: Colors.white),
+            child: Text('workout.delete'.tr()),
+          ),
+        ],
+      ),
+    );
+
+    if (result == true) {
+      await _programService.removeWorkoutFromProgram(
+          widget.programId, workout.id);
+      await _loadProgram();
+    }
+  }
+
   // Карточка одного тренировочного дня с кнопкой "Начать"/"Повторить".
   Widget _buildWorkoutCard(ProgramWorkout workout) {
-    // Проверяем — есть ли для этого дня прошлая тренировка.
     final lastWorkout = _lastWorkoutsByDay[workout.name];
     final hasHistory = lastWorkout != null;
 
@@ -208,10 +633,37 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            workout.name,
-            style: const TextStyle(
-                color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  workout.name,
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold),
+                ),
+              ),
+              // Кнопки редактирования/удаления дня — только для своих программ.
+              if (_program!.isCustom) ...[
+                GestureDetector(
+                  onTap: () => _showAddWorkoutDayToSavedProgram(
+                      existingWorkout: workout),
+                  child: const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 4),
+                    child: Icon(Icons.edit, color: Color(0xFFF97316), size: 16),
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () => _showDeleteWorkoutDayDialog(workout),
+                  child: const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 4),
+                    child:
+                        Icon(Icons.delete_outline, color: Colors.red, size: 16),
+                  ),
+                ),
+              ],
+            ],
           ),
           const SizedBox(height: 4),
           Text(
