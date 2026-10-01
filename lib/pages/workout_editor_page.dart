@@ -234,12 +234,10 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Scaffold(
       // Градиентный фон
       body: Container(
-        color: isDark ? const Color(0xFF1F2937) : const Color(0xFF374151),
+        color: const Color(0xFF0F172A),
         child: SafeArea(
           child: _isLoading
               ? const Center(
@@ -279,7 +277,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
       decoration: BoxDecoration(
-        color: const Color(0xFF1F2937).withOpacity(0.8),
+        color: const Color(0xFF1E293B).withOpacity(0.8),
         border: Border(
           bottom: BorderSide(
             color: const Color(0xFFF97316).withOpacity(0.3),
@@ -312,8 +310,8 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                     ),
                     Text(
                       _workout?.date ?? '',
-                      style: TextStyle(
-                        color: Colors.grey[400],
+                      style: const TextStyle(
+                        color: Color(0xFF64748B),
                         fontSize: 10,
                       ),
                     ),
@@ -480,8 +478,8 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                                     Flexible(
                                       child: Text(
                                         _formatVolume(previousVolume),
-                                        style: TextStyle(
-                                          color: Colors.grey[500],
+                                        style: const TextStyle(
+                                          color: Color(0xFF64748B),
                                           fontSize: 10,
                                           decoration:
                                               TextDecoration.lineThrough,
@@ -641,8 +639,8 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
             // Текст
             Text(
               'workout.no_exercises'.tr(),
-              style: TextStyle(
-                color: Colors.grey[400],
+              style: const TextStyle(
+                color: Color(0xFF64748B),
                 fontSize: 18,
                 fontWeight: FontWeight.w500,
               ),
@@ -650,8 +648,8 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
             const SizedBox(height: 8),
             Text(
               'workout.add_first_exercise'.tr(),
-              style: TextStyle(
-                color: Colors.grey[500],
+              style: const TextStyle(
+                color: Color(0xFF64748B),
                 fontSize: 14,
               ),
               textAlign: TextAlign.center,
@@ -682,12 +680,10 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
 
   // Карточка одного упражнения (сворачиваемая)
   Widget _buildExerciseCard(Exercise exercise) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 2,
-      color: isDark ? const Color(0xFF1F2937) : const Color(0xFF374151),
+      color: const Color(0xFF1E293B),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
@@ -761,8 +757,8 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                   const SizedBox(width: 4),
                   Text(
                     exercise.targetMuscle,
-                    style: TextStyle(
-                      color: Colors.grey[400],
+                    style: const TextStyle(
+                      color: Color(0xFF64748B),
                       fontSize: 10,
                     ),
                   ),
@@ -819,8 +815,8 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                               Flexible(
                                 child: Text(
                                   _formatVolume(previousVolume),
-                                  style: TextStyle(
-                                    color: Colors.grey[500],
+                                  style: const TextStyle(
+                                    color: Color(0xFF64748B),
                                     fontSize: 11,
                                     decoration: TextDecoration.lineThrough,
                                   ),
@@ -878,8 +874,8 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                               const SizedBox(width: 8),
                               Text(
                                 '${'workout.volume'.tr()}: ',
-                                style: TextStyle(
-                                  color: Colors.grey[400],
+                                style: const TextStyle(
+                                  color: Color(0xFF64748B),
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -964,7 +960,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                           'workout.add_one_more'.tr(),
                           style: TextStyle(
                             color: exercise.sets.isEmpty
-                                ? Colors.grey
+                                ? const Color(0xFF64748B)
                                 : const Color(0xFF10B981),
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
@@ -1252,12 +1248,12 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
-        backgroundColor: const Color(0xFF1F2937),
+        backgroundColor: const Color(0xFF1E293B),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
           side: const BorderSide(
             color: Color(0xFFF97316),
-            width: 2,
+            width: 1,
           ),
         ),
         title: Text(
@@ -1281,9 +1277,9 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
                 filled: true,
-                fillColor: const Color(0xFF374151),
+                fillColor: const Color(0xFF0F172A),
                 hintText: 'workout.reps_hint'.tr(),
-                hintStyle: TextStyle(color: Colors.grey[500]),
+                hintStyle: const TextStyle(color: Color(0xFF64748B)),
                 errorText: repsError,
                 labelText: 'workout.reps'.tr(),
                 labelStyle: const TextStyle(color: Color(0xFFF97316)),
@@ -1306,9 +1302,9 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
                 filled: true,
-                fillColor: const Color(0xFF374151),
+                fillColor: const Color(0xFF0F172A),
                 hintText: 'workout.weight_hint'.tr(),
-                hintStyle: TextStyle(color: Colors.grey[500]),
+                hintStyle: const TextStyle(color: Color(0xFF64748B)),
                 errorText: weightError,
                 labelText: '${'workout.weight'.tr()} (${'workout.kg'.tr()})',
                 labelStyle: const TextStyle(color: Color(0xFFF97316)),
@@ -1331,7 +1327,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
             onPressed: () => Navigator.pop(context, false),
             child: Text(
               'workout.cancel'.tr(),
-              style: TextStyle(color: Colors.grey[400]),
+              style: const TextStyle(color: Color(0xFF64748B)),
             ),
           ),
           // Кнопка "Добавить"
@@ -1434,12 +1430,12 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1F2937),
+        backgroundColor: const Color(0xFF1E293B),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
           side: const BorderSide(
             color: Color(0xFFF97316),
-            width: 2,
+            width: 1,
           ),
         ),
         title: Text(
@@ -1459,9 +1455,9 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
                 filled: true,
-                fillColor: const Color(0xFF374151), // Тёмно-серый фон
+                fillColor: const Color(0xFF0F172A), // Тёмно-серый фон
                 hintText: 'workout.exercise_name_hint'.tr(),
-                hintStyle: TextStyle(color: Colors.grey[500]),
+                hintStyle: const TextStyle(color: Color(0xFF64748B)),
                 prefixIcon: const Icon(
                   Icons.fitness_center,
                   color: Color(0xFFF97316),
@@ -1479,9 +1475,9 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
                 filled: true,
-                fillColor: const Color(0xFF374151), // Тёмно-серый фон
+                fillColor: const Color(0xFF0F172A), // Тёмно-серый фон
                 hintText: 'workout.target_muscle_hint'.tr(),
-                hintStyle: TextStyle(color: Colors.grey[500]),
+                hintStyle: const TextStyle(color: Color(0xFF64748B)),
                 prefixIcon: Icon(
                   Icons.radio_button_checked,
                   color: Colors.grey[500],
@@ -1500,7 +1496,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
             onPressed: () => Navigator.pop(context, false),
             child: Text(
               'workout.cancel'.tr(),
-              style: TextStyle(color: Colors.grey[400]),
+              style: const TextStyle(color: Color(0xFF64748B)),
             ),
           ),
           // Кнопка "Добавить"
@@ -1603,12 +1599,12 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1F2937),
+        backgroundColor: const Color(0xFF1E293B),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
           side: const BorderSide(
             color: Color(0xFFF97316),
-            width: 2,
+            width: 1,
           ),
         ),
         title: Text(
@@ -1628,9 +1624,9 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
                 filled: true,
-                fillColor: const Color(0xFF374151),
+                fillColor: const Color(0xFF0F172A),
                 hintText: 'workout.exercise_name_hint'.tr(),
-                hintStyle: TextStyle(color: Colors.grey[500]),
+                hintStyle: const TextStyle(color: Color(0xFF64748B)),
                 prefixIcon: const Icon(
                   Icons.fitness_center,
                   color: Color(0xFFF97316),
@@ -1648,9 +1644,9 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
                 filled: true,
-                fillColor: const Color(0xFF374151),
+                fillColor: const Color(0xFF0F172A),
                 hintText: 'workout.target_muscle_hint'.tr(),
-                hintStyle: TextStyle(color: Colors.grey[500]),
+                hintStyle: const TextStyle(color: Color(0xFF64748B)),
                 prefixIcon: Icon(
                   Icons.radio_button_checked,
                   color: Colors.grey[500],
@@ -1669,7 +1665,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
             onPressed: () => Navigator.pop(context, false),
             child: Text(
               'workout.cancel'.tr(),
-              style: TextStyle(color: Colors.grey[400]),
+              style: const TextStyle(color: Color(0xFF64748B)),
             ),
           ),
           // Кнопка "Сохранить"
@@ -1775,12 +1771,12 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1F2937),
+        backgroundColor: const Color(0xFF1E293B),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
           side: const BorderSide(
             color: Colors.red,
-            width: 2,
+            width: 1,
           ),
         ),
         title: Row(
@@ -1808,8 +1804,8 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
           children: [
             Text(
               'workout.delete_set_message'.tr(),
-              style: TextStyle(
-                color: Colors.grey[400],
+              style: const TextStyle(
+                color: Color(0xFF64748B),
                 fontSize: 14,
               ),
             ),
@@ -1864,7 +1860,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
             onPressed: () => Navigator.pop(context, false),
             child: Text(
               'workout.cancel'.tr(),
-              style: TextStyle(color: Colors.grey[400]),
+              style: const TextStyle(color: Color(0xFF64748B)),
             ),
           ),
           // Кнопка "Удалить" (красная)
@@ -1915,7 +1911,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
       Exercise exercise, WorkoutSet set, int setNumber) async {
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF1F2937),
+      backgroundColor: const Color(0xFF1E293B),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(20),
@@ -1974,7 +1970,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
               title: Text(
                 'workout.edit_set'.tr(),
                 style: TextStyle(
-                  color: set.isDone ? Colors.grey : Colors.white,
+                  color: set.isDone ? const Color(0xFF64748B) : Colors.white,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -1982,7 +1978,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                   ? Text(
                       'workout.cannot_edit_completed'.tr(),
                       style: const TextStyle(
-                        color: Colors.grey,
+                        color: Color(0xFF64748B),
                         fontSize: 12,
                       ),
                     )
@@ -2037,10 +2033,10 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
-        backgroundColor: const Color(0xFF1F2937),
+        backgroundColor: const Color(0xFF1E293B),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: Color(0xFFF97316), width: 2),
+          side: const BorderSide(color: Color(0xFFF97316), width: 1),
         ),
         titlePadding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
         contentPadding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
@@ -2091,7 +2087,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
               style: const TextStyle(color: Colors.white, fontSize: 14),
               decoration: InputDecoration(
                 filled: true,
-                fillColor: const Color(0xFF374151),
+                fillColor: const Color(0xFF0F172A),
                 labelText: 'workout.reps'.tr(),
                 labelStyle:
                     const TextStyle(color: Color(0xFFF97316), fontSize: 12),
@@ -2114,7 +2110,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
               style: const TextStyle(color: Colors.white, fontSize: 14),
               decoration: InputDecoration(
                 filled: true,
-                fillColor: const Color(0xFF374151),
+                fillColor: const Color(0xFF0F172A),
                 labelText: '${'workout.weight'.tr()} (${'workout.kg'.tr()})',
                 labelStyle:
                     const TextStyle(color: Color(0xFFF97316), fontSize: 12),
@@ -2140,7 +2136,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
             ),
             child: Text(
               'workout.cancel'.tr(),
-              style: TextStyle(color: Colors.grey[400], fontSize: 13),
+              style: const TextStyle(color: Color(0xFF64748B), fontSize: 13),
             ),
           ),
           ElevatedButton(
@@ -2292,12 +2288,12 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1F2937),
+        backgroundColor: const Color(0xFF1E293B),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
           side: const BorderSide(
             color: Color(0xFF10B981), // ← Зелёная рамка (успех)
-            width: 2,
+            width: 1,
           ),
         ),
         insetPadding: const EdgeInsets.symmetric(horizontal: 16),
@@ -2326,8 +2322,8 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
           children: [
             Text(
               'workout.finish_workout_message'.tr(),
-              style: TextStyle(
-                color: Colors.grey[400],
+              style: const TextStyle(
+                color: Color(0xFF64748B),
                 fontSize: 14,
               ),
             ),
@@ -2392,7 +2388,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
             onPressed: () => Navigator.pop(context, false),
             child: Text(
               'workout.cancel'.tr(),
-              style: TextStyle(color: Colors.grey[400]),
+              style: const TextStyle(color: Color(0xFF64748B)),
             ),
           ),
           // Кнопка "Завершить" (зелёная)
@@ -2447,19 +2443,19 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1F2937),
+        backgroundColor: const Color(0xFF1E293B),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
           side: const BorderSide(
-            color: Colors.orange,
-            width: 2,
+            color: Color(0xFFF97316),
+            width: 1,
           ),
         ),
         title: Row(
           children: [
             const Icon(
               Icons.warning_rounded,
-              color: Colors.orange,
+              color: Color(0xFFF97316),
               size: 28,
             ),
             const SizedBox(width: 12),
@@ -2480,8 +2476,8 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
           children: [
             Text(
               'workout.incomplete_exercises_warning'.tr(),
-              style: TextStyle(
-                color: Colors.grey[400],
+              style: const TextStyle(
+                color: Color(0xFF64748B),
                 fontSize: 14,
               ),
             ),
@@ -2503,7 +2499,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                         children: [
                           const Icon(
                             Icons.fitness_center,
-                            color: Colors.orange,
+                            color: Color(0xFFF97316),
                             size: 16,
                           ),
                           const SizedBox(width: 8),
@@ -2522,8 +2518,8 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                                 const SizedBox(height: 2),
                                 Text(
                                   item['issue'],
-                                  style: TextStyle(
-                                    color: Colors.grey[400],
+                                  style: const TextStyle(
+                                    color: Color(0xFF64748B),
                                     fontSize: 12,
                                   ),
                                 ),
@@ -2572,8 +2568,8 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
         const SizedBox(width: 8),
         Text(
           label,
-          style: TextStyle(
-            color: Colors.grey[400],
+          style: const TextStyle(
+            color: Color(0xFF64748B),
             fontSize: 14,
           ),
         ),
@@ -2616,8 +2612,8 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
               children: [
                 Text(
                   label,
-                  style: TextStyle(
-                    color: Colors.grey[400],
+                  style: const TextStyle(
+                    color: Color(0xFF64748B),
                     fontSize: 12,
                   ),
                 ),
@@ -2627,8 +2623,8 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                     if (previous != null) ...[
                       Text(
                         '$previous',
-                        style: TextStyle(
-                          color: Colors.grey[500],
+                        style: const TextStyle(
+                          color: Color(0xFF64748B),
                           fontSize: 10,
                           decoration: TextDecoration.lineThrough,
                         ),
@@ -2700,8 +2696,8 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
               children: [
                 Text(
                   'workout.total_volume_short'.tr(),
-                  style: TextStyle(
-                    color: Colors.grey[400],
+                  style: const TextStyle(
+                    color: Color(0xFF64748B),
                     fontSize: 12,
                   ),
                 ),
@@ -2714,8 +2710,8 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                           _formatVolume(previous)
                               .replaceAll(' ${'workout.kg'.tr()}', '')
                               .replaceAll(' ${'workout.t'.tr()}', ''),
-                          style: TextStyle(
-                            color: Colors.grey[500],
+                          style: const TextStyle(
+                            color: Color(0xFF64748B),
                             fontSize: 12,
                             decoration: TextDecoration.lineThrough,
                           ),
@@ -2797,8 +2793,8 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
               children: [
                 Text(
                   'workout.duration'.tr(),
-                  style: TextStyle(
-                    color: Colors.grey[400],
+                  style: const TextStyle(
+                    color: Color(0xFF64748B),
                     fontSize: 12,
                   ),
                 ),
@@ -2808,8 +2804,8 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                     if (previousSeconds != null) ...[
                       Text(
                         _formatDuration(previousSeconds),
-                        style: TextStyle(
-                          color: Colors.grey[500],
+                        style: const TextStyle(
+                          color: Color(0xFF64748B),
                           fontSize: 16,
                           decoration: TextDecoration.lineThrough,
                         ),
@@ -2915,12 +2911,12 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1F2937),
+        backgroundColor: const Color(0xFF1E293B),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
           side: const BorderSide(
             color: Color(0xFFF97316),
-            width: 2,
+            width: 1,
           ),
         ),
         title: Text(
@@ -2955,9 +2951,9 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
                 filled: true,
-                fillColor: const Color(0xFF374151),
+                fillColor: const Color(0xFF0F172A),
                 hintText: 'workout.workout_name_hint'.tr(),
-                hintStyle: TextStyle(color: Colors.grey[500]),
+                hintStyle: const TextStyle(color: Color(0xFF64748B)),
                 prefixIcon: const Icon(
                   Icons.fitness_center,
                   color: Color(0xFFF97316),
@@ -2976,7 +2972,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
             onPressed: () => Navigator.pop(context, false),
             child: Text(
               'workout.cancel'.tr(),
-              style: TextStyle(color: Colors.grey[400]),
+              style: const TextStyle(color: Color(0xFF64748B)),
             ),
           ),
           // Кнопка "Сохранить"
