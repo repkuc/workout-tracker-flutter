@@ -40,6 +40,16 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
   int _restDuration = 120; // Длительность паузы в секундах (например, 2 минуты)
   Timer? _restTimer; // Таймер для паузы
 
+  // Ключ блока нижних кнопок — по нему узнаём его реальную высоту для отступа SnackBar
+  final _bottomButtonsKey = GlobalKey();
+
+  // Отступ для SnackBar, чтобы он появлялся над нижними кнопками, а не перекрывал их.
+  // Высоту берём у отрисованного блока (учитывает размер шрифта и т.п.), 120 — запасной вариант.
+  EdgeInsets _snackBarMargin() {
+    final buttonsHeight = _bottomButtonsKey.currentContext?.size?.height ?? 120;
+    return EdgeInsets.fromLTRB(15, 5, 15, buttonsHeight + 10);
+  }
+
   // Контроллеры для формы добавления упражнения
   final _exerciseNameController = TextEditingController();
   final _targetMuscleController = TextEditingController();
@@ -1190,6 +1200,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                   ),
                   backgroundColor: const Color(0xFF1E293B),
                   behavior: SnackBarBehavior.floating,
+                  margin: _snackBarMargin(),
                   duration: const Duration(seconds: 3),
                 ),
               );
@@ -1209,6 +1220,8 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
           SnackBar(
             content: Text('workout.workout_started'.tr()),
             backgroundColor: const Color(0xFF10B981),
+            behavior: SnackBarBehavior.floating,
+            margin: _snackBarMargin(),
             duration: const Duration(seconds: 2),
           ),
         );
@@ -1231,9 +1244,14 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
     _repsController.clear();
     _weightController.clear();
 
+    // Ошибки валидации показываем прямо под полями (SnackBar рисовался бы за фоном диалога)
+    String? repsError;
+    String? weightError;
+
     final result = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
         backgroundColor: const Color(0xFF1F2937),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
@@ -1249,7 +1267,10 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        content: Column(
+        // Прокрутка — чтобы при открытой клавиатуре на низком экране
+        // (например, складные телефоны) поля не наезжали на кнопки
+        content: SingleChildScrollView(
+          child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             // Поле "Повторы"
@@ -1263,6 +1284,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                 fillColor: const Color(0xFF374151),
                 hintText: 'workout.reps_hint'.tr(),
                 hintStyle: TextStyle(color: Colors.grey[500]),
+                errorText: repsError,
                 labelText: 'workout.reps'.tr(),
                 labelStyle: const TextStyle(color: Color(0xFFF97316)),
                 prefixIcon: const Icon(
@@ -1287,6 +1309,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                 fillColor: const Color(0xFF374151),
                 hintText: 'workout.weight_hint'.tr(),
                 hintStyle: TextStyle(color: Colors.grey[500]),
+                errorText: weightError,
                 labelText: '${'workout.weight'.tr()} (${'workout.kg'.tr()})',
                 labelStyle: const TextStyle(color: Color(0xFFF97316)),
                 prefixIcon: const Icon(
@@ -1300,6 +1323,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
               ),
             ),
           ],
+          ),
         ),
         actions: [
           // Кнопка "Отмена"
@@ -1313,35 +1337,25 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
           // Кнопка "Добавить"
           ElevatedButton(
             onPressed: () {
-              // Проверка повторов
+              // Проверка повторов и веса — ошибки показываем под полями
               final reps = int.tryParse(_repsController.text.trim());
-              if (reps == null || reps <= 0) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('workout.reps_required'.tr()),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-                return;
-              }
-
-              // Проверка веса
               final weight = double.tryParse(_weightController.text.trim());
-              if (weight == null || weight < 0) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('workout.weight_required'.tr()),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-                return;
-              }
+              setDialogState(() {
+                repsError = (reps == null || reps <= 0)
+                    ? 'workout.reps_required'.tr()
+                    : null;
+                weightError = (weight == null || weight < 0)
+                    ? 'workout.weight_required'.tr()
+                    : null;
+              });
+              if (repsError != null || weightError != null) return;
 
               Navigator.pop(context, true);
             },
             child: Text('workout.add_set_button'.tr()),
           ),
         ],
+      ),
       ),
     );
 
@@ -1403,6 +1417,8 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
             content: Text(
                 '${'workout.add_set_button'.tr()}! $reps × $weight ${'workout.kg'.tr()}'),
             backgroundColor: const Color(0xFF10B981),
+            behavior: SnackBarBehavior.floating,
+            margin: _snackBarMargin(),
           ),
         );
       }
@@ -2013,9 +2029,14 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
     _repsController.text = set.reps.toString();
     _weightController.text = set.weight.toString();
 
+    // Ошибки валидации показываем прямо под полями (SnackBar рисовался бы за фоном диалога)
+    String? repsError;
+    String? weightError;
+
     final result = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
         backgroundColor: const Color(0xFF1F2937),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
@@ -2032,7 +2053,10 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        content: Column(
+        // Прокрутка — чтобы при открытой клавиатуре на низком экране
+        // (например, складные телефоны) поля не наезжали на кнопки
+        content: SingleChildScrollView(
+          child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
@@ -2071,6 +2095,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                 labelText: 'workout.reps'.tr(),
                 labelStyle:
                     const TextStyle(color: Color(0xFFF97316), fontSize: 12),
+                errorText: repsError,
                 prefixIcon: const Icon(Icons.repeat,
                     color: Color(0xFFF97316), size: 16),
                 contentPadding:
@@ -2093,6 +2118,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                 labelText: '${'workout.weight'.tr()} (${'workout.kg'.tr()})',
                 labelStyle:
                     const TextStyle(color: Color(0xFFF97316), fontSize: 12),
+                errorText: weightError,
                 prefixIcon: const Icon(Icons.fitness_center,
                     color: Color(0xFFF97316), size: 16),
                 contentPadding:
@@ -2104,6 +2130,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
               ),
             ),
           ],
+          ),
         ),
         actions: [
           TextButton(
@@ -2118,26 +2145,18 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
           ),
           ElevatedButton(
             onPressed: () {
+              // Проверка повторов и веса — ошибки показываем под полями
               final reps = int.tryParse(_repsController.text.trim());
-              if (reps == null || reps <= 0) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('workout.reps_required'.tr()),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-                return;
-              }
               final weight = double.tryParse(_weightController.text.trim());
-              if (weight == null || weight < 0) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('workout.weight_required'.tr()),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-                return;
-              }
+              setDialogState(() {
+                repsError = (reps == null || reps <= 0)
+                    ? 'workout.reps_required'.tr()
+                    : null;
+                weightError = (weight == null || weight < 0)
+                    ? 'workout.weight_required'.tr()
+                    : null;
+              });
+              if (repsError != null || weightError != null) return;
               Navigator.pop(context, true);
             },
             style: ElevatedButton.styleFrom(
@@ -2147,6 +2166,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
             child: Text('workout.save'.tr()),
           ),
         ],
+      ),
       ),
     );
 
@@ -2178,6 +2198,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
             content: Text('workout.set_updated'.tr()),
             backgroundColor: const Color(0xFF10B981), // ← Зелёный (успех)
             behavior: SnackBarBehavior.floating,
+            margin: _snackBarMargin(),
             duration: const Duration(seconds: 2),
           ),
         );
@@ -3014,6 +3035,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
     final isStarted = _workout?.startedAt != null;
 
     return Container(
+      key: _bottomButtonsKey,
       padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
       decoration: BoxDecoration(
         color: const Color(0xFF0F172A),
