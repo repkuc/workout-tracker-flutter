@@ -567,7 +567,7 @@ class _HomePageState extends State<HomePage> {
         const SizedBox(width: 10),
         _buildStatCard(
           icon: Icons.monitor_weight,
-          color: const Color(0xFF34D399),
+          color: const Color(0xFF10B981),
           value: _formatVolume(_totalVolume),
           label: 'workout.total_volume_short'.tr(),
         ),

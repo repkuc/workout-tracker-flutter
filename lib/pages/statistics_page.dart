@@ -239,7 +239,7 @@ class _OverviewTabState extends State<_OverviewTab> {
                   'statistics.total_workouts'.tr(), const Color(0xFFF97316)),
               const SizedBox(width: 8),
               _buildStatCard(Icons.monitor_weight, _formatVolume(_totalVolume),
-                  'statistics.total_volume'.tr(), const Color(0xFF34D399)),
+                  'statistics.total_volume'.tr(), const Color(0xFF10B981)),
               const SizedBox(width: 8),
               _buildStatCard(Icons.repeat, '$_totalReps',
                   'statistics.total_reps'.tr(), const Color(0xFF818CF8)),
@@ -476,7 +476,7 @@ class _OverviewTabState extends State<_OverviewTab> {
                     ),
                     Text('${entry.value} ${'workout.kg'.tr()}',
                         style: const TextStyle(
-                            color: Color(0xFF34D399),
+                            color: Color(0xFF10B981),
                             fontSize: 11,
                             fontWeight: FontWeight.bold)),
                   ],
@@ -492,7 +492,7 @@ class _OverviewTabState extends State<_OverviewTab> {
                       : 'progress.show_more'
                           .tr(namedArgs: {'count': '${allRecords.length - 5}'}),
                   style:
-                      const TextStyle(color: Color(0xFF34D399), fontSize: 11),
+                      const TextStyle(color: Color(0xFF10B981), fontSize: 11),
                 ),
               ),
           ],

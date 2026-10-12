@@ -384,7 +384,7 @@ class _HistoryPageState extends State<HistoryPage> {
                             _buildStat('$totalReps', 'history.reps'.tr(),
                                 const Color(0xFF818CF8)),
                             _buildStat(_formatVolume(totalVolume),
-                                'history.volume'.tr(), const Color(0xFF34D399)),
+                                'history.volume'.tr(), const Color(0xFF10B981)),
                             if (workout.duration != null)
                               _buildStat(
                                   _formatDuration(workout.duration!),

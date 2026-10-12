@@ -142,7 +142,7 @@ class _WorkoutDetailsPageState extends State<WorkoutDetailsPage> {
               const SizedBox(width: 8),
               _buildStatCard('$totalReps', 'history.reps'.tr(), const Color(0xFF818CF8)),
               const SizedBox(width: 8),
-              _buildStatCard(_formatVolume(totalVolume), 'history.volume'.tr(), const Color(0xFF34D399)),
+              _buildStatCard(_formatVolume(totalVolume), 'history.volume'.tr(), const Color(0xFF10B981)),
             ],
           ),
         ],

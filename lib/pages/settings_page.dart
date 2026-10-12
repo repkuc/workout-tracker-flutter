@@ -76,7 +76,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     _buildCard(children: [
                       _buildActionItem(
                         icon: Icons.upload,
-                        color: const Color(0xFF34D399),
+                        color: const Color(0xFF10B981),
                         title: 'backup.export'.tr(),
                         subtitle: 'settings.export_subtitle'.tr(),
                         onTap: () async {

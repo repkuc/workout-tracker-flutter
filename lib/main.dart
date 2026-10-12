@@ -101,7 +101,7 @@ class MyApp extends StatelessWidget {
         colorScheme: const ColorScheme.dark(
           primary: Color(0xFFFB923C), // Ярко-оранжевый
           secondary: Color(0xFFF97316), // Оранжевый
-          tertiary: Color(0xFF34D399), // Зелёный
+          tertiary: Color(0xFF10B981), // Зелёный (успех)
           surface: Color(0xFF111827), // Почти чёрный
           onPrimary: Colors.white,
           onSecondary: Colors.black,
