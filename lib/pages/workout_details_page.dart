@@ -219,7 +219,7 @@ class _WorkoutDetailsPageState extends State<WorkoutDetailsPage> {
                   ],
                 ),
               ),
-              Text(_formatVolume(volume), style: const TextStyle(color: AppColors.accent, fontSize: 12, fontWeight: FontWeight.w600)),
+              Text(_formatVolume(volume), style: const TextStyle(color: AppColors.volume, fontSize: 12, fontWeight: FontWeight.w600)),
             ],
           ),
 
@@ -384,7 +384,7 @@ class _WorkoutDetailsPageState extends State<WorkoutDetailsPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Ошибка: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text('Ошибка: $e'), backgroundColor: AppColors.danger),
         );
       }
     }

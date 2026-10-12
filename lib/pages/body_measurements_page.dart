@@ -395,7 +395,7 @@ class _BodyMeasurementsPageState extends State<BodyMeasurementsPage> {
         backgroundColor: AppColors.surface,
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
-            side: const BorderSide(color: Colors.red, width: 1)),
+            side: const BorderSide(color: AppColors.danger, width: 1)),
         title: Text('workout.delete_workout_confirm'.tr(),
             style: const TextStyle(
                 color: Colors.white,
@@ -410,7 +410,7 @@ class _BodyMeasurementsPageState extends State<BodyMeasurementsPage> {
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red, foregroundColor: Colors.white),
+                backgroundColor: AppColors.danger, foregroundColor: Colors.white),
             child: Text('workout.delete'.tr()),
           ),
         ],

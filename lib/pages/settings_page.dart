@@ -89,7 +89,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                 SnackBar(
                                     content: Text(
                                         '${'backup.export_error'.tr()}: $e'),
-                                    backgroundColor: Colors.red),
+                                    backgroundColor: AppColors.danger),
                               );
                             }
                           }
@@ -113,7 +113,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                       : 'backup.no_new_workouts'.tr()),
                                   backgroundColor: count > 0
                                       ? AppColors.success
-                                      : Colors.grey,
+                                      : AppColors.snackbarNeutral,
                                 ),
                               );
                             }
@@ -123,7 +123,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                 SnackBar(
                                     content: Text(
                                         '${'backup.import_error'.tr()}: $e'),
-                                    backgroundColor: Colors.red),
+                                    backgroundColor: AppColors.danger),
                               );
                             }
                           }
@@ -305,7 +305,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right, color: AppColors.textFaint, size: 20),
+            const Icon(Icons.chevron_right, color: AppColors.textMuted, size: 20),
           ],
         ),
       ),

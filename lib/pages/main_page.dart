@@ -56,27 +56,27 @@ class _MainPageState extends State<MainPage> {
             surfaceTintColor: Colors.transparent,
             destinations: const [
               NavigationDestination(
-                icon: Icon(Icons.home_outlined, color: Colors.grey),
+                icon: Icon(Icons.home_outlined, color: AppColors.inactive),
                 selectedIcon: Icon(Icons.home, color: AppColors.accent),
                 label: '',
               ),
               NavigationDestination(
-                icon: Icon(Icons.assignment_outlined, color: Colors.grey),
+                icon: Icon(Icons.assignment_outlined, color: AppColors.inactive),
                 selectedIcon: Icon(Icons.assignment, color: AppColors.accent),
                 label: '',
               ),
               NavigationDestination(
-                icon: Icon(Icons.history_outlined, color: Colors.grey),
+                icon: Icon(Icons.history_outlined, color: AppColors.inactive),
                 selectedIcon: Icon(Icons.history, color: AppColors.accent),
                 label: '',
               ),
               NavigationDestination(
-                icon: Icon(Icons.bar_chart_outlined, color: Colors.grey),
+                icon: Icon(Icons.bar_chart_outlined, color: AppColors.inactive),
                 selectedIcon: Icon(Icons.bar_chart, color: AppColors.accent),
                 label: '',
               ),
               NavigationDestination(
-                icon: Icon(Icons.settings_outlined, color: Colors.grey),
+                icon: Icon(Icons.settings_outlined, color: AppColors.inactive),
                 selectedIcon: Icon(Icons.settings, color: AppColors.accent),
                 label: '',
               ),

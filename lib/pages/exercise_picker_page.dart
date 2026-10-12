@@ -476,7 +476,7 @@ class _ExercisePickerPageState extends State<ExercisePickerPage> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                         content: Text('workout.exercise_name_required'.tr()),
-                        backgroundColor: Colors.red),
+                        backgroundColor: AppColors.danger),
                   );
                   return;
                 }

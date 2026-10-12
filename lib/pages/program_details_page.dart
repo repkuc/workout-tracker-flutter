@@ -236,7 +236,7 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.delete, color: Colors.red),
+              leading: const Icon(Icons.delete, color: AppColors.danger),
               title: Text('programs.delete_program'.tr(),
                   style: const TextStyle(color: Colors.white)),
               onTap: () {
@@ -318,7 +318,7 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                       content: Text('programs.name_required'.tr()),
-                      backgroundColor: Colors.red),
+                      backgroundColor: AppColors.danger),
                 );
                 return;
               }
@@ -348,7 +348,7 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
         backgroundColor: AppColors.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: Colors.red, width: 1),
+          side: const BorderSide(color: AppColors.danger, width: 1),
         ),
         title: Text(
           'programs.delete_confirm'.tr(),
@@ -368,7 +368,7 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red, foregroundColor: Colors.white),
+                backgroundColor: AppColors.danger, foregroundColor: Colors.white),
             child: Text('workout.delete'.tr()),
           ),
         ],
@@ -467,7 +467,7 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
                             onTap: () =>
                                 setDialogState(() => dayExercises.remove(ex)),
                             child: const Icon(Icons.close,
-                                color: Colors.red, size: 16),
+                                color: AppColors.danger, size: 16),
                           ),
                         ],
                       ),
@@ -531,7 +531,7 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
                   ScaffoldMessenger.of(dialogContext).showSnackBar(
                     SnackBar(
                         content: Text('programs.day_name_required'.tr()),
-                        backgroundColor: Colors.red),
+                        backgroundColor: AppColors.danger),
                   );
                   return;
                 }
@@ -584,7 +584,7 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
         backgroundColor: AppColors.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: Colors.red, width: 1),
+          side: const BorderSide(color: AppColors.danger, width: 1),
         ),
         title: Text(
           'programs.delete_day_confirm'.tr(),
@@ -604,7 +604,7 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red, foregroundColor: Colors.white),
+                backgroundColor: AppColors.danger, foregroundColor: Colors.white),
             child: Text('workout.delete'.tr()),
           ),
         ],
@@ -660,7 +660,7 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
                   child: const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 4),
                     child:
-                        Icon(Icons.delete_outline, color: Colors.red, size: 16),
+                        Icon(Icons.delete_outline, color: AppColors.danger, size: 16),
                   ),
                 ),
               ],

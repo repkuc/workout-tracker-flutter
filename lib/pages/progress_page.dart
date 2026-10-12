@@ -221,7 +221,7 @@ class _ProgressPageState extends State<ProgressPage> {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text('progress.weight_invalid'.tr()),
-                    backgroundColor: Colors.red,
+                    backgroundColor: AppColors.danger,
                   ),
                 );
                 return;

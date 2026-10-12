@@ -460,16 +460,16 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 10, vertical: 6),
                         decoration: BoxDecoration(
-                          color: AppColors.accent.withOpacity(0.15),
+                          color: AppColors.volume.withOpacity(0.15),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                              color: AppColors.accent, width: 1),
+                              color: AppColors.volume, width: 1),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             const Icon(Icons.monitor_weight,
-                                color: AppColors.accent, size: 13),
+                                color: AppColors.volume, size: 13),
                             const SizedBox(width: 4),
                             Flexible(
                               child: Row(
@@ -489,7 +489,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                                       ),
                                     ),
                                     const Icon(Icons.arrow_forward,
-                                        color: AppColors.accent, size: 10),
+                                        color: AppColors.volume, size: 10),
                                   ],
                                   Flexible(
                                     child: Text(
@@ -510,7 +510,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                                       style: TextStyle(
                                         color: isIncrease
                                             ? AppColors.improvement
-                                            : Colors.red,
+                                            : AppColors.danger,
                                         fontSize: 10,
                                         fontWeight: FontWeight.bold,
                                       ),
@@ -750,9 +750,9 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
             if (exercise.targetMuscle.isNotEmpty && !exercise.isCompleted) ...[
               Row(
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.radio_button_checked,
-                    color: Colors.grey[500],
+                    color: AppColors.iconNeutral,
                     size: 12,
                   ),
                   const SizedBox(width: 4),
@@ -797,10 +797,10 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     decoration: BoxDecoration(
-                      color: AppColors.accent.withOpacity(0.1),
+                      color: AppColors.volume.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                        color: AppColors.accent.withOpacity(0.3),
+                        color: AppColors.volume.withOpacity(0.3),
                         width: 1,
                       ),
                     ),
@@ -809,7 +809,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                             children: [
                               const Icon(
                                 Icons.monitor_weight,
-                                color: AppColors.accent,
+                                color: AppColors.volume,
                                 size: 14,
                               ),
                               const SizedBox(width: 6),
@@ -825,13 +825,13 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                                 ),
                               ),
                               const Icon(Icons.arrow_forward,
-                                  color: AppColors.accent, size: 12),
+                                  color: AppColors.volume, size: 12),
                               const SizedBox(width: 4),
                               Flexible(
                                 child: Text(
                                   _formatVolume(currentVolume),
                                   style: const TextStyle(
-                                    color: AppColors.accent,
+                                    color: AppColors.volume,
                                     fontSize: 13,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -846,7 +846,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                                       : Icons.arrow_downward,
                                   color: isIncrease
                                       ? AppColors.improvement
-                                      : Colors.red,
+                                      : AppColors.danger,
                                   size: 11,
                                 ),
                                 Flexible(
@@ -855,7 +855,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                                     style: TextStyle(
                                       color: isIncrease
                                           ? AppColors.improvement
-                                          : Colors.red,
+                                          : AppColors.danger,
                                       fontSize: 11,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -869,7 +869,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                             children: [
                               const Icon(
                                 Icons.monitor_weight,
-                                color: AppColors.accent,
+                                color: AppColors.volume,
                                 size: 12,
                               ),
                               const SizedBox(width: 8),
@@ -884,7 +884,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                               Text(
                                 _formatVolume(currentVolume),
                                 style: const TextStyle(
-                                  color: AppColors.accent,
+                                  color: AppColors.volume,
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -970,7 +970,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                         style: OutlinedButton.styleFrom(
                           side: BorderSide(
                             color: exercise.sets.isEmpty
-                                ? Colors.grey
+                                ? AppColors.inactive
                                 : AppColors.success,
                             width: 1,
                           ),
@@ -1006,7 +1006,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                     ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: exercise.isCompleted
-                          ? Colors.grey[700]
+                          ? AppColors.completedButton
                           : AppColors.success,
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
@@ -1045,7 +1045,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
         border: Border.all(
           color: set.isDone
               ? AppColors.success
-              : Colors.grey.withOpacity(0.3),
+              : AppColors.inactive.withOpacity(0.3),
           width: 1,
         ),
       ),
@@ -1116,7 +1116,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
             ],
             Icon(
               set.isDone ? Icons.check_circle : Icons.radio_button_unchecked,
-              color: set.isDone ? AppColors.success : Colors.grey,
+              color: set.isDone ? AppColors.success : AppColors.inactive,
               size: 20,
             ),
           ],
@@ -1479,9 +1479,9 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                 fillColor: AppColors.inputFill, // Тёмно-серый фон
                 hintText: 'workout.target_muscle_hint'.tr(),
                 hintStyle: const TextStyle(color: AppColors.textMuted),
-                prefixIcon: Icon(
+                prefixIcon: const Icon(
                   Icons.radio_button_checked,
-                  color: Colors.grey[500],
+                  color: AppColors.iconNeutral,
                 ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -1507,7 +1507,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text('workout.exercise_name_required'.tr()),
-                    backgroundColor: Colors.red,
+                    backgroundColor: AppColors.danger,
                   ),
                 );
                 return;
@@ -1648,9 +1648,9 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                 fillColor: AppColors.inputFill,
                 hintText: 'workout.target_muscle_hint'.tr(),
                 hintStyle: const TextStyle(color: AppColors.textMuted),
-                prefixIcon: Icon(
+                prefixIcon: const Icon(
                   Icons.radio_button_checked,
-                  color: Colors.grey[500],
+                  color: AppColors.iconNeutral,
                 ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -1676,7 +1676,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text('workout.exercise_name_required'.tr()),
-                    backgroundColor: Colors.red,
+                    backgroundColor: AppColors.danger,
                   ),
                 );
                 return;
@@ -1776,7 +1776,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
           side: const BorderSide(
-            color: Colors.red,
+            color: AppColors.danger,
             width: 1,
           ),
         ),
@@ -1784,7 +1784,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
           children: [
             const Icon(
               Icons.warning_rounded,
-              color: Colors.red,
+              color: AppColors.danger,
               size: 28,
             ),
             const SizedBox(width: 12),
@@ -1868,7 +1868,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
+              backgroundColor: AppColors.danger,
               foregroundColor: Colors.white,
             ),
             child: Text('workout.delete'.tr()),
@@ -1898,7 +1898,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('workout.set_deleted'.tr()),
-            backgroundColor: Colors.red, // ← Красный для удаления
+            backgroundColor: AppColors.danger, // ← Красный для удаления
             behavior: SnackBarBehavior.floating,
             duration: const Duration(seconds: 2),
           ),
@@ -1966,7 +1966,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
             ListTile(
               leading: Icon(
                 Icons.edit,
-                color: set.isDone ? Colors.grey : AppColors.accent,
+                color: set.isDone ? AppColors.inactive : AppColors.accent,
               ),
               title: Text(
                 'workout.edit_set'.tr(),
@@ -1997,7 +1997,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
             ListTile(
               leading: const Icon(
                 Icons.delete,
-                color: Colors.red,
+                color: AppColors.danger,
               ),
               title: Text(
                 'workout.delete_set'.tr(),
@@ -2651,7 +2651,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                         decoration: BoxDecoration(
                           color: isIncrease
                               ? AppColors.improvement.withOpacity(0.2)
-                              : Colors.red.withOpacity(0.2),
+                              : AppColors.danger.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
@@ -2659,7 +2659,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                           style: TextStyle(
                             color: isIncrease
                                 ? AppColors.improvement
-                                : Colors.red,
+                                : AppColors.danger,
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
                           ),
@@ -2689,7 +2689,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
       ),
       child: Row(
         children: [
-          const Icon(Icons.monitor_weight, color: AppColors.success, size: 24),
+          const Icon(Icons.monitor_weight, color: AppColors.volume, size: 24),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -2721,7 +2721,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                       ),
                       const SizedBox(width: 4),
                       const Icon(Icons.arrow_forward,
-                          color: AppColors.accent, size: 14),
+                          color: AppColors.volume, size: 14),
                       const SizedBox(width: 4),
                     ],
                     Flexible(
@@ -2744,7 +2744,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                           decoration: BoxDecoration(
                             color: isIncrease
                                 ? AppColors.improvement.withOpacity(0.2)
-                                : Colors.red.withOpacity(0.2),
+                                : AppColors.danger.withOpacity(0.2),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
@@ -2752,7 +2752,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                             style: TextStyle(
                               color: isIncrease
                                   ? AppColors.improvement
-                                  : Colors.red,
+                                  : AppColors.danger,
                               fontSize: 10,
                               fontWeight: FontWeight.bold,
                             ),
@@ -2832,7 +2832,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                         decoration: BoxDecoration(
                           color: isFaster
                               ? AppColors.improvement.withOpacity(0.2)
-                              : Colors.red.withOpacity(0.2),
+                              : AppColors.danger.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Row(
@@ -2843,7 +2843,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                               size: 14,
                               color: isFaster
                                   ? AppColors.improvement
-                                  : Colors.red,
+                                  : AppColors.danger,
                             ),
                             const SizedBox(width: 2),
                             Text(
@@ -2851,7 +2851,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                               style: TextStyle(
                                 color: isFaster
                                     ? AppColors.improvement
-                                    : Colors.red,
+                                    : AppColors.danger,
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -2983,7 +2983,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text('workout.workout_name_required'.tr()),
-                    backgroundColor: Colors.red,
+                    backgroundColor: AppColors.danger,
                   ),
                 );
                 return;

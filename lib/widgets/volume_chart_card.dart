@@ -210,7 +210,7 @@ class _VolumeChartCardState extends State<VolumeChartCard> {
             final is5t = value % 5000 == 0;
             return FlLine(
               color: is5t
-                  ? AppColors.chartGridHighlight // ярче
+                  ? AppColors.chartGridMajor // ярче
                   : AppColors.chartGrid, // обычная тёмная
               strokeWidth: is5t ? 1.5 : 0.8,
             );

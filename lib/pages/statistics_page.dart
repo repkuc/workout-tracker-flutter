@@ -409,7 +409,7 @@ class _OverviewTabState extends State<_OverviewTab> {
                     ),
                     Text(_formatVolume(ex.value),
                         style: const TextStyle(
-                            color: AppColors.accent,
+                            color: AppColors.volume,
                             fontSize: 11,
                             fontWeight: FontWeight.w600)),
                   ],
@@ -477,7 +477,7 @@ class _OverviewTabState extends State<_OverviewTab> {
                     ),
                     Text('${entry.value} ${'workout.kg'.tr()}',
                         style: const TextStyle(
-                            color: AppColors.success,
+                            color: AppColors.record,
                             fontSize: 11,
                             fontWeight: FontWeight.bold)),
                   ],
@@ -493,7 +493,7 @@ class _OverviewTabState extends State<_OverviewTab> {
                       : 'progress.show_more'
                           .tr(namedArgs: {'count': '${allRecords.length - 5}'}),
                   style:
-                      const TextStyle(color: AppColors.success, fontSize: 11),
+                      const TextStyle(color: AppColors.accent, fontSize: 11),
                 ),
               ),
           ],

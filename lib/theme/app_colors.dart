@@ -22,7 +22,6 @@ abstract final class AppColors {
   // ── Текст ──
   static const Color textMuted = Color(0xFF64748B); // второстепенный текст и иконки
   static const Color textSoft = Color(0xFFE2E8F0); // светлый текст строк в списках статистики
-  static const Color textFaint = Color(0xFF374151); // очень тусклые подсказки, шеврон в настройках
 
   // ── Статусы ──
   static const Color success = Color(0xFF10B981); // успех / выполнено
@@ -33,11 +32,18 @@ abstract final class AppColors {
   static const Color paused = Color(0xFFF97316); // таймер на паузе
   static const Color warning = Color(0xFFF97316); // предупреждение (незавершённые упражнения)
   static const Color improvement = Color(0xFF10B981); // положительная разница «до / после»
-  static const Color record = Color(0xFFFBBF24); // значок и уведомление о новом рекорде (PR)
+  static const Color record = Color(0xFFFBBF24); // рекорды (PR): значок в редакторе, список в статистике
+  static const Color danger = Color(0xFFF44336); // удаление, ошибки, отрицательная разница (= Colors.red)
+
+  // ── Нейтральные серые (значения Material, пока не slate) ──
+  static const Color inactive = Color(0xFF9E9E9E); // невыбранные иконки навигации, неактивные/невыполненные элементы (= Colors.grey)
+  static const Color iconNeutral = Color(0xFF9E9E9E); // нейтральная иконка целевой мышцы (= Colors.grey[500])
+  static const Color completedButton = Color(0xFF616161); // кнопка уже завершённого упражнения (= Colors.grey[700])
+  static const Color snackbarNeutral = Color(0xFF9E9E9E); // нейтральный snackbar «нечего импортировать» (= Colors.grey)
 
   // ── Метрики (карточки статистики) ──
   static const Color count = Color(0xFFF97316); // количество тренировок / упражнений
-  static const Color volume = Color(0xFF10B981); // объём (кг)
+  static const Color volume = Color(0xFF22D3EE); // объём (кг): карточки, топ упражнений, сравнение в редакторе
   static const Color reps = Color(0xFF818CF8); // повторения
   static const Color duration = Color(0xFF60A5FA); // время
 
@@ -64,12 +70,11 @@ abstract final class AppColors {
   static const Color weightUpBackground = Color(0xFF7C2D12);
 
   // ── Карточки графиков ──
-  static const Color chartCard = Color(0xFF1F2937); // фон карточки графика
-  static const Color chartText = Color(0xFF9CA3AF); // заголовки и легенда
-  static const Color chartTextMuted = Color(0xFF6B7280); // подписи осей, «нет данных»
-  static const Color chartGrid = Color(0xFF374151); // обычные линии сетки
-  static const Color chartGridMajor = Color(0xFF4B5563); // линии на целых кг (график веса)
-  static const Color chartGridHighlight = Color(0xFF6B7280); // линии каждые 5 т (график объёма)
+  static const Color chartCard = surface; // фон карточки графика
+  static const Color chartText = Color(0xFF94A3B8); // заголовки и легенда
+  static const Color chartTextMuted = textMuted; // подписи осей, «нет данных»
+  static const Color chartGrid = Color(0xFF334155); // обычные линии сетки
+  static const Color chartGridMajor = Color(0xFF475569); // «главные» линии: целые кг (вес), каждые 5 т (объём)
 
   // ── Material-темы (main.dart) ──
   static const Color themeLightSecondary = Color(0xFFEA580C);

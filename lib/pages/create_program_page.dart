@@ -110,7 +110,7 @@ class _CreateProgramPageState extends State<CreateProgramPage> {
           style: const TextStyle(color: Colors.white, fontSize: 14),
           decoration: InputDecoration(
             filled: true,
-            fillColor: AppColors.surface,
+            fillColor: AppColors.inputFill,
             hintText: 'programs.program_name_hint'.tr(),
             hintStyle: const TextStyle(color: AppColors.textMuted),
             contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -138,7 +138,7 @@ class _CreateProgramPageState extends State<CreateProgramPage> {
           style: const TextStyle(color: Colors.white, fontSize: 14),
           decoration: InputDecoration(
             filled: true,
-            fillColor: AppColors.surface,
+            fillColor: AppColors.inputFill,
             hintText: 'programs.schedule_hint'.tr(),
             hintStyle: const TextStyle(color: AppColors.textMuted),
             contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -236,7 +236,7 @@ class _CreateProgramPageState extends State<CreateProgramPage> {
                   _workouts.remove(workout);
                 });
               },
-              child: const Icon(Icons.delete_outline, color: Colors.red, size: 20),
+              child: const Icon(Icons.delete_outline, color: AppColors.danger, size: 20),
             ),
           ],
         ),
@@ -273,7 +273,7 @@ class _CreateProgramPageState extends State<CreateProgramPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('programs.name_required'.tr()),
-          backgroundColor: Colors.red,
+          backgroundColor: AppColors.danger,
         ),
       );
       return;
@@ -428,7 +428,7 @@ class _CreateProgramPageState extends State<CreateProgramPage> {
                                 dayExercises.remove(ex);
                               });
                             },
-                            child: const Icon(Icons.close, color: Colors.red, size: 16),
+                            child: const Icon(Icons.close, color: AppColors.danger, size: 16),
                           ),
                         ],
                       ),
@@ -488,7 +488,7 @@ class _CreateProgramPageState extends State<CreateProgramPage> {
                   ScaffoldMessenger.of(dialogContext).showSnackBar(
                     SnackBar(
                       content: Text('programs.day_name_required'.tr()),
-                      backgroundColor: Colors.red,
+                      backgroundColor: AppColors.danger,
                     ),
                   );
                   return;

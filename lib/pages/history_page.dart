@@ -148,7 +148,7 @@ class _HistoryPageState extends State<HistoryPage> {
               style: const TextStyle(color: AppColors.textMuted, fontSize: 16)),
           const SizedBox(height: 4),
           Text('history.start_first'.tr(),
-              style: const TextStyle(color: AppColors.textFaint, fontSize: 13)),
+              style: const TextStyle(color: AppColors.textMuted, fontSize: 13)),
         ],
       ),
     );
@@ -485,7 +485,7 @@ class _HistoryPageState extends State<HistoryPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Ошибка: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text('Ошибка: $e'), backgroundColor: AppColors.danger),
         );
       }
     }
@@ -530,7 +530,7 @@ class _HistoryPageState extends State<HistoryPage> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.delete, color: Colors.red),
+              leading: const Icon(Icons.delete, color: AppColors.danger),
               title: Text('workout.delete_workout'.tr(),
                   style: const TextStyle(color: Colors.white)),
               onTap: () {
@@ -552,7 +552,7 @@ class _HistoryPageState extends State<HistoryPage> {
         backgroundColor: AppColors.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: Colors.red, width: 1),
+          side: const BorderSide(color: AppColors.danger, width: 1),
         ),
         titlePadding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
         contentPadding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
@@ -573,7 +573,7 @@ class _HistoryPageState extends State<HistoryPage> {
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red, foregroundColor: Colors.white),
+                backgroundColor: AppColors.danger, foregroundColor: Colors.white),
             child: Text('workout.delete'.tr()),
           ),
         ],
@@ -597,7 +597,7 @@ class _HistoryPageState extends State<HistoryPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
               content: Text('workout.workout_deleted'.tr()),
-              backgroundColor: Colors.red),
+              backgroundColor: AppColors.danger),
         );
       }
     }

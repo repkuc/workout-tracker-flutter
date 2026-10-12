@@ -142,7 +142,7 @@ class _ProgramsPageState extends State<ProgramsPage> {
           const SizedBox(height: 4),
           Text(
             'programs.create_first'.tr(),
-            style: const TextStyle(color: AppColors.textFaint, fontSize: 13),
+            style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
           ),
         ],
       ),

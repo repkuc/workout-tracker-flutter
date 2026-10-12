@@ -286,7 +286,7 @@ class _HomePageState extends State<HomePage> {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text('progress.weight_invalid'.tr()),
-                    backgroundColor: Colors.red,
+                    backgroundColor: AppColors.danger,
                   ),
                 );
                 return;
@@ -334,7 +334,7 @@ class _HomePageState extends State<HomePage> {
           border: Border.all(
             color: _todayWeight != null
                 ? AppColors.bodyWeight.withOpacity(0.4)
-                : Colors.grey.withOpacity(0.2),
+                : AppColors.inactive.withOpacity(0.2),
             width: 1,
           ),
         ),
@@ -575,7 +575,7 @@ class _HomePageState extends State<HomePage> {
         const SizedBox(width: 10),
         _buildStatCard(
           icon: Icons.timer,
-          color: const Color(0xFF818CF8),
+          color: AppColors.duration,
           value: _totalDuration > 0 ? _formatDuration(_totalDuration) : '—',
           label: 'workout.duration'.tr(),
         ),
@@ -903,7 +903,7 @@ class _HomePageState extends State<HomePage> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                         content: Text('workout.workout_name_required'.tr()),
-                        backgroundColor: Colors.red),
+                        backgroundColor: AppColors.danger),
                   );
                   return;
                 }
@@ -1130,7 +1130,7 @@ class _HomePageState extends State<HomePage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Ошибка: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text('Ошибка: $e'), backgroundColor: AppColors.danger),
         );
       }
     }
