@@ -101,16 +101,23 @@ assets/
 
 ## 6. Current tasks
 
+### Done and checked on the phone
+- **B1: `AppColors` refactor** (`a402731`). ~610 hardcoded `Color(0xFF…)` replaced with `AppColors` constants across 18 files; values unchanged.
+- **Colour polish** (`f698d08`). Volume is cyan `22D3EE` everywhere it is shown (stat cards, top exercises, Workout details exercise volume, editor volume chips and finish dialog). Home duration stat → `duration` blue. Statistics PR values → `record` yellow, its "show more" → `accent`. Chart cards moved from Tailwind gray to slate (`1E293B` card, `94A3B8` text, `64748B` labels, `334155` grid, `475569` major lines on both charts). Create program inputs → `inputFill`. Empty-state hints and settings chevron → `textMuted`. `Colors.red` / `Colors.grey[…]` moved into `AppColors` with identical values.
+
 ### Done, awaiting on-device testing (branch `claude-code-experiments`, not merged to `main`)
 - **Palette unification + button theme fix** (`428b47b`). Changed `workout_editor_page.dart` and the body-weight dialogs in `home_page.dart` / `progress_page.dart` from the old "gray" palette (`1F2937`, `374151` inputs, `Colors.grey[…]` text, 2px dialog borders) to the slate palette (`1E293B`, `0F172A` inputs, `64748B` text, 1px borders). Also removed the editor's `isDark` light/dark branching. In `main.dart`, the `ElevatedButton` theme now uses padding 16×8 and `F97316` in both themes.
   - Test before merging: the editor with the phone in **light system mode** (it should look the same as dark), and the sizes of unstyled dialog confirm and red Delete buttons across the app (they are now smaller).
   - Intentionally left: `374151` as the background of inner panels inside editor dialogs and as the rest-chip border, and `Colors.grey` used for icons, borders and button backgrounds.
 - **"Second green" unified** (`538f606`). `34D399` → `10B981` in UI stat cards, settings export icon, PR list and dark theme `tertiary`. `34D399` stays only in the workout palette, chart series and the weight-loss badge text.
-- **B1: `AppColors` refactor** (`a402731`). ~610 hardcoded `Color(0xFF…)` replaced with `AppColors` constants across 18 files; values unchanged.
-- **Colour polish** (uncommitted when written, check on device). Volume is cyan `22D3EE` everywhere it is shown (stat cards, top exercises, Workout details exercise volume, editor volume chips and finish dialog). Home duration stat → `duration` blue. Statistics PR values → `record` yellow, its "show more" → `accent`. Chart cards moved from Tailwind gray to slate (`1E293B` card, `94A3B8` text, `64748B` labels, `334155` grid, `475569` major lines on both charts). Create program inputs → `inputFill`. Empty-state hints and settings chevron → `textMuted`. `Colors.red` / `Colors.grey[…]` moved into `AppColors` with identical values.
 - **Samsung Galaxy Z Flip7 overlap fix** (`69903c2`). The add/edit set dialogs now scroll (`SingleChildScrollView`). Validation errors appear as inline `errorText` (via `StatefulBuilder`) instead of snackbars hidden behind the dialog backdrop. Editor snackbars float above the bottom buttons, with a margin based on the measured height of `_bottomButtonsKey`. Test on a foldable or short screen if one becomes available.
 
+### Next task
+**B2: shared header widgets:** one for the main tabs (orange icon box + 22pt title) and one for the sub-pages (back arrow + title).
+
 ### Deferred / planned
-1. **Z Flip7 cause #2 (not addressed):** the editor's own `Column` (header + `Expanded` list + `_buildBottomButtons`) overflows when the keyboard shrinks the body on very short or narrow screens (cover screen, landscape, split-screen). The fixed header (~145dp) plus bottom buttons (~120dp) leave no room for the list, so the bottom buttons get drawn over the content.
-2. **B2: shared header widgets (next task, not started):** one for the main tabs (orange icon box + 22pt title) and one for the sub-pages (back arrow + title).
-3. **Maybe later:** move the Material greys (`inactive`, `iconNeutral`, `completedButton`, `snackbarNeutral`) and `danger` to slate/Tailwind values.
+1. **Colour leftovers (can be folded into B2):**
+   - Move the remaining Material greys to slate: `inactive` / `iconNeutral` → `94A3B8` or `64748B`, `completedButton` → `475569`. Most visible on the bottom nav icons.
+   - Statistics → Charts: the "show more" pill under the exercise chips (`exercise_progress_card.dart`) still uses `panel` (`374151`, old gray) on a slate card.
+   - Optional: `danger` → Tailwind red-500 (`EF4444`).
+2. **Z Flip7 cause #2 (not addressed):** the editor's own `Column` (header + `Expanded` list + `_buildBottomButtons`) overflows when the keyboard shrinks the body on very short or narrow screens (cover screen, landscape, split-screen). The fixed header (~145dp) plus bottom buttons (~120dp) leave no room for the list, so the bottom buttons get drawn over the content.
