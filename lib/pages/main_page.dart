@@ -7,6 +7,7 @@ import 'progress_page.dart';
 import 'settings_page.dart';
 import '../widgets/active_workout_banner.dart';
 import 'programs_page.dart';
+import '../theme/app_colors.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -50,33 +51,33 @@ class _MainPageState extends State<MainPage> {
             onDestinationSelected: (index) {
               setState(() => _currentIndex = index);
             },
-            backgroundColor: const Color(0xFF0F172A),
-            indicatorColor: const Color(0xFFF97316).withOpacity(0.2),
+            backgroundColor: AppColors.background,
+            indicatorColor: AppColors.accent.withOpacity(0.2),
             surfaceTintColor: Colors.transparent,
             destinations: const [
               NavigationDestination(
                 icon: Icon(Icons.home_outlined, color: Colors.grey),
-                selectedIcon: Icon(Icons.home, color: Color(0xFFF97316)),
+                selectedIcon: Icon(Icons.home, color: AppColors.accent),
                 label: '',
               ),
               NavigationDestination(
                 icon: Icon(Icons.assignment_outlined, color: Colors.grey),
-                selectedIcon: Icon(Icons.assignment, color: Color(0xFFF97316)),
+                selectedIcon: Icon(Icons.assignment, color: AppColors.accent),
                 label: '',
               ),
               NavigationDestination(
                 icon: Icon(Icons.history_outlined, color: Colors.grey),
-                selectedIcon: Icon(Icons.history, color: Color(0xFFF97316)),
+                selectedIcon: Icon(Icons.history, color: AppColors.accent),
                 label: '',
               ),
               NavigationDestination(
                 icon: Icon(Icons.bar_chart_outlined, color: Colors.grey),
-                selectedIcon: Icon(Icons.bar_chart, color: Color(0xFFF97316)),
+                selectedIcon: Icon(Icons.bar_chart, color: AppColors.accent),
                 label: '',
               ),
               NavigationDestination(
                 icon: Icon(Icons.settings_outlined, color: Colors.grey),
-                selectedIcon: Icon(Icons.settings, color: Color(0xFFF97316)),
+                selectedIcon: Icon(Icons.settings, color: AppColors.accent),
                 label: '',
               ),
             ],

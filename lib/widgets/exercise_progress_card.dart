@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../services/workout_service.dart';
+import '../theme/app_colors.dart';
 
 class ExerciseProgressCard extends StatefulWidget {
   final int? selectedDays;
@@ -83,7 +84,7 @@ class _ExerciseProgressCardState extends State<ExerciseProgressCard> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1F2937),
+        color: AppColors.chartCard,
         borderRadius: BorderRadius.circular(14),
       ),
       child: Column(
@@ -93,7 +94,7 @@ class _ExerciseProgressCardState extends State<ExerciseProgressCard> {
           Text(
             'progress.exercises_title'.tr(),
             style: const TextStyle(
-              color: Color(0xFF9CA3AF),
+              color: AppColors.chartText,
               fontSize: 11,
               letterSpacing: 1.5,
             ),
@@ -113,14 +114,14 @@ class _ExerciseProgressCardState extends State<ExerciseProgressCard> {
             child: _isLoading
                 ? const Center(
                     child: CircularProgressIndicator(
-                      color: Color(0xFFF97316),
+                      color: AppColors.accent,
                     ),
                   )
                 : _activeExercises.isEmpty || _allData.isEmpty
                     ? Center(
                         child: Text(
                           'progress.no_data'.tr(),
-                          style: const TextStyle(color: Color(0xFF6B7280)),
+                          style: const TextStyle(color: AppColors.chartTextMuted),
                         ),
                       )
                     : _buildChart(),
@@ -136,7 +137,7 @@ class _ExerciseProgressCardState extends State<ExerciseProgressCard> {
     return Center(
       child: Text(
         'progress.no_data'.tr(),
-        style: const TextStyle(color: Color(0xFF6B7280)),
+        style: const TextStyle(color: AppColors.chartTextMuted),
       ),
     );
   }
@@ -216,7 +217,7 @@ class _ExerciseProgressCardState extends State<ExerciseProgressCard> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
             decoration: BoxDecoration(
-              color: const Color(0xFF374151),
+              color: AppColors.panel,
               borderRadius: BorderRadius.circular(20),
             ),
             child: Row(
@@ -224,7 +225,7 @@ class _ExerciseProgressCardState extends State<ExerciseProgressCard> {
               children: [
                 Icon(
                   _chipsExpanded ? Icons.expand_less : Icons.expand_more,
-                  color: const Color(0xFF9CA3AF),
+                  color: AppColors.chartText,
                   size: 16,
                 ),
                 const SizedBox(width: 4),
@@ -235,7 +236,7 @@ class _ExerciseProgressCardState extends State<ExerciseProgressCard> {
                           namedArgs: {'count': '${allNames.length - 5}'},
                         ),
                   style: const TextStyle(
-                    color: Color(0xFF9CA3AF),
+                    color: AppColors.chartText,
                     fontSize: 11,
                   ),
                 ),
@@ -303,7 +304,7 @@ class _ExerciseProgressCardState extends State<ExerciseProgressCard> {
           show: true,
           drawVerticalLine: false,
           getDrawingHorizontalLine: (value) => FlLine(
-            color: const Color(0xFF374151),
+            color: AppColors.chartGrid,
             strokeWidth: 1,
           ),
         ),
@@ -331,7 +332,7 @@ class _ExerciseProgressCardState extends State<ExerciseProgressCard> {
                 return Text(
                   '${parts[2]}.${parts[1]}',
                   style: const TextStyle(
-                    color: Color(0xFF6B7280),
+                    color: AppColors.chartTextMuted,
                     fontSize: 10,
                   ),
                 );
@@ -346,7 +347,7 @@ class _ExerciseProgressCardState extends State<ExerciseProgressCard> {
                 return Text(
                   '${value.toInt()}',
                   style: const TextStyle(
-                    color: Color(0xFF6B7280),
+                    color: AppColors.chartTextMuted,
                     fontSize: 10,
                   ),
                 );

@@ -24,6 +24,7 @@ import '../models/workout_models.dart';
 import 'package:uuid/uuid.dart';
 import '../models/exercise_template.dart';
 import 'exercise_picker_page.dart';
+import '../theme/app_colors.dart';
 
 class ProgramDetailsPage extends StatefulWidget {
   // Экран получает не саму программу, а только её ID.
@@ -100,11 +101,11 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: _isLoading
             ? const Center(
-                child: CircularProgressIndicator(color: Color(0xFFF97316)))
+                child: CircularProgressIndicator(color: AppColors.accent))
             : _program == null
                 ? Center(
                     child: Text(
@@ -183,7 +184,7 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
         Text(
           'programs.schedule'.tr(),
           style: const TextStyle(
-              color: Color(0xFF64748B), fontSize: 11, letterSpacing: 1),
+              color: AppColors.textMuted, fontSize: 11, letterSpacing: 1),
         ),
         const SizedBox(height: 4),
         Text(
@@ -199,7 +200,7 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
     return Text(
       '${'programs.workouts_in_program'.tr()} (${_program!.workouts.length})',
       style: const TextStyle(
-          color: Color(0xFF64748B), fontSize: 11, letterSpacing: 1),
+          color: AppColors.textMuted, fontSize: 11, letterSpacing: 1),
     );
   }
 
@@ -207,7 +208,7 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
   Future<void> _showProgramActionsMenu() async {
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF1E293B),
+      backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
             topLeft: Radius.circular(20), topRight: Radius.circular(20)),
@@ -217,7 +218,7 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.edit, color: Color(0xFFF97316)),
+              leading: const Icon(Icons.edit, color: AppColors.accent),
               title: Text('programs.edit_program'.tr(),
                   style: const TextStyle(color: Colors.white)),
               onTap: () {
@@ -226,7 +227,7 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.add, color: Color(0xFFF97316)),
+              leading: const Icon(Icons.add, color: AppColors.accent),
               title: Text('programs.add_workout_day'.tr(),
                   style: const TextStyle(color: Colors.white)),
               onTap: () {
@@ -258,10 +259,10 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1E293B),
+        backgroundColor: AppColors.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: Color(0xFFF97316), width: 1),
+          side: const BorderSide(color: AppColors.dialogBorder, width: 1),
         ),
         title: Text(
           'programs.edit_program'.tr(),
@@ -277,9 +278,9 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
               style: const TextStyle(color: Colors.white, fontSize: 14),
               decoration: InputDecoration(
                 filled: true,
-                fillColor: const Color(0xFF0F172A),
+                fillColor: AppColors.inputFill,
                 hintText: 'programs.program_name_hint'.tr(),
-                hintStyle: const TextStyle(color: Color(0xFF64748B)),
+                hintStyle: const TextStyle(color: AppColors.textMuted),
                 contentPadding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 border: OutlineInputBorder(
@@ -293,9 +294,9 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
               style: const TextStyle(color: Colors.white, fontSize: 14),
               decoration: InputDecoration(
                 filled: true,
-                fillColor: const Color(0xFF0F172A),
+                fillColor: AppColors.inputFill,
                 hintText: 'programs.schedule_hint'.tr(),
-                hintStyle: const TextStyle(color: Color(0xFF64748B)),
+                hintStyle: const TextStyle(color: AppColors.textMuted),
                 contentPadding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 border: OutlineInputBorder(
@@ -309,7 +310,7 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
           TextButton(
             onPressed: () => Navigator.pop(context, false),
             child: Text('workout.cancel'.tr(),
-                style: const TextStyle(color: Color(0xFF64748B))),
+                style: const TextStyle(color: AppColors.textMuted)),
           ),
           ElevatedButton(
             onPressed: () {
@@ -344,7 +345,7 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1E293B),
+        backgroundColor: AppColors.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
           side: const BorderSide(color: Colors.red, width: 1),
@@ -356,13 +357,13 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
         ),
         content: Text(
           'programs.delete_message'.tr(),
-          style: const TextStyle(color: Color(0xFF64748B), fontSize: 13),
+          style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
             child: Text('workout.cancel'.tr(),
-                style: const TextStyle(color: Color(0xFF64748B))),
+                style: const TextStyle(color: AppColors.textMuted)),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
@@ -398,10 +399,10 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
       barrierDismissible: false,
       builder: (dialogContext) => StatefulBuilder(
         builder: (dialogContext, setDialogState) => AlertDialog(
-          backgroundColor: const Color(0xFF1E293B),
+          backgroundColor: AppColors.surface,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
-            side: const BorderSide(color: Color(0xFFF97316), width: 1),
+            side: const BorderSide(color: AppColors.dialogBorder, width: 1),
           ),
           title: Text(
             'programs.new_workout_day'.tr(),
@@ -421,9 +422,9 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
                     style: const TextStyle(color: Colors.white, fontSize: 14),
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: const Color(0xFF0F172A),
+                      fillColor: AppColors.inputFill,
                       hintText: 'programs.day_name_hint'.tr(),
-                      hintStyle: const TextStyle(color: Color(0xFF64748B)),
+                      hintStyle: const TextStyle(color: AppColors.textMuted),
                       contentPadding: const EdgeInsets.symmetric(
                           horizontal: 12, vertical: 10),
                       border: OutlineInputBorder(
@@ -435,7 +436,7 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
                   Text(
                     'programs.exercises'.tr(),
                     style: const TextStyle(
-                        color: Color(0xFF64748B),
+                        color: AppColors.textMuted,
                         fontSize: 11,
                         letterSpacing: 1),
                   ),
@@ -446,7 +447,7 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 10, vertical: 8),
                       decoration: BoxDecoration(
-                          color: const Color(0xFF0F172A),
+                          color: AppColors.surfaceInset,
                           borderRadius: BorderRadius.circular(8)),
                       child: Row(
                         children: [
@@ -457,7 +458,7 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
                           Text(
                             '${ex.targetSets} ${'programs.sets_short'.tr()}',
                             style: const TextStyle(
-                                color: Color(0xFFF97316),
+                                color: AppColors.accent,
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold),
                           ),
@@ -494,20 +495,20 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(vertical: 10),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF97316).withOpacity(0.1),
+                        color: AppColors.accent.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                            color: const Color(0xFFF97316).withOpacity(0.4)),
+                            color: AppColors.accent.withOpacity(0.4)),
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           const Icon(Icons.add,
-                              color: Color(0xFFF97316), size: 16),
+                              color: AppColors.accent, size: 16),
                           const SizedBox(width: 4),
                           Text('workout.add_exercise'.tr(),
                               style: const TextStyle(
-                                  color: Color(0xFFF97316),
+                                  color: AppColors.accent,
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold)),
                         ],
@@ -522,7 +523,7 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
             TextButton(
               onPressed: () => Navigator.pop(dialogContext, false),
               child: Text('workout.cancel'.tr(),
-                  style: const TextStyle(color: Color(0xFF64748B))),
+                  style: const TextStyle(color: AppColors.textMuted)),
             ),
             ElevatedButton(
               onPressed: () {
@@ -580,7 +581,7 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1E293B),
+        backgroundColor: AppColors.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
           side: const BorderSide(color: Colors.red, width: 1),
@@ -592,13 +593,13 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
         ),
         content: Text(
           workout.name,
-          style: const TextStyle(color: Color(0xFF64748B), fontSize: 13),
+          style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
             child: Text('workout.cancel'.tr(),
-                style: const TextStyle(color: Color(0xFF64748B))),
+                style: const TextStyle(color: AppColors.textMuted)),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
@@ -626,9 +627,9 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFF1E293B),
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFF97316).withOpacity(0.2)),
+        border: Border.all(color: AppColors.accent.withOpacity(0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -651,7 +652,7 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
                       existingWorkout: workout),
                   child: const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 4),
-                    child: Icon(Icons.edit, color: Color(0xFFF97316), size: 16),
+                    child: Icon(Icons.edit, color: AppColors.accent, size: 16),
                   ),
                 ),
                 GestureDetector(
@@ -668,7 +669,7 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
           const SizedBox(height: 4),
           Text(
             '${workout.exercises.length} ${'programs.exercises_count'.tr()}',
-            style: const TextStyle(color: Color(0xFF64748B), fontSize: 11),
+            style: const TextStyle(color: AppColors.textMuted, fontSize: 11),
           ),
 
           // Показываем дату последнего выполнения, только если она есть.
@@ -676,12 +677,12 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
             const SizedBox(height: 4),
             Row(
               children: [
-                const Icon(Icons.history, color: Color(0xFF818CF8), size: 12),
+                const Icon(Icons.history, color: AppColors.program, size: 12),
                 const SizedBox(width: 4),
                 Text(
                   '${'programs.last_done'.tr()}: ${_formatLastDate(lastWorkout.finishedAt)}',
                   style:
-                      const TextStyle(color: Color(0xFF818CF8), fontSize: 11),
+                      const TextStyle(color: AppColors.program, fontSize: 11),
                 ),
               ],
             ),
@@ -706,7 +707,7 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
                     const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFF97316),
+                backgroundColor: AppColors.accent,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 shape: RoundedRectangleBorder(

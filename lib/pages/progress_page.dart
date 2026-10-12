@@ -5,6 +5,7 @@ import '../models/body_weight_entry.dart';
 import '../widgets/volume_chart_card.dart';
 import '../widgets/exercise_progress_card.dart';
 import '../widgets/body_weight_chart_card.dart';
+import '../theme/app_colors.dart';
 
 class ProgressPage extends StatefulWidget {
   const ProgressPage({super.key});
@@ -57,10 +58,10 @@ class _ProgressPageState extends State<ProgressPage> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: const Color(0xFF0F172A),
+      color: AppColors.background,
       child: _isLoading
           ? const Center(
-              child: CircularProgressIndicator(color: Color(0xFFF97316)),
+              child: CircularProgressIndicator(color: AppColors.accent),
             )
           : Column(
               children: [
@@ -76,13 +77,13 @@ class _ProgressPageState extends State<ProgressPage> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 12, vertical: 10),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF1E293B),
+                            color: AppColors.surface,
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Row(
                             children: [
                               const Icon(Icons.monitor_weight,
-                                  color: Color(0xFFE879F9), size: 20),
+                                  color: AppColors.bodyWeight, size: 20),
                               const SizedBox(width: 10),
                               if (_todayWeight != null) ...[
                                 Text(
@@ -95,12 +96,12 @@ class _ProgressPageState extends State<ProgressPage> {
                                 const SizedBox(width: 6),
                                 Text('progress.today'.tr(),
                                     style: const TextStyle(
-                                        color: Color(0xFF64748B),
+                                        color: AppColors.textMuted,
                                         fontSize: 12)),
                               ] else ...[
                                 Text('progress.no_weight_today'.tr(),
                                     style: const TextStyle(
-                                        color: Color(0xFF64748B),
+                                        color: AppColors.textMuted,
                                         fontSize: 13)),
                               ],
                               const Spacer(),
@@ -110,11 +111,11 @@ class _ProgressPageState extends State<ProgressPage> {
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 12, vertical: 6),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFFE879F9)
+                                    color: AppColors.bodyWeight
                                         .withOpacity(0.15),
                                     borderRadius: BorderRadius.circular(8),
                                     border: Border.all(
-                                        color: const Color(0xFFE879F9)
+                                        color: AppColors.bodyWeight
                                             .withOpacity(0.4)),
                                   ),
                                   child: Text(
@@ -122,7 +123,7 @@ class _ProgressPageState extends State<ProgressPage> {
                                         ? 'progress.edit_weight'.tr()
                                         : 'progress.add_weight_short'.tr(),
                                     style: const TextStyle(
-                                        color: Color(0xFFE879F9),
+                                        color: AppColors.bodyWeight,
                                         fontSize: 12,
                                         fontWeight: FontWeight.bold),
                                   ),
@@ -151,10 +152,10 @@ class _ProgressPageState extends State<ProgressPage> {
     final result = await showDialog<double>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1E293B),
+        backgroundColor: AppColors.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: Color(0xFFF97316), width: 1),
+          side: const BorderSide(color: AppColors.dialogBorder, width: 1),
         ),
         titlePadding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
         contentPadding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
@@ -179,15 +180,15 @@ class _ProgressPageState extends State<ProgressPage> {
               style: const TextStyle(color: Colors.white, fontSize: 14),
               decoration: InputDecoration(
                 filled: true,
-                fillColor: const Color(0xFF0F172A),
+                fillColor: AppColors.inputFill,
                 labelText: 'progress.weight_kg'.tr(),
                 labelStyle: const TextStyle(
-                  color: Color(0xFFF97316),
+                  color: AppColors.accent,
                   fontSize: 12,
                 ),
                 prefixIcon: const Icon(
                   Icons.monitor_weight,
-                  color: Color(0xFFF97316),
+                  color: AppColors.accent,
                   size: 18,
                 ),
                 contentPadding: const EdgeInsets.symmetric(
@@ -210,7 +211,7 @@ class _ProgressPageState extends State<ProgressPage> {
             ),
             child: Text(
               'workout.cancel'.tr(),
-              style: const TextStyle(color: Color(0xFF64748B), fontSize: 13),
+              style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
             ),
           ),
           ElevatedButton(
@@ -247,7 +248,7 @@ class _ProgressPageState extends State<ProgressPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('progress.weight_saved'.tr()),
-            backgroundColor: const Color(0xFF10B981),
+            backgroundColor: AppColors.success,
           ),
         );
       }
@@ -282,8 +283,8 @@ class _ProgressPageState extends State<ProgressPage> {
                   padding: const EdgeInsets.symmetric(vertical: 7),
                   decoration: BoxDecoration(
                     color: isActive
-                        ? const Color(0xFFF97316)
-                        : const Color(0xFF1E293B),
+                        ? AppColors.accent
+                        : AppColors.surface,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Center(
@@ -291,7 +292,7 @@ class _ProgressPageState extends State<ProgressPage> {
                       label,
                       style: TextStyle(
                         color:
-                            isActive ? Colors.white : const Color(0xFF64748B),
+                            isActive ? Colors.white : AppColors.textMuted,
                         fontSize: 11,
                         fontWeight:
                             isActive ? FontWeight.bold : FontWeight.normal,

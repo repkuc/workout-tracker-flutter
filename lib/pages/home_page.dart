@@ -6,6 +6,7 @@ import '../services/backup_service.dart';
 import '../models/workout_models.dart';
 import '../models/body_weight_entry.dart';
 import 'workout_editor_page.dart';
+import '../theme/app_colors.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -126,11 +127,11 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: _isLoading
             ? const Center(
-                child: CircularProgressIndicator(color: Color(0xFFF97316)))
+                child: CircularProgressIndicator(color: AppColors.accent))
             : Column(
                 children: [
                   // Шапка — фиксированная
@@ -189,7 +190,7 @@ class _HomePageState extends State<HomePage> {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: const Color(0xFFF97316),
+                color: AppColors.accent,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: const Icon(Icons.fitness_center,
@@ -216,10 +217,10 @@ class _HomePageState extends State<HomePage> {
     final result = await showDialog<double>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1E293B),
+        backgroundColor: AppColors.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: Color(0xFFF97316), width: 1),
+          side: const BorderSide(color: AppColors.dialogBorder, width: 1),
         ),
         titlePadding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
         contentPadding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
@@ -244,15 +245,15 @@ class _HomePageState extends State<HomePage> {
               style: const TextStyle(color: Colors.white, fontSize: 14),
               decoration: InputDecoration(
                 filled: true,
-                fillColor: const Color(0xFF0F172A),
+                fillColor: AppColors.inputFill,
                 labelText: 'progress.weight_kg'.tr(),
                 labelStyle: const TextStyle(
-                  color: Color(0xFFF97316),
+                  color: AppColors.accent,
                   fontSize: 12,
                 ),
                 prefixIcon: const Icon(
                   Icons.monitor_weight,
-                  color: Color(0xFFF97316),
+                  color: AppColors.accent,
                   size: 18,
                 ),
                 contentPadding: const EdgeInsets.symmetric(
@@ -275,7 +276,7 @@ class _HomePageState extends State<HomePage> {
             ),
             child: Text(
               'workout.cancel'.tr(),
-              style: const TextStyle(color: Color(0xFF64748B), fontSize: 13),
+              style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
             ),
           ),
           ElevatedButton(
@@ -312,7 +313,7 @@ class _HomePageState extends State<HomePage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('progress.weight_saved'.tr()),
-            backgroundColor: const Color(0xFF10B981),
+            backgroundColor: AppColors.success,
           ),
         );
       }
@@ -328,11 +329,11 @@ class _HomePageState extends State<HomePage> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: const Color(0xFF1E293B),
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: _todayWeight != null
-                ? const Color(0xFFE879F9).withOpacity(0.4)
+                ? AppColors.bodyWeight.withOpacity(0.4)
                 : Colors.grey.withOpacity(0.2),
             width: 1,
           ),
@@ -342,11 +343,11 @@ class _HomePageState extends State<HomePage> {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: const Color(0xFFE879F9).withOpacity(0.15),
+                color: AppColors.bodyWeight.withOpacity(0.15),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: const Icon(Icons.monitor_weight,
-                  color: Color(0xFFE879F9), size: 18),
+                  color: AppColors.bodyWeight, size: 18),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -356,7 +357,7 @@ class _HomePageState extends State<HomePage> {
                   Text(
                     'progress.weight_title'.tr(),
                     style: const TextStyle(
-                        color: Color(0xFF64748B),
+                        color: AppColors.textMuted,
                         fontSize: 11,
                         letterSpacing: 1),
                   ),
@@ -367,7 +368,7 @@ class _HomePageState extends State<HomePage> {
                     style: TextStyle(
                       color: _todayWeight != null
                           ? Colors.white
-                          : const Color(0xFF64748B),
+                          : AppColors.textMuted,
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                     ),
@@ -379,7 +380,7 @@ class _HomePageState extends State<HomePage> {
               _todayWeight != null
                   ? 'progress.edit_weight'.tr()
                   : 'progress.add_weight_short'.tr(),
-              style: const TextStyle(color: Color(0xFFE879F9), fontSize: 12),
+              style: const TextStyle(color: AppColors.bodyWeight, fontSize: 12),
             ),
           ],
         ),
@@ -406,7 +407,7 @@ class _HomePageState extends State<HomePage> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFF1E293B),
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(14),
       ),
       child: Column(
@@ -463,7 +464,7 @@ class _HomePageState extends State<HomePage> {
                     child: Center(
                       child: Text(day,
                           style: const TextStyle(
-                              color: Color(0xFF64748B), fontSize: 10)),
+                              color: AppColors.textMuted, fontSize: 10)),
                     ),
                   ),
                 )
@@ -507,7 +508,7 @@ class _HomePageState extends State<HomePage> {
                     margin: const EdgeInsets.all(1.5),
                     decoration: BoxDecoration(
                       color: isToday
-                          ? const Color(0xFFF97316)
+                          ? AppColors.accent
                           : hasWorkout
                               ? workoutColor!.withOpacity(0.15)
                               : Colors.transparent,
@@ -560,14 +561,14 @@ class _HomePageState extends State<HomePage> {
       children: [
         _buildStatCard(
           icon: Icons.fitness_center,
-          color: const Color(0xFFF97316),
+          color: AppColors.count,
           value: '${_completedWorkouts.length}',
           label: 'home.total_workouts'.tr(),
         ),
         const SizedBox(width: 10),
         _buildStatCard(
           icon: Icons.monitor_weight,
-          color: const Color(0xFF10B981),
+          color: AppColors.volume,
           value: _formatVolume(_totalVolume),
           label: 'workout.total_volume_short'.tr(),
         ),
@@ -595,7 +596,7 @@ class _HomePageState extends State<HomePage> {
         child: Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: const Color(0xFF1E293B),
+            color: AppColors.surface,
             borderRadius: BorderRadius.circular(14),
           ),
           child: Column(
@@ -630,7 +631,7 @@ class _HomePageState extends State<HomePage> {
                   Text(
                     label,
                     style:
-                        const TextStyle(color: Color(0xFF64748B), fontSize: 9),
+                        const TextStyle(color: AppColors.textMuted, fontSize: 9),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -690,7 +691,7 @@ class _HomePageState extends State<HomePage> {
         ),
         style: ElevatedButton.styleFrom(
           backgroundColor:
-              hasDraft ? const Color(0xFFF97316) : const Color(0xFF10B981),
+              hasDraft ? AppColors.draft : AppColors.active,
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape:
@@ -711,10 +712,10 @@ class _HomePageState extends State<HomePage> {
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
-          backgroundColor: const Color(0xFF1E293B),
+          backgroundColor: AppColors.surface,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
-            side: const BorderSide(color: Color(0xFFF97316), width: 1),
+            side: const BorderSide(color: AppColors.dialogBorder, width: 1),
           ),
           titlePadding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
           contentPadding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
@@ -738,11 +739,11 @@ class _HomePageState extends State<HomePage> {
                   style: const TextStyle(color: Colors.white, fontSize: 14),
                   decoration: InputDecoration(
                     filled: true,
-                    fillColor: const Color(0xFF0F172A),
+                    fillColor: AppColors.inputFill,
                     hintText: 'workout.workout_name_hint'.tr(),
-                    hintStyle: const TextStyle(color: Color(0xFF64748B)),
+                    hintStyle: const TextStyle(color: AppColors.textMuted),
                     prefixIcon: const Icon(Icons.fitness_center,
-                        color: Color(0xFFF97316), size: 18),
+                        color: AppColors.accent, size: 18),
                     contentPadding: const EdgeInsets.symmetric(
                         horizontal: 12, vertical: 10),
                     border: OutlineInputBorder(
@@ -757,7 +758,7 @@ class _HomePageState extends State<HomePage> {
                 Text(
                   'workout.color'.tr(),
                   style: const TextStyle(
-                      color: Color(0xFF64748B), fontSize: 11, letterSpacing: 1),
+                      color: AppColors.textMuted, fontSize: 11, letterSpacing: 1),
                 ),
                 const SizedBox(height: 8),
                 Row(
@@ -799,7 +800,7 @@ class _HomePageState extends State<HomePage> {
                 Text(
                   'workout.muscle_groups'.tr(),
                   style: const TextStyle(
-                      color: Color(0xFF64748B), fontSize: 11, letterSpacing: 1),
+                      color: AppColors.textMuted, fontSize: 11, letterSpacing: 1),
                 ),
                 const SizedBox(height: 8),
                 GridView.count(
@@ -835,7 +836,7 @@ class _HomePageState extends State<HomePage> {
                         decoration: BoxDecoration(
                           color: isSelected
                               ? accentColor.withOpacity(0.15)
-                              : const Color(0xFF0F172A),
+                              : AppColors.surfaceInset,
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(
                             color:
@@ -855,14 +856,14 @@ class _HomePageState extends State<HomePage> {
                                     Icons.fitness_center,
                                     color: isSelected
                                         ? accentColor
-                                        : const Color(0xFF64748B),
+                                        : AppColors.textMuted,
                                     size: 24),
                               )
                             else
                               Icon(Icons.accessibility_new,
                                   color: isSelected
                                       ? accentColor
-                                      : const Color(0xFF64748B),
+                                      : AppColors.textMuted,
                                   size: 28),
                             const SizedBox(height: 3),
                             Text(
@@ -870,7 +871,7 @@ class _HomePageState extends State<HomePage> {
                               style: TextStyle(
                                 color: isSelected
                                     ? accentColor
-                                    : const Color(0xFF64748B),
+                                    : AppColors.textMuted,
                                 fontSize: 9,
                                 fontWeight: isSelected
                                     ? FontWeight.bold
@@ -893,7 +894,7 @@ class _HomePageState extends State<HomePage> {
             TextButton(
               onPressed: () => Navigator.pop(context, null),
               child: Text('workout.cancel'.tr(),
-                  style: const TextStyle(color: Color(0xFF64748B))),
+                  style: const TextStyle(color: AppColors.textMuted)),
             ),
             ElevatedButton(
               onPressed: () {
@@ -934,7 +935,7 @@ class _HomePageState extends State<HomePage> {
 
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF1E293B),
+      backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(20),
@@ -975,7 +976,7 @@ class _HomePageState extends State<HomePage> {
               const SizedBox(height: 4),
               Text(
                 workout.date,
-                style: const TextStyle(color: Color(0xFF64748B), fontSize: 12),
+                style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
               ),
 
               // Бейдж "из программы" — такой же как в истории.
@@ -985,16 +986,16 @@ class _HomePageState extends State<HomePage> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF818CF8).withOpacity(0.12),
+                    color: AppColors.program.withOpacity(0.12),
                     borderRadius: BorderRadius.circular(6),
                     border: Border.all(
-                        color: const Color(0xFF818CF8).withOpacity(0.4)),
+                        color: AppColors.program.withOpacity(0.4)),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       const Icon(Icons.assignment,
-                          color: Color(0xFF818CF8), size: 10),
+                          color: AppColors.program, size: 10),
                       const SizedBox(width: 4),
                       // Показываем "Название программы · Название дня".
                       // Если по какой-то причине programName не сохранился
@@ -1007,7 +1008,7 @@ class _HomePageState extends State<HomePage> {
                               : workout.programWorkoutName ??
                                   'programs.title'.tr(),
                           style: const TextStyle(
-                            color: Color(0xFF818CF8),
+                            color: AppColors.program,
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
                           ),
@@ -1104,7 +1105,7 @@ class _HomePageState extends State<HomePage> {
             ),
             Text(
               label,
-              style: const TextStyle(color: Color(0xFF64748B), fontSize: 9),
+              style: const TextStyle(color: AppColors.textMuted, fontSize: 9),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,

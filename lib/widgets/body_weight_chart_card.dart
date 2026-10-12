@@ -3,6 +3,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../services/body_weight_service.dart';
 import '../models/body_weight_entry.dart';
+import '../theme/app_colors.dart';
 
 class BodyWeightChartCard extends StatefulWidget {
   final int? selectedDays;
@@ -53,7 +54,7 @@ class _BodyWeightChartCardState extends State<BodyWeightChartCard> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1F2937),
+        color: AppColors.chartCard,
         borderRadius: BorderRadius.circular(14),
       ),
       child: Column(
@@ -69,7 +70,7 @@ class _BodyWeightChartCardState extends State<BodyWeightChartCard> {
                   Text(
                     'progress.weight_title'.tr(),
                     style: const TextStyle(
-                      color: Color(0xFF9CA3AF),
+                      color: AppColors.chartText,
                       fontSize: 11,
                       letterSpacing: 1.5,
                     ),
@@ -102,7 +103,7 @@ class _BodyWeightChartCardState extends State<BodyWeightChartCard> {
             child: _isLoading
                 ? const Center(
                     child: CircularProgressIndicator(
-                      color: Color(0xFFF97316),
+                      color: AppColors.accent,
                     ),
                   )
                 : _entries.isEmpty
@@ -110,7 +111,7 @@ class _BodyWeightChartCardState extends State<BodyWeightChartCard> {
                         child: Text(
                           'progress.no_data'.tr(),
                           style: const TextStyle(
-                            color: Color(0xFF6B7280),
+                            color: AppColors.chartTextMuted,
                           ),
                         ),
                       )
@@ -143,14 +144,14 @@ class _BodyWeightChartCardState extends State<BodyWeightChartCard> {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
         color: isDown
-            ? const Color(0xFF064E3B) // тёмно-зелёный
-            : const Color(0xFF7C2D12), // тёмно-красный
+            ? AppColors.weightDownBackground // тёмно-зелёный
+            : AppColors.weightUpBackground, // тёмно-красный
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
         '${isDown ? '' : '+'}${delta.toStringAsFixed(1)} ${'workout.kg'.tr()}',
         style: TextStyle(
-          color: isDown ? const Color(0xFF34D399) : const Color(0xFFFB7185),
+          color: isDown ? AppColors.weightDownText : AppColors.weightUpText,
           fontSize: 13,
           fontWeight: FontWeight.bold,
         ),
@@ -181,7 +182,7 @@ class _BodyWeightChartCardState extends State<BodyWeightChartCard> {
             final isWhole = value == value.roundToDouble();
             return FlLine(
               color:
-                  isWhole ? const Color(0xFF4B5563) : const Color(0xFF374151),
+                  isWhole ? AppColors.chartGridMajor : AppColors.chartGrid,
               strokeWidth: isWhole ? 1.2 : 0.6,
             );
           },
@@ -222,7 +223,7 @@ class _BodyWeightChartCardState extends State<BodyWeightChartCard> {
                   child: Text(
                     '${parts[2]}.${parts[1]}',
                     style: const TextStyle(
-                      color: Color(0xFF6B7280),
+                      color: AppColors.chartTextMuted,
                       fontSize: 9,
                     ),
                   ),
@@ -241,7 +242,7 @@ class _BodyWeightChartCardState extends State<BodyWeightChartCard> {
                 return Text(
                   value.toInt().toString(),
                   style: const TextStyle(
-                    color: Color(0xFF6B7280),
+                    color: AppColors.chartTextMuted,
                     fontSize: 9,
                   ),
                 );
@@ -252,7 +253,7 @@ class _BodyWeightChartCardState extends State<BodyWeightChartCard> {
         lineBarsData: [
           LineChartBarData(
             spots: spots,
-            color: const Color(0xFFE879F9),
+            color: AppColors.bodyWeight,
             barWidth: 2,
             isCurved: true,
             curveSmoothness: 0.3,
@@ -264,15 +265,15 @@ class _BodyWeightChartCardState extends State<BodyWeightChartCard> {
                 return FlDotCirclePainter(
                   radius: isBig ? 4 : 2,
                   color: isBig
-                      ? const Color(0xFFE879F9)
-                      : const Color(0xFFE879F9).withOpacity(0.4),
+                      ? AppColors.bodyWeight
+                      : AppColors.bodyWeight.withOpacity(0.4),
                   strokeWidth: 0,
                 );
               },
             ),
             belowBarData: BarAreaData(
               show: true,
-              color: const Color(0xFFE879F9).withOpacity(0.08),
+              color: AppColors.bodyWeight.withOpacity(0.08),
             ),
           ),
         ],

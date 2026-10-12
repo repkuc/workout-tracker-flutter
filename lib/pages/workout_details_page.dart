@@ -3,6 +3,7 @@ import 'package:easy_localization/easy_localization.dart';
 import '../services/workout_service.dart';
 import '../models/workout_models.dart';
 import 'workout_editor_page.dart';
+import '../theme/app_colors.dart';
 
 class WorkoutDetailsPage extends StatefulWidget {
   final String workoutId;
@@ -50,10 +51,10 @@ class _WorkoutDetailsPageState extends State<WorkoutDetailsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: _isLoading
-            ? const Center(child: CircularProgressIndicator(color: Color(0xFFF97316)))
+            ? const Center(child: CircularProgressIndicator(color: AppColors.accent))
             : _workout == null
                 ? Center(child: Text('workout.not_found'.tr(), style: const TextStyle(color: Colors.white)))
                 : Column(
@@ -86,9 +87,9 @@ class _WorkoutDetailsPageState extends State<WorkoutDetailsPage> {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
       decoration: BoxDecoration(
-        color: const Color(0xFF0F172A),
+        color: AppColors.background,
         border: Border(
-          bottom: BorderSide(color: const Color(0xFFF97316).withOpacity(0.2), width: 1),
+          bottom: BorderSide(color: AppColors.accent.withOpacity(0.2), width: 1),
         ),
       ),
       child: Column(
@@ -118,15 +119,15 @@ class _WorkoutDetailsPageState extends State<WorkoutDetailsPage> {
             runSpacing: 4,
             children: [
               Row(mainAxisSize: MainAxisSize.min, children: [
-                const Icon(Icons.check_circle, color: Color(0xFF10B981), size: 14),
+                const Icon(Icons.check_circle, color: AppColors.success, size: 14),
                 const SizedBox(width: 4),
-                Text(formattedDate, style: const TextStyle(color: Color(0xFF64748B), fontSize: 12)),
+                Text(formattedDate, style: const TextStyle(color: AppColors.textMuted, fontSize: 12)),
               ]),
               if (_workout!.duration != null)
                 Row(mainAxisSize: MainAxisSize.min, children: [
-                  const Icon(Icons.timer, color: Color(0xFF10B981), size: 14),
+                  const Icon(Icons.timer, color: AppColors.success, size: 14),
                   const SizedBox(width: 4),
-                  Text(_formatDuration(_workout!.duration!), style: const TextStyle(color: Color(0xFF64748B), fontSize: 12)),
+                  Text(_formatDuration(_workout!.duration!), style: const TextStyle(color: AppColors.textMuted, fontSize: 12)),
                 ]),
             ],
           ),
@@ -136,13 +137,13 @@ class _WorkoutDetailsPageState extends State<WorkoutDetailsPage> {
           // 4 карточки статистики
           Row(
             children: [
-              _buildStatCard('${_workout!.exercises.length}', 'history.exercises'.tr(), const Color(0xFFF97316)),
+              _buildStatCard('${_workout!.exercises.length}', 'history.exercises'.tr(), AppColors.count),
               const SizedBox(width: 8),
-              _buildStatCard('$doneSets/$totalSets', 'history.sets'.tr(), const Color(0xFF10B981)),
+              _buildStatCard('$doneSets/$totalSets', 'history.sets'.tr(), AppColors.success),
               const SizedBox(width: 8),
-              _buildStatCard('$totalReps', 'history.reps'.tr(), const Color(0xFF818CF8)),
+              _buildStatCard('$totalReps', 'history.reps'.tr(), AppColors.reps),
               const SizedBox(width: 8),
-              _buildStatCard(_formatVolume(totalVolume), 'history.volume'.tr(), const Color(0xFF10B981)),
+              _buildStatCard(_formatVolume(totalVolume), 'history.volume'.tr(), AppColors.volume),
             ],
           ),
         ],
@@ -155,7 +156,7 @@ class _WorkoutDetailsPageState extends State<WorkoutDetailsPage> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
         decoration: BoxDecoration(
-          color: const Color(0xFF1E293B),
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(10),
         ),
         child: Column(
@@ -164,7 +165,7 @@ class _WorkoutDetailsPageState extends State<WorkoutDetailsPage> {
               fit: BoxFit.scaleDown,
               child: Text(value, style: TextStyle(color: color, fontSize: 14, fontWeight: FontWeight.bold)),
             ),
-            Text(label, style: const TextStyle(color: Color(0xFF64748B), fontSize: 9), maxLines: 1, overflow: TextOverflow.ellipsis),
+            Text(label, style: const TextStyle(color: AppColors.textMuted, fontSize: 9), maxLines: 1, overflow: TextOverflow.ellipsis),
           ],
         ),
       ),
@@ -190,7 +191,7 @@ class _WorkoutDetailsPageState extends State<WorkoutDetailsPage> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFF1E293B),
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -202,10 +203,10 @@ class _WorkoutDetailsPageState extends State<WorkoutDetailsPage> {
               Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF97316).withOpacity(0.15),
+                  color: AppColors.accent.withOpacity(0.15),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Icon(Icons.fitness_center, color: Color(0xFFF97316), size: 14),
+                child: const Icon(Icons.fitness_center, color: AppColors.accent, size: 14),
               ),
               const SizedBox(width: 8),
               Expanded(
@@ -214,17 +215,17 @@ class _WorkoutDetailsPageState extends State<WorkoutDetailsPage> {
                   children: [
                     Text(exercise.name, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600)),
                     if (exercise.targetMuscle.isNotEmpty)
-                      Text(exercise.targetMuscle, style: const TextStyle(color: Color(0xFF64748B), fontSize: 11)),
+                      Text(exercise.targetMuscle, style: const TextStyle(color: AppColors.textMuted, fontSize: 11)),
                   ],
                 ),
               ),
-              Text(_formatVolume(volume), style: const TextStyle(color: Color(0xFFF97316), fontSize: 12, fontWeight: FontWeight.w600)),
+              Text(_formatVolume(volume), style: const TextStyle(color: AppColors.accent, fontSize: 12, fontWeight: FontWeight.w600)),
             ],
           ),
 
           if (exercise.sets.isNotEmpty) ...[
             const SizedBox(height: 10),
-            const Divider(height: 1, color: Color(0xFF0F172A)),
+            const Divider(height: 1, color: AppColors.divider),
             const SizedBox(height: 10),
 
             // Подходы в сетку 2 колонки
@@ -253,7 +254,7 @@ class _WorkoutDetailsPageState extends State<WorkoutDetailsPage> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       decoration: BoxDecoration(
-        color: const Color(0xFF0F172A),
+        color: AppColors.surfaceInset,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -261,7 +262,7 @@ class _WorkoutDetailsPageState extends State<WorkoutDetailsPage> {
           Container(
             width: 20, height: 20,
             decoration: BoxDecoration(
-              color: set.isDone ? const Color(0xFF10B981) : const Color(0xFFF97316),
+              color: set.isDone ? AppColors.success : AppColors.pending,
               shape: BoxShape.circle,
             ),
             child: Center(
@@ -284,7 +285,7 @@ class _WorkoutDetailsPageState extends State<WorkoutDetailsPage> {
                 ),
                 Text(
                   '${set.weight} ${'workout.kg'.tr()}',
-                  style: const TextStyle(color: Color(0xFF64748B), fontSize: 10),
+                  style: const TextStyle(color: AppColors.textMuted, fontSize: 10),
                 ),
               ],
             ),
@@ -296,7 +297,7 @@ class _WorkoutDetailsPageState extends State<WorkoutDetailsPage> {
 
   Widget _buildEmptyState() {
     return Center(
-      child: Text('workout.no_exercises_in_workout'.tr(), style: const TextStyle(color: Color(0xFF64748B))),
+      child: Text('workout.no_exercises_in_workout'.tr(), style: const TextStyle(color: AppColors.textMuted)),
     );
   }
 
@@ -313,7 +314,7 @@ class _WorkoutDetailsPageState extends State<WorkoutDetailsPage> {
             style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
           ),
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFFF97316),
+            backgroundColor: AppColors.accent,
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(vertical: 14),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -327,10 +328,10 @@ class _WorkoutDetailsPageState extends State<WorkoutDetailsPage> {
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1E293B),
+        backgroundColor: AppColors.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: Color(0xFFF97316), width: 1),
+          side: const BorderSide(color: AppColors.dialogBorder, width: 1),
         ),
         titlePadding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
         contentPadding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
@@ -341,19 +342,19 @@ class _WorkoutDetailsPageState extends State<WorkoutDetailsPage> {
         ),
         content: Text(
           'workout.repeat_workout_message'.tr(),
-          style: const TextStyle(color: Color(0xFF64748B), fontSize: 13),
+          style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text('workout.cancel'.tr(), style: const TextStyle(color: Color(0xFF64748B))),
+            child: Text('workout.cancel'.tr(), style: const TextStyle(color: AppColors.textMuted)),
           ),
           ElevatedButton.icon(
             onPressed: () => Navigator.pop(context, true),
             icon: const Icon(Icons.repeat, size: 16),
             label: Text('history.repeat'.tr()),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFF97316),
+              backgroundColor: AppColors.accent,
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             ),
@@ -372,7 +373,7 @@ class _WorkoutDetailsPageState extends State<WorkoutDetailsPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('workout.workout_copied'.tr()),
-            backgroundColor: const Color(0xFF10B981),
+            backgroundColor: AppColors.success,
           ),
         );
         Navigator.pushReplacement(

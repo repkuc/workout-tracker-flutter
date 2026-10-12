@@ -10,6 +10,7 @@ import '../services/body_measurement_service.dart';
 
 // Подключаем fl_chart для графика.
 import 'package:fl_chart/fl_chart.dart';
+import '../theme/app_colors.dart';
 
 class BodyMeasurementsPage extends StatefulWidget {
   const BodyMeasurementsPage({super.key});
@@ -99,7 +100,7 @@ class _BodyMeasurementsPageState extends State<BodyMeasurementsPage> {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return const Center(
-          child: CircularProgressIndicator(color: Color(0xFFF97316)));
+          child: CircularProgressIndicator(color: AppColors.accent));
     }
 
     return SingleChildScrollView(
@@ -126,19 +127,19 @@ class _BodyMeasurementsPageState extends State<BodyMeasurementsPage> {
         width: double.infinity,
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: const Color(0xFFF97316).withOpacity(0.1),
+          color: AppColors.accent.withOpacity(0.1),
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: const Color(0xFFF97316).withOpacity(0.4)),
+          border: Border.all(color: AppColors.accent.withOpacity(0.4)),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.add, color: Color(0xFFF97316), size: 18),
+            const Icon(Icons.add, color: AppColors.accent, size: 18),
             const SizedBox(width: 6),
             Text(
               'measurements.add_measurement'.tr(),
               style: const TextStyle(
-                  color: Color(0xFFF97316),
+                  color: AppColors.accent,
                   fontSize: 13,
                   fontWeight: FontWeight.bold),
             ),
@@ -158,7 +159,7 @@ class _BodyMeasurementsPageState extends State<BodyMeasurementsPage> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-          color: const Color(0xFF1E293B),
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(12)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -172,7 +173,7 @@ class _BodyMeasurementsPageState extends State<BodyMeasurementsPage> {
                     child: Text(
                       'measurements.need_more_data'.tr(),
                       style: const TextStyle(
-                          color: Color(0xFF64748B), fontSize: 12),
+                          color: AppColors.textMuted, fontSize: 12),
                     ),
                   )
                 : LineChart(
@@ -181,7 +182,7 @@ class _BodyMeasurementsPageState extends State<BodyMeasurementsPage> {
                         show: true,
                         drawVerticalLine: false,
                         getDrawingHorizontalLine: (value) => FlLine(
-                            color: const Color(0xFF374151), strokeWidth: 0.8),
+                            color: AppColors.chartGrid, strokeWidth: 0.8),
                       ),
                       borderData: FlBorderData(show: false),
                       titlesData: FlTitlesData(
@@ -196,7 +197,7 @@ class _BodyMeasurementsPageState extends State<BodyMeasurementsPage> {
                             getTitlesWidget: (value, meta) => Text(
                               '${value.toInt()}',
                               style: const TextStyle(
-                                  color: Color(0xFF6B7280), fontSize: 10),
+                                  color: AppColors.chartTextMuted, fontSize: 10),
                             ),
                           ),
                         ),
@@ -218,7 +219,7 @@ class _BodyMeasurementsPageState extends State<BodyMeasurementsPage> {
                               return Text(
                                 '${date.day}.${date.month}',
                                 style: const TextStyle(
-                                    color: Color(0xFF6B7280), fontSize: 9),
+                                    color: AppColors.chartTextMuted, fontSize: 9),
                               );
                             },
                           ),
@@ -279,10 +280,10 @@ class _BodyMeasurementsPageState extends State<BodyMeasurementsPage> {
                   decoration: BoxDecoration(
                     color: isVisible
                         ? color.withOpacity(0.15)
-                        : const Color(0xFF0F172A),
+                        : AppColors.surfaceInset,
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                        color: isVisible ? color : const Color(0xFF374151)),
+                        color: isVisible ? color : AppColors.chipBorder),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -291,14 +292,14 @@ class _BodyMeasurementsPageState extends State<BodyMeasurementsPage> {
                         width: 6,
                         height: 6,
                         decoration: BoxDecoration(
-                            color: isVisible ? color : const Color(0xFF64748B),
+                            color: isVisible ? color : AppColors.textMuted,
                             shape: BoxShape.circle),
                       ),
                       const SizedBox(width: 4),
                       Text(
                         (type['labelKey'] as String).tr(),
                         style: TextStyle(
-                          color: isVisible ? color : const Color(0xFF64748B),
+                          color: isVisible ? color : AppColors.textMuted,
                           fontSize: 10,
                           fontWeight:
                               isVisible ? FontWeight.bold : FontWeight.normal,
@@ -323,7 +324,7 @@ class _BodyMeasurementsPageState extends State<BodyMeasurementsPage> {
         Text(
           'measurements.history'.tr(),
           style: const TextStyle(
-              color: Color(0xFF64748B), fontSize: 11, letterSpacing: 1),
+              color: AppColors.textMuted, fontSize: 11, letterSpacing: 1),
         ),
         const SizedBox(height: 8),
         if (_entries.isEmpty)
@@ -332,7 +333,7 @@ class _BodyMeasurementsPageState extends State<BodyMeasurementsPage> {
             child: Center(
               child: Text(
                 'measurements.no_entries'.tr(),
-                style: const TextStyle(color: Color(0xFF64748B), fontSize: 13),
+                style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
               ),
             ),
           )
@@ -363,7 +364,7 @@ class _BodyMeasurementsPageState extends State<BodyMeasurementsPage> {
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
-            color: const Color(0xFF1E293B),
+            color: AppColors.surface,
             borderRadius: BorderRadius.circular(10)),
         child: Row(
           children: [
@@ -371,7 +372,7 @@ class _BodyMeasurementsPageState extends State<BodyMeasurementsPage> {
               width: 50,
               child: Text(formattedDate,
                   style:
-                      const TextStyle(color: Color(0xFF64748B), fontSize: 11)),
+                      const TextStyle(color: AppColors.textMuted, fontSize: 11)),
             ),
             Expanded(
               child: Text(
@@ -391,7 +392,7 @@ class _BodyMeasurementsPageState extends State<BodyMeasurementsPage> {
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1E293B),
+        backgroundColor: AppColors.surface,
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
             side: const BorderSide(color: Colors.red, width: 1)),
@@ -404,7 +405,7 @@ class _BodyMeasurementsPageState extends State<BodyMeasurementsPage> {
           TextButton(
             onPressed: () => Navigator.pop(context, false),
             child: Text('workout.cancel'.tr(),
-                style: const TextStyle(color: Color(0xFF64748B))),
+                style: const TextStyle(color: AppColors.textMuted)),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
@@ -440,10 +441,10 @@ class _BodyMeasurementsPageState extends State<BodyMeasurementsPage> {
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1E293B),
+        backgroundColor: AppColors.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: Color(0xFFF97316), width: 1),
+          side: const BorderSide(color: AppColors.dialogBorder, width: 1),
         ),
         title: Text(
           // Заголовок отличается — "Добавить замер" или "Редактировать замер".
@@ -458,7 +459,7 @@ class _BodyMeasurementsPageState extends State<BodyMeasurementsPage> {
               children: [
                 Text(
                   'measurements.fill_hint'.tr(),
-                  style: const TextStyle(color: Color(0xFF64748B), fontSize: 11),
+                  style: const TextStyle(color: AppColors.textMuted, fontSize: 11),
                 ),
                 const SizedBox(height: 12),
                 ..._measurementTypes.map((type) {
@@ -471,11 +472,11 @@ class _BodyMeasurementsPageState extends State<BodyMeasurementsPage> {
                       style: const TextStyle(color: Colors.white, fontSize: 14),
                       decoration: InputDecoration(
                         filled: true,
-                        fillColor: const Color(0xFF0F172A),
+                        fillColor: AppColors.inputFill,
                         labelText: (type['labelKey'] as String).tr(),
                         labelStyle: TextStyle(color: type['color'] as Color, fontSize: 12),
                         suffixText: 'см',
-                        suffixStyle: const TextStyle(color: Color(0xFF64748B), fontSize: 12),
+                        suffixStyle: const TextStyle(color: AppColors.textMuted, fontSize: 12),
                         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
                       ),
@@ -489,7 +490,7 @@ class _BodyMeasurementsPageState extends State<BodyMeasurementsPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text('workout.cancel'.tr(), style: const TextStyle(color: Color(0xFF64748B))),
+            child: Text('workout.cancel'.tr(), style: const TextStyle(color: AppColors.textMuted)),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
@@ -522,7 +523,7 @@ class _BodyMeasurementsPageState extends State<BodyMeasurementsPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('measurements.saved'.tr()),
-            backgroundColor: const Color(0xFF10B981),
+            backgroundColor: AppColors.success,
           ),
         );
       }

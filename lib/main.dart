@@ -3,6 +3,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'services/workout_service.dart';
 import 'pages/main_page.dart';
 import 'services/exercise_library_service.dart';
+import 'theme/app_colors.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -45,15 +46,15 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
         brightness: Brightness.light,
         colorScheme: const ColorScheme.light(
-          primary: Color(0xFFF97316), // ОРАНЖЕВЫЙ (энергия)
-          secondary: Color(0xFFEA580C), // Тёмно-оранжевый
-          tertiary: Color(0xFF10B981), // Зелёный (успех)
-          surface: Color(0xFFF5F5F5), // Светло-серый
+          primary: AppColors.accent, // ОРАНЖЕВЫЙ (энергия)
+          secondary: AppColors.themeLightSecondary, // Тёмно-оранжевый
+          tertiary: AppColors.success, // Зелёный (успех)
+          surface: AppColors.themeLightSurface, // Светло-серый
           onPrimary: Colors.white,
           onSecondary: Colors.white,
         ),
         appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFF1F2937), // Тёмно-серый (металл)
+          backgroundColor: AppColors.themeLightAppBar, // Тёмно-серый (металл)
           foregroundColor: Colors.white,
           elevation: 4,
           centerTitle: true,
@@ -67,7 +68,7 @@ class MyApp extends StatelessWidget {
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFFF97316), // Оранжевый (как в тёмной теме)
+            backgroundColor: AppColors.accent, // Оранжевый (как в тёмной теме)
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             shape: RoundedRectangleBorder(
@@ -81,15 +82,15 @@ class MyApp extends StatelessWidget {
           fillColor: Colors.white,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+            borderSide: const BorderSide(color: AppColors.themeLightInputBorder),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+            borderSide: const BorderSide(color: AppColors.themeLightInputBorder),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Color(0xFFF97316), width: 2),
+            borderSide: const BorderSide(color: AppColors.accent, width: 2),
           ),
         ),
       ),
@@ -99,15 +100,15 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
         brightness: Brightness.dark,
         colorScheme: const ColorScheme.dark(
-          primary: Color(0xFFFB923C), // Ярко-оранжевый
-          secondary: Color(0xFFF97316), // Оранжевый
-          tertiary: Color(0xFF10B981), // Зелёный (успех)
-          surface: Color(0xFF111827), // Почти чёрный
+          primary: AppColors.themeDarkPrimary, // Ярко-оранжевый
+          secondary: AppColors.accent, // Оранжевый
+          tertiary: AppColors.success, // Зелёный (успех)
+          surface: AppColors.themeDarkSurface, // Почти чёрный
           onPrimary: Colors.white,
           onSecondary: Colors.black,
         ),
         appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFF0F172A), // Глубокий чёрный
+          backgroundColor: AppColors.background, // Глубокий чёрный
           foregroundColor: Colors.white,
           elevation: 4,
           centerTitle: true,
@@ -117,11 +118,11 @@ class MyApp extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          color: const Color(0xFF1F2937), // Тёмно-серый
+          color: AppColors.themeDarkCard, // Тёмно-серый
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFFF97316), // Оранжевый
+            backgroundColor: AppColors.accent, // Оранжевый
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             shape: RoundedRectangleBorder(

@@ -4,6 +4,7 @@ import 'progress_page.dart';
 import '../services/workout_service.dart';
 import '../models/workout_models.dart';
 import 'body_measurements_page.dart'; // Импортируем страницу замеров тела
+import '../theme/app_colors.dart';
 
 class StatisticsPage extends StatefulWidget {
   const StatisticsPage({super.key});
@@ -31,7 +32,7 @@ class _StatisticsPageState extends State<StatisticsPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: Column(
           children: [
@@ -43,7 +44,7 @@ class _StatisticsPageState extends State<StatisticsPage>
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF97316),
+                      color: AppColors.accent,
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: const Icon(Icons.bar_chart,
@@ -67,19 +68,19 @@ class _StatisticsPageState extends State<StatisticsPage>
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Container(
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1E293B),
+                  color: AppColors.surface,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: TabBar(
                   controller: _tabController,
                   indicator: BoxDecoration(
-                    color: const Color(0xFFF97316),
+                    color: AppColors.accent,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   indicatorSize: TabBarIndicatorSize.tab,
                   dividerColor: Colors.transparent,
                   labelColor: Colors.white,
-                  unselectedLabelColor: const Color(0xFF64748B),
+                  unselectedLabelColor: AppColors.textMuted,
                   tabs: const [
                     Tab(icon: Icon(Icons.dashboard, size: 20)),
                     Tab(icon: Icon(Icons.show_chart, size: 20)),
@@ -210,7 +211,7 @@ class _OverviewTabState extends State<_OverviewTab> {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return const Center(
-          child: CircularProgressIndicator(color: Color(0xFFF97316)));
+          child: CircularProgressIndicator(color: AppColors.accent));
     }
 
     return SingleChildScrollView(
@@ -236,16 +237,16 @@ class _OverviewTabState extends State<_OverviewTab> {
           Row(
             children: [
               _buildStatCard(Icons.fitness_center, '$_totalWorkouts',
-                  'statistics.total_workouts'.tr(), const Color(0xFFF97316)),
+                  'statistics.total_workouts'.tr(), AppColors.count),
               const SizedBox(width: 8),
               _buildStatCard(Icons.monitor_weight, _formatVolume(_totalVolume),
-                  'statistics.total_volume'.tr(), const Color(0xFF10B981)),
+                  'statistics.total_volume'.tr(), AppColors.volume),
               const SizedBox(width: 8),
               _buildStatCard(Icons.repeat, '$_totalReps',
-                  'statistics.total_reps'.tr(), const Color(0xFF818CF8)),
+                  'statistics.total_reps'.tr(), AppColors.reps),
               const SizedBox(width: 8),
               _buildStatCard(Icons.timer, _formatDuration(_totalDuration),
-                  'statistics.total_time'.tr(), const Color(0xFF60A5FA)),
+                  'statistics.total_time'.tr(), AppColors.duration),
             ],
           ),
 
@@ -280,14 +281,14 @@ class _OverviewTabState extends State<_OverviewTab> {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 7),
           decoration: BoxDecoration(
-            color: isActive ? const Color(0xFFF97316) : const Color(0xFF1E293B),
+            color: isActive ? AppColors.accent : AppColors.surface,
             borderRadius: BorderRadius.circular(8),
           ),
           child: Center(
             child: Text(
               label,
               style: TextStyle(
-                color: isActive ? Colors.white : const Color(0xFF64748B),
+                color: isActive ? Colors.white : AppColors.textMuted,
                 fontSize: 11,
                 fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
               ),
@@ -304,7 +305,7 @@ class _OverviewTabState extends State<_OverviewTab> {
       child: Container(
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: const Color(0xFF1E293B),
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
@@ -330,7 +331,7 @@ class _OverviewTabState extends State<_OverviewTab> {
             ),
             Text(
               label,
-              style: const TextStyle(color: Color(0xFF64748B), fontSize: 9),
+              style: const TextStyle(color: AppColors.textMuted, fontSize: 9),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -342,11 +343,11 @@ class _OverviewTabState extends State<_OverviewTab> {
 
   Widget _buildTop() {
     final medals = [
-      const Color(0xFFFFD700),
-      const Color(0xFFC0C0C0),
-      const Color(0xFFCD7F32),
-      const Color(0xFF374151),
-      const Color(0xFF374151),
+      AppColors.medalGold,
+      AppColors.medalSilver,
+      AppColors.medalBronze,
+      AppColors.medalNone,
+      AppColors.medalNone,
     ];
 
     final visible =
@@ -355,7 +356,7 @@ class _OverviewTabState extends State<_OverviewTab> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFF1E293B),
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -367,7 +368,7 @@ class _OverviewTabState extends State<_OverviewTab> {
               const SizedBox(width: 6),
               Text('statistics.top_exercises'.tr().replaceAll('🏆 ', ''),
                   style: const TextStyle(
-                      color: Color(0xFF64748B),
+                      color: AppColors.textMuted,
                       fontSize: 10,
                       letterSpacing: 1)),
             ],
@@ -375,12 +376,12 @@ class _OverviewTabState extends State<_OverviewTab> {
           const SizedBox(height: 10),
           if (_topExercises.isEmpty)
             Text('statistics.no_exercises'.tr(),
-                style: const TextStyle(color: Color(0xFF64748B), fontSize: 11))
+                style: const TextStyle(color: AppColors.textMuted, fontSize: 11))
           else ...[
             ...visible.asMap().entries.map((entry) {
               final i = entry.key;
               final ex = entry.value;
-              final color = i < 3 ? medals[i] : const Color(0xFF374151);
+              final color = i < 3 ? medals[i] : AppColors.medalNone;
               return Padding(
                 padding: const EdgeInsets.only(bottom: 8),
                 child: Row(
@@ -402,13 +403,13 @@ class _OverviewTabState extends State<_OverviewTab> {
                     Expanded(
                       child: Text(ex.key,
                           style: const TextStyle(
-                              color: Color(0xFFE2E8F0), fontSize: 11),
+                              color: AppColors.textSoft, fontSize: 11),
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1),
                     ),
                     Text(_formatVolume(ex.value),
                         style: const TextStyle(
-                            color: Color(0xFFF97316),
+                            color: AppColors.accent,
                             fontSize: 11,
                             fontWeight: FontWeight.w600)),
                   ],
@@ -424,7 +425,7 @@ class _OverviewTabState extends State<_OverviewTab> {
                       : 'progress.show_more'.tr(
                           namedArgs: {'count': '${_topExercises.length - 5}'}),
                   style:
-                      const TextStyle(color: Color(0xFFF97316), fontSize: 11),
+                      const TextStyle(color: AppColors.accent, fontSize: 11),
                 ),
               ),
           ],
@@ -440,7 +441,7 @@ class _OverviewTabState extends State<_OverviewTab> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFF1E293B),
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -452,7 +453,7 @@ class _OverviewTabState extends State<_OverviewTab> {
               const SizedBox(width: 6),
               Text('statistics.records'.tr(),
                   style: const TextStyle(
-                      color: Color(0xFF64748B),
+                      color: AppColors.textMuted,
                       fontSize: 10,
                       letterSpacing: 1)),
             ],
@@ -460,7 +461,7 @@ class _OverviewTabState extends State<_OverviewTab> {
           const SizedBox(height: 10),
           if (allRecords.isEmpty)
             Text('statistics.no_exercises'.tr(),
-                style: const TextStyle(color: Color(0xFF64748B), fontSize: 11))
+                style: const TextStyle(color: AppColors.textMuted, fontSize: 11))
           else ...[
             ...visible.map((entry) {
               return Padding(
@@ -470,13 +471,13 @@ class _OverviewTabState extends State<_OverviewTab> {
                     Expanded(
                       child: Text(entry.key,
                           style: const TextStyle(
-                              color: Color(0xFFE2E8F0), fontSize: 11),
+                              color: AppColors.textSoft, fontSize: 11),
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1),
                     ),
                     Text('${entry.value} ${'workout.kg'.tr()}',
                         style: const TextStyle(
-                            color: Color(0xFF10B981),
+                            color: AppColors.success,
                             fontSize: 11,
                             fontWeight: FontWeight.bold)),
                   ],
@@ -492,7 +493,7 @@ class _OverviewTabState extends State<_OverviewTab> {
                       : 'progress.show_more'
                           .tr(namedArgs: {'count': '${allRecords.length - 5}'}),
                   style:
-                      const TextStyle(color: Color(0xFF10B981), fontSize: 11),
+                      const TextStyle(color: AppColors.success, fontSize: 11),
                 ),
               ),
           ],

@@ -4,6 +4,7 @@ import 'dart:async';
 import '../services/workout_service.dart';
 import '../models/workout_models.dart';
 import '../pages/workout_editor_page.dart';
+import '../theme/app_colors.dart';
 
 class ActiveWorkoutBanner extends StatefulWidget {
   const ActiveWorkoutBanner({super.key});
@@ -85,10 +86,10 @@ class _ActiveWorkoutBannerState extends State<ActiveWorkoutBanner> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: const Color(0xFF1E293B),
+        color: AppColors.surface,
         border: Border(
           top: BorderSide(
-            color: const Color(0xFF10B981).withOpacity(0.4),
+            color: AppColors.active.withOpacity(0.4),
             width: 1,
           ),
         ),
@@ -116,7 +117,7 @@ class _ActiveWorkoutBannerState extends State<ActiveWorkoutBanner> {
           Text(
             _formatDuration(_elapsedSeconds),
             style: const TextStyle(
-              color: Color(0xFF10B981),
+              color: AppColors.active,
               fontSize: 13,
               fontWeight: FontWeight.bold,
               fontFeatures: [FontFeature.tabularFigures()],
@@ -140,14 +141,14 @@ class _ActiveWorkoutBannerState extends State<ActiveWorkoutBanner> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: const Color(0xFFF97316).withOpacity(0.15),
+                color: AppColors.accent.withOpacity(0.15),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: const Color(0xFFF97316), width: 1),
+                border: Border.all(color: AppColors.accent, width: 1),
               ),
               child: Text(
                 'workout.open'.tr(),
                 style: const TextStyle(
-                  color: Color(0xFFF97316),
+                  color: AppColors.accent,
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
                 ),
@@ -168,7 +169,7 @@ class _ActiveWorkoutBannerState extends State<ActiveWorkoutBanner> {
           width: 8,
           height: 8,
           decoration: BoxDecoration(
-            color: const Color(0xFF10B981).withOpacity(value),
+            color: AppColors.active.withOpacity(value),
             shape: BoxShape.circle,
           ),
         );

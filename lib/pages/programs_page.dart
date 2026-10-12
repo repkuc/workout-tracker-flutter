@@ -14,6 +14,7 @@ import '../services/program_service.dart';
 import 'create_program_page.dart';
 // Подключаем экран деталей программы, чтобы можно было на него перейти.
 import 'program_details_page.dart';
+import '../theme/app_colors.dart';
 
 // StatefulWidget — потому что страница должна загружать данные асинхронно
 // и обновлять экран когда данные придут (в отличие от StatelessWidget).
@@ -63,7 +64,7 @@ class _ProgramsPageState extends State<ProgramsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: Column(
           children: [
@@ -75,7 +76,7 @@ class _ProgramsPageState extends State<ProgramsPage> {
               child: _isLoading
                   ? const Center(
                       child:
-                          CircularProgressIndicator(color: Color(0xFFF97316)),
+                          CircularProgressIndicator(color: AppColors.accent),
                     )
                   : _programs.isEmpty
                       ? _buildEmptyState()
@@ -99,7 +100,7 @@ class _ProgramsPageState extends State<ProgramsPage> {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: const Color(0xFFF97316),
+              color: AppColors.accent,
               borderRadius: BorderRadius.circular(10),
             ),
             child: const Icon(Icons.assignment, color: Colors.white, size: 20),
@@ -127,21 +128,21 @@ class _ProgramsPageState extends State<ProgramsPage> {
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: const Color(0xFFF97316).withOpacity(0.1),
+              color: AppColors.accent.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
             child: const Icon(Icons.assignment,
-                size: 56, color: Color(0xFFF97316)),
+                size: 56, color: AppColors.accent),
           ),
           const SizedBox(height: 16),
           Text(
             'programs.no_programs'.tr(),
-            style: const TextStyle(color: Color(0xFF64748B), fontSize: 16),
+            style: const TextStyle(color: AppColors.textMuted, fontSize: 16),
           ),
           const SizedBox(height: 4),
           Text(
             'programs.create_first'.tr(),
-            style: const TextStyle(color: Color(0xFF374151), fontSize: 13),
+            style: const TextStyle(color: AppColors.textFaint, fontSize: 13),
           ),
         ],
       ),
@@ -175,10 +176,10 @@ class _ProgramsPageState extends State<ProgramsPage> {
         margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: const Color(0xFF1E293B),
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: const Color(0xFFF97316).withOpacity(0.2),
+            color: AppColors.accent.withOpacity(0.2),
             width: 1,
           ),
         ),
@@ -203,14 +204,14 @@ class _ProgramsPageState extends State<ProgramsPage> {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF818CF8).withOpacity(0.15),
-                      border: Border.all(color: const Color(0xFF818CF8)),
+                      color: AppColors.program.withOpacity(0.15),
+                      border: Border.all(color: AppColors.program),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
                       'programs.custom_badge'.tr(),
                       style: const TextStyle(
-                        color: Color(0xFF818CF8),
+                        color: AppColors.program,
                         fontSize: 9,
                         fontWeight: FontWeight.bold,
                       ),
@@ -225,12 +226,12 @@ class _ProgramsPageState extends State<ProgramsPage> {
               Row(
                 children: [
                   const Icon(Icons.calendar_today,
-                      color: Color(0xFF64748B), size: 12),
+                      color: AppColors.textMuted, size: 12),
                   const SizedBox(width: 4),
                   Text(
                     program.schedule,
                     style:
-                        const TextStyle(color: Color(0xFF64748B), fontSize: 11),
+                        const TextStyle(color: AppColors.textMuted, fontSize: 11),
                   ),
                 ],
               ),
@@ -248,15 +249,15 @@ class _ProgramsPageState extends State<ProgramsPage> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF97316).withOpacity(0.12),
+                    color: AppColors.accent.withOpacity(0.12),
                     border: Border.all(
-                        color: const Color(0xFFF97316).withOpacity(0.3)),
+                        color: AppColors.accent.withOpacity(0.3)),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
                     w.name,
                     style: const TextStyle(
-                      color: Color(0xFFF97316),
+                      color: AppColors.accent,
                       fontSize: 11,
                       fontWeight: FontWeight.bold,
                     ),
@@ -294,7 +295,7 @@ class _ProgramsPageState extends State<ProgramsPage> {
             style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
           ),
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFFF97316),
+            backgroundColor: AppColors.accent,
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(vertical: 14),
             shape:

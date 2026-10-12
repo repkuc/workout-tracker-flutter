@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../models/exercise_template.dart';
 import '../services/exercise_library_service.dart';
+import '../theme/app_colors.dart';
 
 class ExercisePickerPage extends StatefulWidget {
   const ExercisePickerPage({super.key});
@@ -69,7 +70,7 @@ class _ExercisePickerPageState extends State<ExercisePickerPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: Column(
           children: [
@@ -101,7 +102,7 @@ class _ExercisePickerPageState extends State<ExercisePickerPage> {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Container(
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1E293B),
+                  color: AppColors.surface,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: TextField(
@@ -111,9 +112,9 @@ class _ExercisePickerPageState extends State<ExercisePickerPage> {
                     filled: true,
                     fillColor: Colors.transparent,
                     hintText: 'workout.exercise_search_hint'.tr(),
-                    hintStyle: const TextStyle(color: Color(0xFF64748B)),
+                    hintStyle: const TextStyle(color: AppColors.textMuted),
                     prefixIcon: const Icon(Icons.search,
-                        color: Color(0xFF64748B), size: 20),
+                        color: AppColors.textMuted, size: 20),
                     border: InputBorder.none,
                     contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16, vertical: 12),
@@ -150,12 +151,12 @@ class _ExercisePickerPageState extends State<ExercisePickerPage> {
                       ),
                       decoration: BoxDecoration(
                         color: isSelected
-                            ? const Color(0xFFF97316).withOpacity(0.15)
-                            : const Color(0xFF1E293B),
+                            ? AppColors.accent.withOpacity(0.15)
+                            : AppColors.surface,
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
                           color: isSelected
-                              ? const Color(0xFFF97316)
+                              ? AppColors.accent
                               : Colors.transparent,
                           width: 1.5,
                         ),
@@ -167,8 +168,8 @@ class _ExercisePickerPageState extends State<ExercisePickerPage> {
                               ? Icon(
                                   Icons.fitness_center,
                                   color: isSelected
-                                      ? const Color(0xFFF97316)
-                                      : const Color(0xFF64748B),
+                                      ? AppColors.accent
+                                      : AppColors.textMuted,
                                   size: 20,
                                 )
                               : Image.asset(
@@ -176,13 +177,13 @@ class _ExercisePickerPageState extends State<ExercisePickerPage> {
                                   width: 22,
                                   height: 22,
                                   color: isSelected
-                                      ? const Color(0xFFF97316)
-                                      : const Color(0xFF64748B),
+                                      ? AppColors.accent
+                                      : AppColors.textMuted,
                                   errorBuilder: (_, __, ___) => Icon(
                                     Icons.fitness_center,
                                     color: isSelected
-                                        ? const Color(0xFFF97316)
-                                        : const Color(0xFF64748B),
+                                        ? AppColors.accent
+                                        : AppColors.textMuted,
                                     size: 20,
                                   ),
                                 ),
@@ -193,7 +194,7 @@ class _ExercisePickerPageState extends State<ExercisePickerPage> {
                                   ? 'workout.all_exercises'.tr()
                                   : 'workout.muscle_$key'.tr(),
                               style: const TextStyle(
-                                color: Color(0xFFF97316),
+                                color: AppColors.accent,
                                 fontSize: 10,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -214,7 +215,7 @@ class _ExercisePickerPageState extends State<ExercisePickerPage> {
               child: _isLoading
                   ? const Center(
                       child:
-                          CircularProgressIndicator(color: Color(0xFFF97316)))
+                          CircularProgressIndicator(color: AppColors.accent))
                   : _filtered.isEmpty
                       ? _buildEmpty()
                       : ListView.builder(
@@ -245,7 +246,7 @@ class _ExercisePickerPageState extends State<ExercisePickerPage> {
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
-          color: const Color(0xFF1E293B),
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
@@ -255,7 +256,7 @@ class _ExercisePickerPageState extends State<ExercisePickerPage> {
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                color: const Color(0xFFF97316).withOpacity(0.15),
+                color: AppColors.accent.withOpacity(0.15),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: exercise.muscleGroup.isNotEmpty
@@ -265,12 +266,12 @@ class _ExercisePickerPageState extends State<ExercisePickerPage> {
                       height: 24,
                       errorBuilder: (_, __, ___) => const Icon(
                         Icons.fitness_center,
-                        color: Color(0xFFF97316),
+                        color: AppColors.accent,
                         size: 18,
                       ),
                     )
                   : const Icon(Icons.fitness_center,
-                      color: Color(0xFFF97316), size: 18),
+                      color: AppColors.accent, size: 18),
             ),
             const SizedBox(width: 12),
 
@@ -291,7 +292,7 @@ class _ExercisePickerPageState extends State<ExercisePickerPage> {
                     Text(
                       'workout.muscle_${exercise.muscleGroup}'.tr(),
                       style: const TextStyle(
-                        color: Color(0xFF64748B),
+                        color: AppColors.textMuted,
                         fontSize: 11,
                       ),
                     ),
@@ -301,10 +302,10 @@ class _ExercisePickerPageState extends State<ExercisePickerPage> {
 
             // Иконка пользовательского упражнения
             if (exercise.isCustom)
-              const Icon(Icons.person, color: Color(0xFF64748B), size: 16),
+              const Icon(Icons.person, color: AppColors.textMuted, size: 16),
 
             const Icon(Icons.add_circle_outline,
-                color: Color(0xFFF97316), size: 20),
+                color: AppColors.accent, size: 20),
           ],
         ),
       ),
@@ -316,11 +317,11 @@ class _ExercisePickerPageState extends State<ExercisePickerPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.search_off, color: Color(0xFF64748B), size: 48),
+          const Icon(Icons.search_off, color: AppColors.textMuted, size: 48),
           const SizedBox(height: 12),
           Text(
             'workout.no_exercises_found'.tr(),
-            style: const TextStyle(color: Color(0xFF64748B), fontSize: 14),
+            style: const TextStyle(color: AppColors.textMuted, fontSize: 14),
           ),
           const SizedBox(height: 20),
           _buildAddCustomButton(),
@@ -337,22 +338,22 @@ class _ExercisePickerPageState extends State<ExercisePickerPage> {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           decoration: BoxDecoration(
-            color: const Color(0xFFF97316).withOpacity(0.1),
+            color: AppColors.accent.withOpacity(0.1),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: const Color(0xFFF97316).withOpacity(0.4),
+              color: AppColors.accent.withOpacity(0.4),
               width: 1,
             ),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.add, color: Color(0xFFF97316), size: 20),
+              const Icon(Icons.add, color: AppColors.accent, size: 20),
               const SizedBox(width: 8),
               Text(
                 'workout.add_custom_exercise'.tr(),
                 style: const TextStyle(
-                  color: Color(0xFFF97316),
+                  color: AppColors.accent,
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                 ),
@@ -372,10 +373,10 @@ class _ExercisePickerPageState extends State<ExercisePickerPage> {
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
-          backgroundColor: const Color(0xFF1E293B),
+          backgroundColor: AppColors.surface,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
-            side: const BorderSide(color: Color(0xFFF97316), width: 1),
+            side: const BorderSide(color: AppColors.dialogBorder, width: 1),
           ),
           titlePadding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
           contentPadding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
@@ -397,11 +398,11 @@ class _ExercisePickerPageState extends State<ExercisePickerPage> {
                   style: const TextStyle(color: Colors.white, fontSize: 14),
                   decoration: InputDecoration(
                     filled: true,
-                    fillColor: const Color(0xFF0F172A),
+                    fillColor: AppColors.inputFill,
                     hintText: 'workout.exercise_name_hint'.tr(),
-                    hintStyle: const TextStyle(color: Color(0xFF64748B)),
+                    hintStyle: const TextStyle(color: AppColors.textMuted),
                     prefixIcon: const Icon(Icons.fitness_center,
-                        color: Color(0xFFF97316), size: 18),
+                        color: AppColors.accent, size: 18),
                     contentPadding: const EdgeInsets.symmetric(
                         horizontal: 12, vertical: 10),
                     border: OutlineInputBorder(
@@ -414,7 +415,7 @@ class _ExercisePickerPageState extends State<ExercisePickerPage> {
                 Text(
                   'workout.muscle_groups'.tr(),
                   style: const TextStyle(
-                      color: Color(0xFF64748B), fontSize: 11, letterSpacing: 1),
+                      color: AppColors.textMuted, fontSize: 11, letterSpacing: 1),
                 ),
                 const SizedBox(height: 8),
                 Wrap(
@@ -438,21 +439,21 @@ class _ExercisePickerPageState extends State<ExercisePickerPage> {
                             horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
                           color: isSelected
-                              ? const Color(0xFFF97316).withOpacity(0.2)
-                              : const Color(0xFF0F172A),
+                              ? AppColors.accent.withOpacity(0.2)
+                              : AppColors.surfaceInset,
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
                             color: isSelected
-                                ? const Color(0xFFF97316)
-                                : const Color(0xFF374151),
+                                ? AppColors.accent
+                                : AppColors.chipBorder,
                           ),
                         ),
                         child: Text(
                           'workout.muscle_$key'.tr(),
                           style: TextStyle(
                             color: isSelected
-                                ? const Color(0xFFF97316)
-                                : const Color(0xFF64748B),
+                                ? AppColors.accent
+                                : AppColors.textMuted,
                             fontSize: 12,
                           ),
                         ),
@@ -467,7 +468,7 @@ class _ExercisePickerPageState extends State<ExercisePickerPage> {
             TextButton(
               onPressed: () => Navigator.pop(context, false),
               child: Text('workout.cancel'.tr(),
-                  style: const TextStyle(color: Color(0xFF64748B))),
+                  style: const TextStyle(color: AppColors.textMuted)),
             ),
             ElevatedButton(
               onPressed: () {

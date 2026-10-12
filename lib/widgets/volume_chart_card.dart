@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../services/workout_service.dart';
+import '../theme/app_colors.dart';
 
 class VolumeChartCard extends StatefulWidget {
   final int? selectedDays;
@@ -91,7 +92,7 @@ class _VolumeChartCardState extends State<VolumeChartCard> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1F2937),
+        color: AppColors.chartCard,
         borderRadius: BorderRadius.circular(14),
       ),
       child: Column(
@@ -107,7 +108,7 @@ class _VolumeChartCardState extends State<VolumeChartCard> {
                   Text(
                     'progress.volume_title'.tr(),
                     style: const TextStyle(
-                      color: Color(0xFF9CA3AF),
+                      color: AppColors.chartText,
                       fontSize: 11,
                       letterSpacing: 1.5,
                     ),
@@ -155,7 +156,7 @@ class _VolumeChartCardState extends State<VolumeChartCard> {
                       child: Text(
                         entry.key,
                         style: const TextStyle(
-                          color: Color(0xFF9CA3AF),
+                          color: AppColors.chartText,
                           fontSize: 11,
                         ),
                         overflow: TextOverflow.ellipsis,
@@ -175,7 +176,7 @@ class _VolumeChartCardState extends State<VolumeChartCard> {
             child: _isLoading
                 ? const Center(
                     child: CircularProgressIndicator(
-                      color: Color(0xFFF97316),
+                      color: AppColors.accent,
                     ),
                   )
                 : _data.isEmpty
@@ -183,7 +184,7 @@ class _VolumeChartCardState extends State<VolumeChartCard> {
                         child: Text(
                           'progress.no_data'.tr(),
                           style: const TextStyle(
-                            color: Color(0xFF6B7280),
+                            color: AppColors.chartTextMuted,
                           ),
                         ),
                       )
@@ -209,8 +210,8 @@ class _VolumeChartCardState extends State<VolumeChartCard> {
             final is5t = value % 5000 == 0;
             return FlLine(
               color: is5t
-                  ? const Color(0xFF6B7280) // ярче
-                  : const Color(0xFF374151), // обычная тёмная
+                  ? AppColors.chartGridHighlight // ярче
+                  : AppColors.chartGrid, // обычная тёмная
               strokeWidth: is5t ? 1.5 : 0.8,
             );
           },
@@ -238,7 +239,7 @@ class _VolumeChartCardState extends State<VolumeChartCard> {
                 return Text(
                   '${parts[2]}.${parts[1]}',
                   style: const TextStyle(
-                    color: Color(0xFF6B7280),
+                    color: AppColors.chartTextMuted,
                     fontSize: 10,
                   ),
                 );
@@ -253,7 +254,7 @@ class _VolumeChartCardState extends State<VolumeChartCard> {
                 return Text(
                   '${(value / 1000).toStringAsFixed(1)}т',
                   style: const TextStyle(
-                    color: Color(0xFF6B7280),
+                    color: AppColors.chartTextMuted,
                     fontSize: 10,
                   ),
                 );

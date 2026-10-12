@@ -3,6 +3,7 @@ import 'package:easy_localization/easy_localization.dart';
 import '../services/backup_service.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../theme/app_colors.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -28,7 +29,7 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: Column(
           children: [
@@ -39,7 +40,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF97316),
+                      color: AppColors.accent,
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: const Icon(Icons.settings,
@@ -76,7 +77,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     _buildCard(children: [
                       _buildActionItem(
                         icon: Icons.upload,
-                        color: const Color(0xFF10B981),
+                        color: AppColors.iconExport,
                         title: 'backup.export'.tr(),
                         subtitle: 'settings.export_subtitle'.tr(),
                         onTap: () async {
@@ -97,7 +98,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       _buildDivider(),
                       _buildActionItem(
                         icon: Icons.download,
-                        color: const Color(0xFF60A5FA),
+                        color: AppColors.iconImport,
                         title: 'backup.import'.tr(),
                         subtitle: 'settings.import_subtitle'.tr(),
                         onTap: () async {
@@ -111,7 +112,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                           .tr(namedArgs: {'count': '$count'})
                                       : 'backup.no_new_workouts'.tr()),
                                   backgroundColor: count > 0
-                                      ? const Color(0xFF10B981)
+                                      ? AppColors.success
                                       : Colors.grey,
                                 ),
                               );
@@ -138,8 +139,8 @@ class _SettingsPageState extends State<SettingsPage> {
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: [
-                              const Color(0xFFF97316),
-                              const Color(0xFFF97316).withOpacity(0.7),
+                              AppColors.accent,
+                              AppColors.accent.withOpacity(0.7),
                             ],
                           ),
                           borderRadius: BorderRadius.circular(14),
@@ -190,14 +191,14 @@ class _SettingsPageState extends State<SettingsPage> {
                     _buildCard(children: [
                       _buildInfoItem(
                         icon: Icons.info_outline,
-                        color: const Color(0xFF818CF8),
+                        color: AppColors.iconInfo,
                         title: 'settings.version'.tr(),
                         value: _version,
                       ),
                       _buildDivider(),
                       _buildActionItem(
                         icon: Icons.privacy_tip_outlined,
-                        color: const Color(0xFFF97316),
+                        color: AppColors.accent,
                         title: 'settings.privacy'.tr(),
                         subtitle: '',
                         onTap: () async {
@@ -226,7 +227,7 @@ class _SettingsPageState extends State<SettingsPage> {
       padding: const EdgeInsets.only(bottom: 8),
       child: Text(title.toUpperCase(),
           style: const TextStyle(
-              color: Color(0xFF64748B),
+              color: AppColors.textMuted,
               fontSize: 11,
               letterSpacing: 1.2,
               fontWeight: FontWeight.w600)),
@@ -236,7 +237,7 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget _buildCard({required List<Widget> children}) {
     return Container(
       decoration: BoxDecoration(
-          color: const Color(0xFF1E293B),
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(14)),
       child: Column(children: children),
     );
@@ -244,7 +245,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Widget _buildDivider() {
     return const Divider(
-        height: 1, color: Color(0xFF0F172A), indent: 16, endIndent: 16);
+        height: 1, color: AppColors.background, indent: 16, endIndent: 16);
   }
 
   Widget _buildLanguageItem(
@@ -263,7 +264,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     style: const TextStyle(color: Colors.white, fontSize: 15))),
             if (isSelected)
               const Icon(Icons.check_circle,
-                  color: Color(0xFFF97316), size: 20),
+                  color: AppColors.accent, size: 20),
           ],
         ),
       ),
@@ -300,11 +301,11 @@ class _SettingsPageState extends State<SettingsPage> {
                   if (subtitle.isNotEmpty)
                     Text(subtitle,
                         style: const TextStyle(
-                            color: Color(0xFF64748B), fontSize: 12)),
+                            color: AppColors.textMuted, fontSize: 12)),
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right, color: Color(0xFF374151), size: 20),
+            const Icon(Icons.chevron_right, color: AppColors.textFaint, size: 20),
           ],
         ),
       ),
@@ -332,7 +333,7 @@ class _SettingsPageState extends State<SettingsPage> {
               child: Text(title,
                   style: const TextStyle(color: Colors.white, fontSize: 15))),
           Text(value,
-              style: const TextStyle(color: Color(0xFF64748B), fontSize: 14)),
+              style: const TextStyle(color: AppColors.textMuted, fontSize: 14)),
         ],
       ),
     );

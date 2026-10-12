@@ -4,6 +4,7 @@ import '../services/workout_service.dart';
 import '../models/workout_models.dart';
 import 'workout_editor_page.dart';
 import 'workout_details_page.dart';
+import '../theme/app_colors.dart';
 
 class HistoryPage extends StatefulWidget {
   const HistoryPage({super.key});
@@ -84,7 +85,7 @@ class _HistoryPageState extends State<HistoryPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: Column(
           children: [
@@ -93,7 +94,7 @@ class _HistoryPageState extends State<HistoryPage> {
               child: _isLoading
                   ? const Center(
                       child:
-                          CircularProgressIndicator(color: Color(0xFFF97316)))
+                          CircularProgressIndicator(color: AppColors.accent))
                   : _workouts.isEmpty
                       ? _buildEmptyState()
                       : _buildWorkoutsList(),
@@ -112,7 +113,7 @@ class _HistoryPageState extends State<HistoryPage> {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: const Color(0xFFF97316),
+              color: AppColors.accent,
               borderRadius: BorderRadius.circular(10),
             ),
             child: const Icon(Icons.history, color: Colors.white, size: 20),
@@ -136,18 +137,18 @@ class _HistoryPageState extends State<HistoryPage> {
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: const Color(0xFFF97316).withOpacity(0.1),
+              color: AppColors.accent.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
             child:
-                const Icon(Icons.history, size: 56, color: Color(0xFFF97316)),
+                const Icon(Icons.history, size: 56, color: AppColors.accent),
           ),
           const SizedBox(height: 16),
           Text('history.no_workouts'.tr(),
-              style: const TextStyle(color: Color(0xFF64748B), fontSize: 16)),
+              style: const TextStyle(color: AppColors.textMuted, fontSize: 16)),
           const SizedBox(height: 4),
           Text('history.start_first'.tr(),
-              style: const TextStyle(color: Color(0xFF374151), fontSize: 13)),
+              style: const TextStyle(color: AppColors.textFaint, fontSize: 13)),
         ],
       ),
     );
@@ -163,7 +164,7 @@ class _HistoryPageState extends State<HistoryPage> {
 
   Widget _buildWorkoutCard(Workout workout) {
     final isDraft = workout.finishedAt == null;
-    final color = isDraft ? const Color(0xFFF97316) : _getWorkoutColor(workout);
+    final color = isDraft ? AppColors.draft : _getWorkoutColor(workout);
 
     final totalSets =
         workout.exercises.fold<int>(0, (s, e) => s + e.sets.length);
@@ -213,7 +214,7 @@ class _HistoryPageState extends State<HistoryPage> {
       child: Container(
         margin: const EdgeInsets.only(bottom: 10),
         decoration: BoxDecoration(
-          color: const Color(0xFF1E293B),
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(14),
         ),
         child: ClipRRect(
@@ -248,7 +249,7 @@ class _HistoryPageState extends State<HistoryPage> {
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 8, vertical: 3),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFFF97316),
+                                  color: AppColors.draft,
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: Text(
@@ -277,11 +278,11 @@ class _HistoryPageState extends State<HistoryPage> {
                                 padding: const EdgeInsets.all(6),
                                 decoration: BoxDecoration(
                                   color:
-                                      const Color(0xFF10B981).withOpacity(0.15),
+                                      AppColors.success.withOpacity(0.15),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: const Icon(Icons.check,
-                                    color: Color(0xFF10B981), size: 16),
+                                    color: AppColors.success, size: 16),
                               ),
                             ],
                           ],
@@ -293,7 +294,7 @@ class _HistoryPageState extends State<HistoryPage> {
                         Row(
                           children: [
                             Icon(Icons.calendar_today,
-                                color: const Color(0xFF64748B), size: 12),
+                                color: AppColors.textMuted, size: 12),
                             const SizedBox(width: 4),
                             Text(
                               isDraft
@@ -301,7 +302,7 @@ class _HistoryPageState extends State<HistoryPage> {
                                   : formattedDate,
                               style: TextStyle(
                                 color:
-                                    isDraft ? color : const Color(0xFF64748B),
+                                    isDraft ? color : AppColors.textMuted,
                                 fontSize: 11,
                                 fontWeight: isDraft
                                     ? FontWeight.bold
@@ -311,11 +312,11 @@ class _HistoryPageState extends State<HistoryPage> {
                             if (formattedTime.isNotEmpty && !isDraft) ...[
                               const SizedBox(width: 8),
                               Icon(Icons.access_time,
-                                  color: const Color(0xFF64748B), size: 12),
+                                  color: AppColors.textMuted, size: 12),
                               const SizedBox(width: 4),
                               Text(formattedTime,
                                   style: const TextStyle(
-                                      color: Color(0xFF64748B), fontSize: 11)),
+                                      color: AppColors.textMuted, fontSize: 11)),
                             ],
                           ],
                         ),
@@ -330,17 +331,17 @@ class _HistoryPageState extends State<HistoryPage> {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 8, vertical: 3),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF818CF8).withOpacity(0.12),
+                              color: AppColors.program.withOpacity(0.12),
                               borderRadius: BorderRadius.circular(6),
                               border: Border.all(
                                   color:
-                                      const Color(0xFF818CF8).withOpacity(0.4)),
+                                      AppColors.program.withOpacity(0.4)),
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 const Icon(Icons.assignment,
-                                    color: Color(0xFF818CF8), size: 10),
+                                    color: AppColors.program, size: 10),
                                 const SizedBox(width: 4),
                                 // Показываем "Название программы · Название дня".
                                 // Если по какой-то причине programName не сохранился
@@ -353,7 +354,7 @@ class _HistoryPageState extends State<HistoryPage> {
                                         : workout.programWorkoutName ??
                                             'programs.title'.tr(),
                                     style: const TextStyle(
-                                      color: Color(0xFF818CF8),
+                                      color: AppColors.program,
                                       fontSize: 10,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -376,20 +377,20 @@ class _HistoryPageState extends State<HistoryPage> {
                             _buildStat(
                                 '${workout.exercises.length}',
                                 'history.exercises'.tr(),
-                                const Color(0xFFF97316)),
+                                AppColors.count),
                             _buildStat(
                                 '$completedSets/$totalSets',
                                 'history.completed_sets'.tr(),
-                                const Color(0xFF10B981)),
+                                AppColors.success),
                             _buildStat('$totalReps', 'history.reps'.tr(),
-                                const Color(0xFF818CF8)),
+                                AppColors.reps),
                             _buildStat(_formatVolume(totalVolume),
-                                'history.volume'.tr(), const Color(0xFF10B981)),
+                                'history.volume'.tr(), AppColors.volume),
                             if (workout.duration != null)
                               _buildStat(
                                   _formatDuration(workout.duration!),
                                   'workout.duration'.tr(),
-                                  const Color(0xFF60A5FA)),
+                                  AppColors.duration),
                           ],
                         ),
                       ],
@@ -415,7 +416,7 @@ class _HistoryPageState extends State<HistoryPage> {
                     color: color, fontSize: 13, fontWeight: FontWeight.bold)),
           ),
           Text(label,
-              style: const TextStyle(color: Color(0xFF64748B), fontSize: 9),
+              style: const TextStyle(color: AppColors.textMuted, fontSize: 9),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center),
@@ -428,10 +429,10 @@ class _HistoryPageState extends State<HistoryPage> {
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1E293B),
+        backgroundColor: AppColors.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: Color(0xFFF97316), width: 1),
+          side: const BorderSide(color: AppColors.dialogBorder, width: 1),
         ),
         titlePadding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
         contentPadding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
@@ -442,19 +443,19 @@ class _HistoryPageState extends State<HistoryPage> {
                 fontSize: 16,
                 fontWeight: FontWeight.bold)),
         content: Text('workout.repeat_workout_message'.tr(),
-            style: const TextStyle(color: Color(0xFF64748B), fontSize: 13)),
+            style: const TextStyle(color: AppColors.textMuted, fontSize: 13)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
             child: Text('workout.cancel'.tr(),
-                style: const TextStyle(color: Color(0xFF64748B))),
+                style: const TextStyle(color: AppColors.textMuted)),
           ),
           ElevatedButton.icon(
             onPressed: () => Navigator.pop(context, true),
             icon: const Icon(Icons.repeat, size: 16),
             label: Text('history.repeat'.tr()),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFF97316),
+              backgroundColor: AppColors.accent,
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             ),
@@ -472,7 +473,7 @@ class _HistoryPageState extends State<HistoryPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
               content: Text('workout.workout_copied'.tr()),
-              backgroundColor: const Color(0xFF10B981)),
+              backgroundColor: AppColors.success),
         );
         Navigator.push(
           context,
@@ -493,7 +494,7 @@ class _HistoryPageState extends State<HistoryPage> {
   Future<void> _showWorkoutActionsMenu(Workout workout) async {
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF1E293B),
+      backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
             topLeft: Radius.circular(20), topRight: Radius.circular(20)),
@@ -507,7 +508,7 @@ class _HistoryPageState extends State<HistoryPage> {
               child: Row(
                 children: [
                   const Icon(Icons.fitness_center,
-                      color: Color(0xFFF97316), size: 20),
+                      color: AppColors.accent, size: 20),
                   const SizedBox(width: 12),
                   Expanded(
                       child: Text(workout.name,
@@ -518,9 +519,9 @@ class _HistoryPageState extends State<HistoryPage> {
                 ],
               ),
             ),
-            const Divider(height: 1, color: Color(0xFF0F172A)),
+            const Divider(height: 1, color: AppColors.divider),
             ListTile(
-              leading: const Icon(Icons.repeat, color: Color(0xFFF97316)),
+              leading: const Icon(Icons.repeat, color: AppColors.accent),
               title: Text('history.repeat'.tr(),
                   style: const TextStyle(color: Colors.white)),
               onTap: () {
@@ -548,7 +549,7 @@ class _HistoryPageState extends State<HistoryPage> {
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1E293B),
+        backgroundColor: AppColors.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
           side: const BorderSide(color: Colors.red, width: 1),
@@ -562,12 +563,12 @@ class _HistoryPageState extends State<HistoryPage> {
                 fontSize: 16,
                 fontWeight: FontWeight.bold)),
         content: Text('workout.delete_workout_message'.tr(),
-            style: const TextStyle(color: Color(0xFF64748B), fontSize: 13)),
+            style: const TextStyle(color: AppColors.textMuted, fontSize: 13)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
             child: Text('workout.cancel'.tr(),
-                style: const TextStyle(color: Color(0xFF64748B))),
+                style: const TextStyle(color: AppColors.textMuted)),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
