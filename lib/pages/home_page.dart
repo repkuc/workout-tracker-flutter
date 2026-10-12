@@ -216,10 +216,10 @@ class _HomePageState extends State<HomePage> {
     final result = await showDialog<double>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1F2937),
+        backgroundColor: const Color(0xFF1E293B),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: Color(0xFFF97316), width: 2),
+          side: const BorderSide(color: Color(0xFFF97316), width: 1),
         ),
         titlePadding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
         contentPadding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
@@ -244,7 +244,7 @@ class _HomePageState extends State<HomePage> {
               style: const TextStyle(color: Colors.white, fontSize: 14),
               decoration: InputDecoration(
                 filled: true,
-                fillColor: const Color(0xFF374151),
+                fillColor: const Color(0xFF0F172A),
                 labelText: 'progress.weight_kg'.tr(),
                 labelStyle: const TextStyle(
                   color: Color(0xFFF97316),
@@ -275,7 +275,7 @@ class _HomePageState extends State<HomePage> {
             ),
             child: Text(
               'workout.cancel'.tr(),
-              style: TextStyle(color: Colors.grey[400], fontSize: 13),
+              style: const TextStyle(color: Color(0xFF64748B), fontSize: 13),
             ),
           ),
           ElevatedButton(
