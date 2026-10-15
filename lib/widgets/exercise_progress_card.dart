@@ -217,7 +217,7 @@ class _ExerciseProgressCardState extends State<ExerciseProgressCard> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
             decoration: BoxDecoration(
-              color: AppColors.panel,
+              color: AppColors.chartPill,
               borderRadius: BorderRadius.circular(20),
             ),
             child: Row(

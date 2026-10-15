@@ -25,6 +25,7 @@ import 'package:uuid/uuid.dart';
 import '../models/exercise_template.dart';
 import 'exercise_picker_page.dart';
 import '../theme/app_colors.dart';
+import '../widgets/page_header.dart';
 
 class ProgramDetailsPage extends StatefulWidget {
   // Экран получает не саму программу, а только её ID.
@@ -141,36 +142,17 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
 
   // Шапка с кнопкой назад и названием программы.
   Widget _buildHeader() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-      child: Row(
-        children: [
-          GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: const Icon(Icons.arrow_back, color: Colors.white, size: 22),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              _program!.name,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-          // Кнопка меню действий — только для своих программ.
-          // Для готовых программ от нас (isCustom == false) её не будет,
-          // как и планировали заранее.
-          if (_program!.isCustom)
-            GestureDetector(
-              onTap: _showProgramActionsMenu,
-              child: const Icon(Icons.more_vert, color: Colors.white, size: 22),
-            ),
-        ],
-      ),
+    return PageHeader(
+      title: _program!.name,
+      // Кнопка меню действий — только для своих программ.
+      // Для готовых программ от нас (isCustom == false) её не будет,
+      // как и планировали заранее.
+      trailing: _program!.isCustom
+          ? IconButton(
+              onPressed: _showProgramActionsMenu,
+              icon: const Icon(Icons.more_vert, color: Colors.white, size: 22),
+            )
+          : null,
     );
   }
 

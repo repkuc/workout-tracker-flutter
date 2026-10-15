@@ -15,6 +15,7 @@ import 'create_program_page.dart';
 // Подключаем экран деталей программы, чтобы можно было на него перейти.
 import 'program_details_page.dart';
 import '../theme/app_colors.dart';
+import '../widgets/tab_header.dart';
 
 // StatefulWidget — потому что страница должна загружать данные асинхронно
 // и обновлять экран когда данные придут (в отличие от StatelessWidget).
@@ -93,30 +94,7 @@ class _ProgramsPageState extends State<ProgramsPage> {
 
   // Заголовок с иконкой и названием раздела.
   Widget _buildHeader() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: AppColors.accent,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: const Icon(Icons.assignment, color: Colors.white, size: 20),
-          ),
-          const SizedBox(width: 10),
-          Text(
-            'programs.title'.tr(),
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
-    );
+    return TabHeader(icon: Icons.assignment, title: 'programs.title'.tr());
   }
 
   // Пустое состояние — когда у пользователя ещё нет ни одной программы.

@@ -3,6 +3,7 @@ import 'package:easy_localization/easy_localization.dart';
 import '../models/exercise_template.dart';
 import '../services/exercise_library_service.dart';
 import '../theme/app_colors.dart';
+import '../widgets/page_header.dart';
 
 class ExercisePickerPage extends StatefulWidget {
   const ExercisePickerPage({super.key});
@@ -75,27 +76,7 @@ class _ExercisePickerPageState extends State<ExercisePickerPage> {
         child: Column(
           children: [
             // Шапка
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-              child: Row(
-                children: [
-                  GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: const Icon(Icons.arrow_back,
-                        color: Colors.white, size: 22),
-                  ),
-                  const SizedBox(width: 12),
-                  Text(
-                    'workout.add_exercise'.tr(),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            PageHeader(title: 'workout.add_exercise'.tr()),
 
             // Поиск
             Padding(

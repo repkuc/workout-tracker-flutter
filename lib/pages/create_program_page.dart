@@ -19,6 +19,7 @@ import '../models/exercise_template.dart';
 // Подключаем экран выбора упражнения.
 import 'exercise_picker_page.dart';
 import '../theme/app_colors.dart';
+import '../widgets/page_header.dart';
 
 class CreateProgramPage extends StatefulWidget {
   const CreateProgramPage({super.key});
@@ -74,26 +75,7 @@ class _CreateProgramPageState extends State<CreateProgramPage> {
   }
 
   Widget _buildHeader() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-      child: Row(
-        children: [
-          GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: const Icon(Icons.arrow_back, color: Colors.white, size: 22),
-          ),
-          const SizedBox(width: 12),
-          Text(
-            'programs.create_program'.tr(),
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
-    );
+    return PageHeader(title: 'programs.create_program'.tr());
   }
 
   Widget _buildNameField() {

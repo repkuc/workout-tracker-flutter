@@ -5,6 +5,7 @@ import '../services/workout_service.dart';
 import '../models/workout_models.dart';
 import 'body_measurements_page.dart'; // Импортируем страницу замеров тела
 import '../theme/app_colors.dart';
+import '../widgets/tab_header.dart';
 
 class StatisticsPage extends StatefulWidget {
   const StatisticsPage({super.key});
@@ -37,30 +38,10 @@ class _StatisticsPageState extends State<StatisticsPage>
         child: Column(
           children: [
             // Шапка
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: AppColors.accent,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: const Icon(Icons.bar_chart,
-                        color: Colors.white, size: 20),
-                  ),
-                  const SizedBox(width: 10),
-                  Text(
-                    'statistics.title'.tr(),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
+            TabHeader(
+              icon: Icons.bar_chart,
+              title: 'statistics.title'.tr(),
+              bottomPadding: 8,
             ),
 
             // Табы

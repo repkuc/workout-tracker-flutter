@@ -12,7 +12,7 @@ abstract final class AppColors {
   static const Color surfaceInset = Color(0xFF0F172A); // вложенные блоки и чипы внутри карточек/диалогов
   static const Color inputFill = Color(0xFF0F172A); // заливка полей ввода
   static const Color divider = Color(0xFF0F172A); // разделители внутри карточек
-  static const Color panel = Color(0xFF374151); // внутренние панели в диалогах редактора и на карточках графиков
+  static const Color panel = Color(0xFF374151); // внутренние панели в диалогах редактора
   static const Color chipBorder = Color(0xFF374151); // рамка невыбранного чипа
 
   // ── Акцент ──
@@ -33,13 +33,13 @@ abstract final class AppColors {
   static const Color warning = Color(0xFFF97316); // предупреждение (незавершённые упражнения)
   static const Color improvement = Color(0xFF10B981); // положительная разница «до / после»
   static const Color record = Color(0xFFFBBF24); // рекорды (PR): значок в редакторе, список в статистике
-  static const Color danger = Color(0xFFF44336); // удаление, ошибки, отрицательная разница (= Colors.red)
+  static const Color danger = Color(0xFFEF4444); // удаление, ошибки, отрицательная разница (Tailwind red-500)
 
-  // ── Нейтральные серые (значения Material, пока не slate) ──
-  static const Color inactive = Color(0xFF9E9E9E); // невыбранные иконки навигации, неактивные/невыполненные элементы (= Colors.grey)
-  static const Color iconNeutral = Color(0xFF9E9E9E); // нейтральная иконка целевой мышцы (= Colors.grey[500])
-  static const Color completedButton = Color(0xFF616161); // кнопка уже завершённого упражнения (= Colors.grey[700])
-  static const Color snackbarNeutral = Color(0xFF9E9E9E); // нейтральный snackbar «нечего импортировать» (= Colors.grey)
+  // ── Нейтральные серые (slate) ──
+  static const Color inactive = Color(0xFF94A3B8); // невыбранные иконки навигации, неактивные/невыполненные элементы
+  static const Color iconNeutral = Color(0xFF94A3B8); // нейтральная иконка целевой мышцы
+  static const Color completedButton = Color(0xFF475569); // кнопка уже завершённого упражнения
+  static const Color snackbarNeutral = Color(0xFF475569); // нейтральный snackbar «нечего импортировать»
 
   // ── Метрики (карточки статистики) ──
   static const Color count = Color(0xFFF97316); // количество тренировок / упражнений
@@ -75,6 +75,7 @@ abstract final class AppColors {
   static const Color chartTextMuted = textMuted; // подписи осей, «нет данных»
   static const Color chartGrid = Color(0xFF334155); // обычные линии сетки
   static const Color chartGridMajor = Color(0xFF475569); // «главные» линии: целые кг (вес), каждые 5 т (объём)
+  static const Color chartPill = Color(0xFF334155); // кнопка «показать ещё / свернуть» под чипами упражнений
 
   // ── Material-темы (main.dart) ──
   static const Color themeLightSecondary = Color(0xFFEA580C);

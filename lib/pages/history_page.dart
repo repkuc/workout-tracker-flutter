@@ -5,6 +5,7 @@ import '../models/workout_models.dart';
 import 'workout_editor_page.dart';
 import 'workout_details_page.dart';
 import '../theme/app_colors.dart';
+import '../widgets/tab_header.dart';
 
 class HistoryPage extends StatefulWidget {
   const HistoryPage({super.key});
@@ -106,27 +107,7 @@ class _HistoryPageState extends State<HistoryPage> {
   }
 
   Widget _buildHeader() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: AppColors.accent,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: const Icon(Icons.history, color: Colors.white, size: 20),
-          ),
-          const SizedBox(width: 10),
-          Text(
-            'history.title'.tr(),
-            style: const TextStyle(
-                color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
-          ),
-        ],
-      ),
-    );
+    return TabHeader(icon: Icons.history, title: 'history.title'.tr());
   }
 
   Widget _buildEmptyState() {

@@ -4,6 +4,7 @@ import '../services/workout_service.dart';
 import '../models/workout_models.dart';
 import 'workout_editor_page.dart';
 import '../theme/app_colors.dart';
+import '../widgets/page_header.dart';
 
 class WorkoutDetailsPage extends StatefulWidget {
   final String workoutId;
@@ -84,35 +85,12 @@ class _WorkoutDetailsPageState extends State<WorkoutDetailsPage> {
     final totalReps = _workout!.exercises.fold<int>(0, (s, e) => s + e.sets.where((set) => set.isDone).fold(0, (r, set) => r + set.reps));
     final totalVolume = _workout!.exercises.fold<double>(0, (s, e) => s + e.sets.where((set) => set.isDone).fold(0.0, (v, set) => v + set.weight * set.reps));
 
-    return Container(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-      decoration: BoxDecoration(
-        color: AppColors.background,
-        border: Border(
-          bottom: BorderSide(color: AppColors.accent.withOpacity(0.2), width: 1),
-        ),
-      ),
-      child: Column(
+    return PageHeader(
+      title: _workout!.name,
+      showDivider: true,
+      bottom: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Назад + название
-          Row(
-            children: [
-              GestureDetector(
-                onTap: () => Navigator.pop(context),
-                child: const Icon(Icons.arrow_back, color: Colors.white, size: 22),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  _workout!.name,
-                  style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-
           // Дата + время
           Wrap(
             spacing: 12,
