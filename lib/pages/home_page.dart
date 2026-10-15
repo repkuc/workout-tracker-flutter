@@ -7,6 +7,7 @@ import '../models/workout_models.dart';
 import '../models/body_weight_entry.dart';
 import 'workout_editor_page.dart';
 import '../theme/app_colors.dart';
+import '../widgets/app_bottom_sheet.dart';
 import '../widgets/app_dialog.dart';
 
 class HomePage extends StatefulWidget {
@@ -883,47 +884,23 @@ class _HomePageState extends State<HomePage> {
         (sum, e) =>
             sum + e.sets.fold(0, (s, set) => s + set.weight * set.reps));
 
-    showModalBottomSheet(
+    showAppBottomSheet(
       context: context,
-      backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(20),
-          topRight: Radius.circular(20),
-        ),
-      ),
-      builder: (context) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
+      builder: (context) => [
+        // Шапка: цвет тренировки, название, дата и бейдж программы
+        AppSheetHeader(
+          leading: Container(
+            width: 12,
+            height: 12,
+            decoration: BoxDecoration(
+              color: color,
+              shape: BoxShape.circle,
+            ),
+          ),
+          title: workout.name,
+          bottom: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Заголовок
-              Row(
-                children: [
-                  Container(
-                    width: 12,
-                    height: 12,
-                    decoration: BoxDecoration(
-                      color: color,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      workout.name,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 4),
               Text(
                 workout.date,
                 style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
@@ -969,9 +946,14 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
               ],
+            ],
+          ),
+        ),
 
-              const SizedBox(height: 16),
-
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+          child: Column(
+            children: [
               // Статистика
               Row(
                 children: [
@@ -1000,7 +982,7 @@ class _HomePageState extends State<HomePage> {
                 ],
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 12),
 
               // Кнопка повторить
               SizedBox(
@@ -1011,13 +993,17 @@ class _HomePageState extends State<HomePage> {
                     await _repeatWorkout(workout.id);
                   },
                   icon: const Icon(Icons.repeat, size: 18),
-                  label: Text('workout.repeat_workout'.tr()),
+                  label: Text(
+                    'workout.repeat_workout'.tr(),
+                    style: const TextStyle(
+                        fontSize: 13, fontWeight: FontWeight.bold),
+                  ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: color,
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    padding: const EdgeInsets.symmetric(vertical: 10),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(10),
                     ),
                   ),
                 ),
@@ -1025,7 +1011,7 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
         ),
-      ),
+      ],
     );
   }
 
@@ -1080,7 +1066,7 @@ class _HomePageState extends State<HomePage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Ошибка: $e'), backgroundColor: AppColors.danger),
+          SnackBar(content: Text('${'workout.error'.tr()}: $e'), backgroundColor: AppColors.danger),
         );
       }
     }

@@ -10,6 +10,7 @@ import 'package:vibration/vibration.dart';
 import 'package:audioplayers/audioplayers.dart';
 import '../theme/app_colors.dart';
 import '../widgets/app_dialog.dart';
+import '../widgets/app_bottom_sheet.dart';
 
 class WorkoutEditorPage extends StatefulWidget {
   final String workoutId;
@@ -1279,6 +1280,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
             '✅ ${lastSet.reps} ${'workout.reps_unit'.tr()} × ${lastSet.weight} ${'workout.kg'.tr()}',
           ),
           backgroundColor: AppColors.success,
+          margin: _snackBarMargin(),
           duration: const Duration(seconds: 1),
         ),
       );
@@ -1307,135 +1309,6 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
             backgroundColor: AppColors.success,
             behavior: SnackBarBehavior.floating,
             margin: _snackBarMargin(),
-          ),
-        );
-      }
-    }
-  }
-
-  // Показать диалог добавления упражнения
-  Future<void> _showAddExerciseDialog() async {
-    // Очищаем поля
-    _exerciseNameController.clear();
-    _targetMuscleController.clear();
-
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(
-            color: AppColors.dialogBorder,
-            width: 1,
-          ),
-        ),
-        title: Text(
-          'workout.add_exercise_dialog_title'.tr(),
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Поле "Название упражнения"
-            TextField(
-              controller: _exerciseNameController,
-              autofocus: true,
-              style: const TextStyle(color: Colors.white),
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: AppColors.inputFill, // Тёмно-серый фон
-                hintText: 'workout.exercise_name_hint'.tr(),
-                hintStyle: const TextStyle(color: AppColors.textMuted),
-                prefixIcon: const Icon(
-                  Icons.fitness_center,
-                  color: AppColors.accent,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            // Поле "Целевая мышца"
-            TextField(
-              controller: _targetMuscleController,
-              style: const TextStyle(color: Colors.white),
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: AppColors.inputFill, // Тёмно-серый фон
-                hintText: 'workout.target_muscle_hint'.tr(),
-                hintStyle: const TextStyle(color: AppColors.textMuted),
-                prefixIcon: const Icon(
-                  Icons.radio_button_checked,
-                  color: AppColors.iconNeutral,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          // Кнопка "Отмена"
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(
-              'workout.cancel'.tr(),
-              style: const TextStyle(color: AppColors.textMuted),
-            ),
-          ),
-          // Кнопка "Добавить"
-          ElevatedButton(
-            onPressed: () {
-              if (_exerciseNameController.text.trim().isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('workout.exercise_name_required'.tr()),
-                    backgroundColor: AppColors.danger,
-                  ),
-                );
-                return;
-              }
-              Navigator.pop(context, true);
-            },
-            child: Text('workout.add_exercise'.tr()),
-          ),
-        ],
-      ),
-    );
-
-    // Если нажали "Добавить"
-    if (result == true) {
-      await _addExercise();
-    }
-  }
-
-// Добавить упражнение в базу
-  Future<void> _addExercise() async {
-    final name = _exerciseNameController.text.trim();
-    final muscle = _targetMuscleController.text.trim();
-
-    final success = await _service.addExercise(
-      widget.workoutId,
-      name: name,
-      targetMuscle: muscle,
-    );
-
-    if (success) {
-      await _loadWorkout();
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content:
-                Text('$name - ${'workout.add_exercise'.tr().toLowerCase()}!'),
-            backgroundColor: AppColors.success,
           ),
         );
       }
@@ -1476,6 +1349,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
             content:
                 Text('$name - ${'workout.add_exercise'.tr().toLowerCase()}!'),
             backgroundColor: AppColors.success,
+            margin: _snackBarMargin(),
           ),
         );
       }
@@ -1581,6 +1455,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
             content: Text('workout.exercise_updated'.tr()),
             backgroundColor: AppColors.success, // ← Зелёный (успех)
             behavior: SnackBarBehavior.floating,
+            margin: _snackBarMargin(),
             duration: const Duration(seconds: 2),
           ),
         );
@@ -1624,6 +1499,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                 ? AppColors.success // Зеленый если завершили
                 : AppColors.pending, // Оранжевый если отменили
             behavior: SnackBarBehavior.floating,
+            margin: _snackBarMargin(),
             duration: const Duration(seconds: 2),
           ),
         );
@@ -1735,8 +1611,9 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('workout.set_deleted'.tr()),
-            backgroundColor: AppColors.danger, // ← Красный для удаления
+            backgroundColor: AppColors.snackbarNeutral, // ← Нейтральный: удаление прошло успешно
             behavior: SnackBarBehavior.floating,
+            margin: _snackBarMargin(),
             duration: const Duration(seconds: 2),
           ),
         );
@@ -1747,112 +1624,84 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
   // Показать меню выбора действия для подхода
   Future<void> _showSetActionsMenu(
       Exercise exercise, WorkoutSet set, int setNumber) async {
-    showModalBottomSheet(
+    showAppBottomSheet(
       context: context,
-      backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(20),
-          topRight: Radius.circular(20),
-        ),
-      ),
-      builder: (context) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Заголовок
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
-                children: [
-                  Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      color: set.isDone
-                          ? AppColors.success
-                          : AppColors.pending,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Center(
-                      child: Text(
-                        '$setNumber',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Text(
-                    '${set.reps} ${'workout.reps'.tr().toLowerCase()} × ${set.weight} ${'workout.kg'.tr()}',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
+      builder: (context) => [
+        // Заголовок: номер подхода и «повторы × вес»
+        AppSheetHeader(
+          leading: Container(
+            width: 28,
+            height: 28,
+            decoration: BoxDecoration(
+              color: set.isDone ? AppColors.success : AppColors.pending,
+              shape: BoxShape.circle,
             ),
-            const Divider(color: AppColors.accent, height: 1),
-
-            // Кнопка "Редактировать"
-            ListTile(
-              leading: Icon(
-                Icons.edit,
-                color: set.isDone ? AppColors.inactive : AppColors.accent,
-              ),
-              title: Text(
-                'workout.edit_set'.tr(),
-                style: TextStyle(
-                  color: set.isDone ? AppColors.textMuted : Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              subtitle: set.isDone
-                  ? Text(
-                      'workout.cannot_edit_completed'.tr(),
-                      style: const TextStyle(
-                        color: AppColors.textMuted,
-                        fontSize: 12,
-                      ),
-                    )
-                  : null,
-              enabled: !set.isDone, // ← Отключаем если выполнен
-              onTap: set.isDone
-                  ? null
-                  : () {
-                      Navigator.pop(context); // Закрываем меню
-                      _showEditSetDialog(exercise, set, setNumber);
-                    },
-            ),
-
-            // Кнопка "Удалить"
-            ListTile(
-              leading: const Icon(
-                Icons.delete,
-                color: AppColors.danger,
-              ),
-              title: Text(
-                'workout.delete_set'.tr(),
+            child: Center(
+              child: Text(
+                '$setNumber',
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
+                  fontSize: 13,
                 ),
               ),
-              onTap: () {
-                Navigator.pop(context); // Закрываем меню
-                _showDeleteSetDialog(exercise, set, setNumber);
-              },
             ),
-
-            const SizedBox(height: 8),
-          ],
+          ),
+          title:
+              '${set.reps} ${'workout.reps'.tr().toLowerCase()} × ${set.weight} ${'workout.kg'.tr()}',
         ),
-      ),
+
+        // Кнопка "Редактировать"
+        ListTile(
+          leading: Icon(
+            Icons.edit,
+            color: set.isDone ? AppColors.inactive : AppColors.accent,
+          ),
+          title: Text(
+            'workout.edit_set'.tr(),
+            style: TextStyle(
+              color: set.isDone ? AppColors.textMuted : Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          subtitle: set.isDone
+              ? Text(
+                  'workout.cannot_edit_completed'.tr(),
+                  style: const TextStyle(
+                    color: AppColors.textMuted,
+                    fontSize: 12,
+                  ),
+                )
+              : null,
+          enabled: !set.isDone, // ← Отключаем если выполнен
+          onTap: set.isDone
+              ? null
+              : () {
+                  Navigator.pop(context); // Закрываем меню
+                  _showEditSetDialog(exercise, set, setNumber);
+                },
+        ),
+
+        // Кнопка "Удалить"
+        ListTile(
+          leading: const Icon(
+            Icons.delete,
+            color: AppColors.danger,
+          ),
+          title: Text(
+            'workout.delete_set'.tr(),
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          onTap: () {
+            Navigator.pop(context); // Закрываем меню
+            _showDeleteSetDialog(exercise, set, setNumber);
+          },
+        ),
+
+      ],
     );
   }
 
@@ -2720,6 +2569,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
             content: Text('workout.workout_name_updated'.tr()),
             backgroundColor: AppColors.success, // ← Зелёный (успех)
             behavior: SnackBarBehavior.floating,
+            margin: _snackBarMargin(),
             duration: const Duration(seconds: 2),
           ),
         );

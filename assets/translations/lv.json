@@ -108,6 +108,7 @@
     "delete_workout_confirm": "Dzēst šo treniņu?",
     "delete_workout_message": "Treniņš tiks neatgriezeniski dzēsts no vēstures",
     "workout_deleted": "Treniņš dzēsts",
+    "error": "Kļūda",
     "complete_exercise": "Pabeigt vingrinājumu",
     "uncomplete_exercise": "Atcelt pabeigšanu",
     "exercise_completed": "Vingrinājums pabeigts",
@@ -265,6 +266,9 @@
   "calf": "Ikri",
   "fill_hint": "Aizpildi tikai tos mērījumus, kurus vēlies saglabāt", 
   "saved": "Mērījumi saglabāti",
+  "unit_cm": "cm",
+  "delete_confirm": "Dzēst mērījumu?",
+  "delete_message": "Ieraksts par {date} tiks dzēsts.",
   "need_more_data": "Nepieciešami vismaz 2 ieraksti diagrammai"
 }
 

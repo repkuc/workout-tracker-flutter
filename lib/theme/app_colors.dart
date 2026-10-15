@@ -42,7 +42,8 @@ abstract final class AppColors {
   static const Color inactive = Color(0xFF94A3B8); // невыбранные иконки навигации, неактивные/невыполненные элементы
   static const Color iconNeutral = Color(0xFF94A3B8); // нейтральная иконка целевой мышцы
   static const Color completedButton = Color(0xFF475569); // кнопка уже завершённого упражнения
-  static const Color snackbarNeutral = Color(0xFF475569); // нейтральный snackbar «нечего импортировать»
+  static const Color snackbarNeutral = Color(0xFF475569); // нейтральный snackbar: «удалено», «нечего импортировать» (цвет по умолчанию)
+  static const Color sheetHandle = Color(0xFF475569); // «ручка» сверху нижнего меню (bottom sheet)
 
   // ── Метрики (карточки статистики) ──
   static const Color count = Color(0xFFF97316); // количество тренировок / упражнений

@@ -79,6 +79,17 @@ class MyApp extends StatelessWidget {
             elevation: 4,
           ),
         ),
+        // Все SnackBar — «плавающие» со скруглёнными углами.
+        // Цвет задаём по смыслу в месте вызова: success — успех, danger — ошибка,
+        // snackbarNeutral — нейтральное сообщение (он же цвет по умолчанию).
+        snackBarTheme: SnackBarThemeData(
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: AppColors.snackbarNeutral,
+          contentTextStyle: const TextStyle(color: Colors.white, fontSize: 14),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
       ),
 
       themeMode: ThemeMode.dark,

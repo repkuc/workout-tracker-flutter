@@ -27,6 +27,7 @@ import 'exercise_picker_page.dart';
 import '../theme/app_colors.dart';
 import '../widgets/page_header.dart';
 import '../widgets/app_dialog.dart';
+import '../widgets/app_bottom_sheet.dart';
 
 class ProgramDetailsPage extends StatefulWidget {
   // Экран получает не саму программу, а только её ID.
@@ -192,48 +193,42 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
 
   // Показать нижнее меню с действиями над программой: редактировать / удалить.
   Future<void> _showProgramActionsMenu() async {
-    showModalBottomSheet(
+    showAppBottomSheet(
       context: context,
-      backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(20), topRight: Radius.circular(20)),
-      ),
-      builder: (context) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.edit, color: AppColors.accent),
-              title: Text('programs.edit_program'.tr(),
-                  style: const TextStyle(color: Colors.white)),
-              onTap: () {
-                Navigator.pop(context);
-                _showEditProgramMetaDialog();
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.add, color: AppColors.accent),
-              title: Text('programs.add_workout_day'.tr(),
-                  style: const TextStyle(color: Colors.white)),
-              onTap: () {
-                Navigator.pop(context);
-                _showAddWorkoutDayToSavedProgram();
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.delete, color: AppColors.danger),
-              title: Text('programs.delete_program'.tr(),
-                  style: const TextStyle(color: Colors.white)),
-              onTap: () {
-                Navigator.pop(context);
-                _showDeleteProgramDialog();
-              },
-            ),
-            const SizedBox(height: 8),
-          ],
+      builder: (context) => [
+        AppSheetHeader(
+          leading:
+              const Icon(Icons.assignment, color: AppColors.accent, size: 20),
+          title: _program!.name,
         ),
-      ),
+        ListTile(
+          leading: const Icon(Icons.edit, color: AppColors.accent),
+          title: Text('programs.edit_program'.tr(),
+              style: const TextStyle(color: Colors.white)),
+          onTap: () {
+            Navigator.pop(context);
+            _showEditProgramMetaDialog();
+          },
+        ),
+        ListTile(
+          leading: const Icon(Icons.add, color: AppColors.accent),
+          title: Text('programs.add_workout_day'.tr(),
+              style: const TextStyle(color: Colors.white)),
+          onTap: () {
+            Navigator.pop(context);
+            _showAddWorkoutDayToSavedProgram();
+          },
+        ),
+        ListTile(
+          leading: const Icon(Icons.delete, color: AppColors.danger),
+          title: Text('programs.delete_program'.tr(),
+              style: const TextStyle(color: Colors.white)),
+          onTap: () {
+            Navigator.pop(context);
+            _showDeleteProgramDialog();
+          },
+        ),
+      ],
     );
   }
 

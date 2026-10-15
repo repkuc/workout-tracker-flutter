@@ -11,6 +11,7 @@ import '../services/body_measurement_service.dart';
 // Подключаем fl_chart для графика.
 import 'package:fl_chart/fl_chart.dart';
 import '../theme/app_colors.dart';
+import '../widgets/app_dialog.dart';
 
 class BodyMeasurementsPage extends StatefulWidget {
   const BodyMeasurementsPage({super.key});
@@ -349,7 +350,7 @@ class _BodyMeasurementsPageState extends State<BodyMeasurementsPage> {
     final filledValues = _measurementTypes
         .where((type) => entry.getByKey(type['key'] as String) != null)
         .map((type) =>
-            '${(type['labelKey'] as String).tr()} ${entry.getByKey(type['key'] as String)}см')
+            '${(type['labelKey'] as String).tr()} ${entry.getByKey(type['key'] as String)}${'measurements.unit_cm'.tr()}')
         .join('  ·  ');
 
     final dateTime = DateTime.tryParse(entry.date);
@@ -389,29 +390,33 @@ class _BodyMeasurementsPageState extends State<BodyMeasurementsPage> {
 
   // Диалог подтверждения удаления записи (по долгому нажатию).
   Future<void> _showDeleteEntryDialog(BodyMeasurementEntry entry) async {
+    // Дата записи в виде ДД.ММ.ГГГГ — чтобы было понятно, что именно удаляем
+    final dateTime = DateTime.tryParse(entry.date);
+    final formattedDate = dateTime != null
+        ? '${dateTime.day.toString().padLeft(2, '0')}.${dateTime.month.toString().padLeft(2, '0')}.${dateTime.year}'
+        : entry.date;
+
     final result = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-            side: const BorderSide(color: AppColors.danger, width: 1)),
-        title: Text('workout.delete_workout_confirm'.tr(),
-            style: const TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.bold)),
+      builder: (context) => AppDialog(
+        title: 'measurements.delete_confirm'.tr(),
+        icon: Icons.warning_amber_rounded,
+        iconColor: AppColors.danger,
+        borderColor: AppColors.danger,
+        content: Text(
+          'measurements.delete_message'
+              .tr(namedArgs: {'date': formattedDate}),
+          style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
+        ),
         actions: [
-          TextButton(
+          AppDialogCancelButton(
+            label: 'workout.cancel'.tr(),
             onPressed: () => Navigator.pop(context, false),
-            child: Text('workout.cancel'.tr(),
-                style: const TextStyle(color: AppColors.textMuted)),
           ),
-          ElevatedButton(
+          AppDialogConfirmButton(
+            label: 'workout.delete'.tr(),
+            color: AppColors.danger,
             onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.danger, foregroundColor: Colors.white),
-            child: Text('workout.delete'.tr()),
           ),
         ],
       ),
@@ -440,61 +445,49 @@ class _BodyMeasurementsPageState extends State<BodyMeasurementsPage> {
 
     final result = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: AppColors.dialogBorder, width: 1),
-        ),
-        title: Text(
-          // Заголовок отличается — "Добавить замер" или "Редактировать замер".
-          entryToEdit != null ? 'measurements.edit_measurement'.tr() : 'measurements.add_measurement'.tr(),
-          style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-        ),
+      builder: (context) => AppDialog(
+        // Заголовок отличается — "Добавить замер" или "Редактировать замер".
+        title: entryToEdit != null ? 'measurements.edit_measurement'.tr() : 'measurements.add_measurement'.tr(),
         content: SizedBox(
           width: double.maxFinite,
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'measurements.fill_hint'.tr(),
-                  style: const TextStyle(color: AppColors.textMuted, fontSize: 11),
-                ),
-                const SizedBox(height: 12),
-                ..._measurementTypes.map((type) {
-                  final key = type['key'] as String;
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 10),
-                    child: TextField(
-                      controller: controllers[key],
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      style: const TextStyle(color: Colors.white, fontSize: 14),
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: AppColors.inputFill,
-                        labelText: (type['labelKey'] as String).tr(),
-                        labelStyle: TextStyle(color: type['color'] as Color, fontSize: 12),
-                        suffixText: 'см',
-                        suffixStyle: const TextStyle(color: AppColors.textMuted, fontSize: 12),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
-                      ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'measurements.fill_hint'.tr(),
+                style: const TextStyle(color: AppColors.textMuted, fontSize: 11),
+              ),
+              const SizedBox(height: 12),
+              ..._measurementTypes.map((type) {
+                final key = type['key'] as String;
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: TextField(
+                    controller: controllers[key],
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    style: const TextStyle(color: Colors.white, fontSize: 14),
+                    // Общее оформление поля диалога, но метка — цветом своего замера (как на графике)
+                    decoration: appDialogInputDecoration(
+                      labelText: (type['labelKey'] as String).tr(),
+                    ).copyWith(
+                      labelStyle: TextStyle(color: type['color'] as Color, fontSize: 12),
+                      suffixText: 'measurements.unit_cm'.tr(),
+                      suffixStyle: const TextStyle(color: AppColors.textMuted, fontSize: 12),
                     ),
-                  );
-                }).toList(),
-              ],
-            ),
+                  ),
+                );
+              }).toList(),
+            ],
           ),
         ),
         actions: [
-          TextButton(
+          AppDialogCancelButton(
+            label: 'workout.cancel'.tr(),
             onPressed: () => Navigator.pop(context, false),
-            child: Text('workout.cancel'.tr(), style: const TextStyle(color: AppColors.textMuted)),
           ),
-          ElevatedButton(
+          AppDialogConfirmButton(
+            label: 'workout.save'.tr(),
             onPressed: () => Navigator.pop(context, true),
-            child: Text('workout.save'.tr()),
           ),
         ],
       ),

@@ -5,6 +5,7 @@ import '../models/workout_models.dart';
 import 'workout_editor_page.dart';
 import 'workout_details_page.dart';
 import '../theme/app_colors.dart';
+import '../widgets/app_bottom_sheet.dart';
 import '../widgets/tab_header.dart';
 
 class HistoryPage extends StatefulWidget {
@@ -466,63 +467,40 @@ class _HistoryPageState extends State<HistoryPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Ошибка: $e'), backgroundColor: AppColors.danger),
+          SnackBar(content: Text('${'workout.error'.tr()}: $e'), backgroundColor: AppColors.danger),
         );
       }
     }
   }
 
   Future<void> _showWorkoutActionsMenu(Workout workout) async {
-    showModalBottomSheet(
+    showAppBottomSheet(
       context: context,
-      backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(20), topRight: Radius.circular(20)),
-      ),
-      builder: (context) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  const Icon(Icons.fitness_center,
-                      color: AppColors.accent, size: 20),
-                  const SizedBox(width: 12),
-                  Expanded(
-                      child: Text(workout.name,
-                          style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold))),
-                ],
-              ),
-            ),
-            const Divider(height: 1, color: AppColors.divider),
-            ListTile(
-              leading: const Icon(Icons.repeat, color: AppColors.accent),
-              title: Text('history.repeat'.tr(),
-                  style: const TextStyle(color: Colors.white)),
-              onTap: () {
-                Navigator.pop(context);
-                _showRepeatWorkoutDialog(workout);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.delete, color: AppColors.danger),
-              title: Text('workout.delete_workout'.tr(),
-                  style: const TextStyle(color: Colors.white)),
-              onTap: () {
-                Navigator.pop(context);
-                _showDeleteWorkoutDialog(workout);
-              },
-            ),
-            const SizedBox(height: 8),
-          ],
+      builder: (context) => [
+        AppSheetHeader(
+          leading: const Icon(Icons.fitness_center,
+              color: AppColors.accent, size: 20),
+          title: workout.name,
         ),
-      ),
+        ListTile(
+          leading: const Icon(Icons.repeat, color: AppColors.accent),
+          title: Text('history.repeat'.tr(),
+              style: const TextStyle(color: Colors.white)),
+          onTap: () {
+            Navigator.pop(context);
+            _showRepeatWorkoutDialog(workout);
+          },
+        ),
+        ListTile(
+          leading: const Icon(Icons.delete, color: AppColors.danger),
+          title: Text('workout.delete_workout'.tr(),
+              style: const TextStyle(color: Colors.white)),
+          onTap: () {
+            Navigator.pop(context);
+            _showDeleteWorkoutDialog(workout);
+          },
+        ),
+      ],
     );
   }
 
@@ -578,7 +556,7 @@ class _HistoryPageState extends State<HistoryPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
               content: Text('workout.workout_deleted'.tr()),
-              backgroundColor: AppColors.danger),
+              backgroundColor: AppColors.snackbarNeutral),
         );
       }
     }

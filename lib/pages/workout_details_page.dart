@@ -362,7 +362,7 @@ class _WorkoutDetailsPageState extends State<WorkoutDetailsPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Ошибка: $e'), backgroundColor: AppColors.danger),
+          SnackBar(content: Text('${'workout.error'.tr()}: $e'), backgroundColor: AppColors.danger),
         );
       }
     }

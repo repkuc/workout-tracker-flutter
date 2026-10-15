@@ -108,6 +108,7 @@
     "delete_workout_confirm": "Delete this workout?",
     "delete_workout_message": "The workout will be permanently deleted from history",
     "workout_deleted": "Workout deleted",
+    "error": "Error",
     "complete_exercise": "Complete exercise",
     "uncomplete_exercise": "Uncomplete exercise",
     "exercise_completed": "Exercise completed",
@@ -265,6 +266,9 @@
   "calf": "Calf",
   "fill_hint": "Fill in only the measurements you want to record", 
   "saved": "Measurements saved",
+  "unit_cm": "cm",
+  "delete_confirm": "Delete measurement?",
+  "delete_message": "The entry for {date} will be deleted.",
   "need_more_data": "Need at least 2 entries for the chart"
 }
 
