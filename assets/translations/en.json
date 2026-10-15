@@ -137,7 +137,10 @@
     "continue_workout": "Continue workout",
     "add_one_more": "+1",
     "hours_short": "h",
-    "minutes_short": "m"
+    "minutes_short": "m",
+    "seconds_short": "s",
+    "paused": "PAUSED",
+    "reps_unit": "reps"
   },
   "nav": {
     "home": "Home",

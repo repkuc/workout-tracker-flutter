@@ -137,7 +137,10 @@
     "continue_workout": "Turpināt treniņu",
     "add_one_more": "+1",
     "hours_short": "h",
-    "minutes_short": "m"
+    "minutes_short": "m",
+    "seconds_short": "s",
+    "paused": "PAUZE",
+    "reps_unit": "atk."
   },
   "nav": {
     "home": "Sākums",

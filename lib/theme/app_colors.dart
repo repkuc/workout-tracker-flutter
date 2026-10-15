@@ -12,7 +12,6 @@ abstract final class AppColors {
   static const Color surfaceInset = Color(0xFF0F172A); // вложенные блоки и чипы внутри карточек/диалогов
   static const Color inputFill = Color(0xFF0F172A); // заливка полей ввода
   static const Color divider = Color(0xFF0F172A); // разделители внутри карточек
-  static const Color panel = Color(0xFF374151); // внутренние панели в диалогах редактора
   static const Color chipBorder = Color(0xFF374151); // рамка невыбранного чипа
 
   // ── Акцент ──
@@ -78,10 +77,6 @@ abstract final class AppColors {
   static const Color chartPill = Color(0xFF334155); // кнопка «показать ещё / свернуть» под чипами упражнений
 
   // ── Material-темы (main.dart) ──
-  static const Color themeLightSecondary = Color(0xFFEA580C);
-  static const Color themeLightSurface = Color(0xFFF5F5F5);
-  static const Color themeLightAppBar = Color(0xFF1F2937);
-  static const Color themeLightInputBorder = Color(0xFFE5E7EB);
   static const Color themeDarkPrimary = Color(0xFFFB923C);
   static const Color themeDarkSurface = Color(0xFF111827);
   static const Color themeDarkCard = Color(0xFF1F2937);

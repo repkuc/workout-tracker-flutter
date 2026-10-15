@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:vibration/vibration.dart';
 import 'package:audioplayers/audioplayers.dart';
 import '../theme/app_colors.dart';
+import '../widgets/app_dialog.dart';
 
 class WorkoutEditorPage extends StatefulWidget {
   final String workoutId;
@@ -381,9 +382,9 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                         ),
                         if (_isPaused) ...[
                           const SizedBox(width: 4),
-                          const Text(
-                            'ПАУЗА',
-                            style: TextStyle(
+                          Text(
+                            'workout.paused'.tr(),
+                            style: const TextStyle(
                               color: AppColors.paused,
                               fontSize: 9,
                               fontWeight: FontWeight.bold,
@@ -581,13 +582,13 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                   Expanded(
                     child: Row(
                       children: [
-                        _buildRestChip(30, '30с'),
+                        _buildRestChip(30, '30${'workout.seconds_short'.tr()}'),
                         const SizedBox(width: 3),
-                        _buildRestChip(60, '1м'),
+                        _buildRestChip(60, '1${'workout.minutes_short'.tr()}'),
                         const SizedBox(width: 3),
-                        _buildRestChip(120, '2м'),
+                        _buildRestChip(120, '2${'workout.minutes_short'.tr()}'),
                         const SizedBox(width: 3),
-                        _buildRestChip(180, '3м'),
+                        _buildRestChip(180, '3${'workout.minutes_short'.tr()}'),
                         const SizedBox(width: 3),
                         _buildRestChip(0, 'workout.rest_off'.tr()),
                       ],
@@ -1275,7 +1276,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            '✅ ${lastSet.reps} reps × ${lastSet.weight} ${'workout.kg'.tr()}',
+            '✅ ${lastSet.reps} ${'workout.reps_unit'.tr()} × ${lastSet.weight} ${'workout.kg'.tr()}',
           ),
           backgroundColor: AppColors.success,
           duration: const Duration(seconds: 1),
@@ -1487,95 +1488,61 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
     _exerciseNameController.text = exercise.name;
     _targetMuscleController.text = exercise.targetMuscle;
 
+    // Ошибку пустого названия показываем прямо под полем
+    String? nameError;
+
     final result = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(
-            color: AppColors.dialogBorder,
-            width: 1,
-          ),
-        ),
-        title: Text(
-          'workout.edit_exercise_dialog_title'.tr(),
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Поле "Название упражнения"
-            TextField(
-              controller: _exerciseNameController,
-              autofocus: true,
-              style: const TextStyle(color: Colors.white),
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: AppColors.inputFill,
-                hintText: 'workout.exercise_name_hint'.tr(),
-                hintStyle: const TextStyle(color: AppColors.textMuted),
-                prefixIcon: const Icon(
-                  Icons.fitness_center,
-                  color: AppColors.accent,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AppDialog(
+          title: 'workout.edit_exercise_dialog_title'.tr(),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Поле "Название упражнения"
+              TextField(
+                controller: _exerciseNameController,
+                autofocus: true,
+                style: const TextStyle(color: Colors.white, fontSize: 14),
+                decoration: appDialogInputDecoration(
+                  hintText: 'workout.exercise_name_hint'.tr(),
+                  icon: Icons.fitness_center,
+                  errorText: nameError,
                 ),
               ),
+              const SizedBox(height: 8),
+              // Поле "Целевая мышца"
+              TextField(
+                controller: _targetMuscleController,
+                style: const TextStyle(color: Colors.white, fontSize: 14),
+                decoration: appDialogInputDecoration(
+                  hintText: 'workout.target_muscle_hint'.tr(),
+                  icon: Icons.radio_button_checked,
+                  iconColor: AppColors.iconNeutral,
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            // Кнопка "Отмена"
+            AppDialogCancelButton(
+              label: 'workout.cancel'.tr(),
+              onPressed: () => Navigator.pop(context, false),
             ),
-            const SizedBox(height: 16),
-            // Поле "Целевая мышца"
-            TextField(
-              controller: _targetMuscleController,
-              style: const TextStyle(color: Colors.white),
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: AppColors.inputFill,
-                hintText: 'workout.target_muscle_hint'.tr(),
-                hintStyle: const TextStyle(color: AppColors.textMuted),
-                prefixIcon: const Icon(
-                  Icons.radio_button_checked,
-                  color: AppColors.iconNeutral,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-              ),
+            // Кнопка "Сохранить"
+            AppDialogConfirmButton(
+              label: 'workout.save'.tr(),
+              onPressed: () {
+                if (_exerciseNameController.text.trim().isEmpty) {
+                  setDialogState(() =>
+                      nameError = 'workout.exercise_name_required'.tr());
+                  return;
+                }
+                Navigator.pop(context, true);
+              },
             ),
           ],
         ),
-        actions: [
-          // Кнопка "Отмена"
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(
-              'workout.cancel'.tr(),
-              style: const TextStyle(color: AppColors.textMuted),
-            ),
-          ),
-          // Кнопка "Сохранить"
-          ElevatedButton(
-            onPressed: () {
-              if (_exerciseNameController.text.trim().isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('workout.exercise_name_required'.tr()),
-                    backgroundColor: AppColors.danger,
-                  ),
-                );
-                return;
-              }
-              Navigator.pop(context, true);
-            },
-            child: Text('workout.save'.tr()),
-          ),
-        ],
       ),
     );
 
@@ -1661,34 +1628,11 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
       Exercise exercise, WorkoutSet set, int setNumber) async {
     final result = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(
-            color: AppColors.danger,
-            width: 1,
-          ),
-        ),
-        title: Row(
-          children: [
-            const Icon(
-              Icons.warning_rounded,
-              color: AppColors.danger,
-              size: 28,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                'workout.delete_set_confirm'.tr(),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
-        ),
+      builder: (context) => AppDialog(
+        title: 'workout.delete_set_confirm'.tr(),
+        icon: Icons.warning_rounded,
+        iconColor: AppColors.danger,
+        borderColor: AppColors.danger,
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1697,23 +1641,23 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
               'workout.delete_set_message'.tr(),
               style: const TextStyle(
                 color: AppColors.textMuted,
-                fontSize: 14,
+                fontSize: 13,
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
             // Показываем детали удаляемого подхода
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
               decoration: BoxDecoration(
-                color: AppColors.panel,
+                color: AppColors.surfaceInset,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
                 children: [
                   // Номер подхода
                   Container(
-                    width: 32,
-                    height: 32,
+                    width: 26,
+                    height: 26,
                     decoration: const BoxDecoration(
                       color: AppColors.accent,
                       shape: BoxShape.circle,
@@ -1724,18 +1668,19 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                         style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
-                          fontSize: 14,
+                          fontSize: 12,
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 10),
                   // Детали подхода
                   Expanded(
                     child: Text(
                       '${set.reps} ${'workout.reps'.tr().toLowerCase()} × ${set.weight} ${'workout.kg'.tr()}',
                       style: const TextStyle(
                         color: Colors.white,
+                        fontSize: 13,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -1747,21 +1692,15 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
         ),
         actions: [
           // Кнопка "Отмена"
-          TextButton(
+          AppDialogCancelButton(
+            label: 'workout.cancel'.tr(),
             onPressed: () => Navigator.pop(context, false),
-            child: Text(
-              'workout.cancel'.tr(),
-              style: const TextStyle(color: AppColors.textMuted),
-            ),
           ),
           // Кнопка "Удалить" (красная)
-          ElevatedButton(
+          AppDialogConfirmButton(
+            label: 'workout.delete'.tr(),
+            color: AppColors.danger,
             onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.danger,
-              foregroundColor: Colors.white,
-            ),
-            child: Text('workout.delete'.tr()),
           ),
         ],
       ),
@@ -1943,145 +1882,91 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: AppColors.dialogBorder, width: 1),
-        ),
-        titlePadding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
-        contentPadding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-        actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-        title: Text(
-          title,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 15,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        // Прокрутка — чтобы при открытой клавиатуре на низком экране
-        // (например, складные телефоны) поля не наезжали на кнопки
-        content: SingleChildScrollView(
-          child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (setNumber != null)
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                margin: const EdgeInsets.only(bottom: 10),
-                decoration: BoxDecoration(
-                  color: AppColors.accent.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: AppColors.accent, width: 1),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.fitness_center,
-                        color: AppColors.accent, size: 14),
-                    const SizedBox(width: 6),
-                    Text(
-                      '${'workout.add_set_button'.tr()} #$setNumber',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
+        builder: (context, setDialogState) => AppDialog(
+          title: title,
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (setNumber != null)
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  margin: const EdgeInsets.only(bottom: 10),
+                  decoration: BoxDecoration(
+                    color: AppColors.accent.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: AppColors.accent, width: 1),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.fitness_center,
+                          color: AppColors.accent, size: 14),
+                      const SizedBox(width: 6),
+                      Text(
+                        '${'workout.add_set_button'.tr()} #$setNumber',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
+                ),
+              TextField(
+                controller: _repsController,
+                autofocus: true,
+                keyboardType: TextInputType.number,
+                style: const TextStyle(color: Colors.white, fontSize: 14),
+                decoration: appDialogInputDecoration(
+                  labelText: 'workout.reps'.tr(),
+                  hintText: 'workout.reps_hint'.tr(),
+                  icon: Icons.repeat,
+                  errorText: repsError,
                 ),
               ),
-            TextField(
-              controller: _repsController,
-              autofocus: true,
-              keyboardType: TextInputType.number,
-              style: const TextStyle(color: Colors.white, fontSize: 14),
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: AppColors.inputFill,
-                labelText: 'workout.reps'.tr(),
-                labelStyle:
-                    const TextStyle(color: AppColors.accent, fontSize: 12),
-                hintText: 'workout.reps_hint'.tr(),
-                hintStyle:
-                    const TextStyle(color: AppColors.textMuted, fontSize: 14),
-                errorText: repsError,
-                prefixIcon: const Icon(Icons.repeat,
-                    color: AppColors.accent, size: 16),
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide.none,
+              const SizedBox(height: 8),
+              TextField(
+                controller: _weightController,
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
+                style: const TextStyle(color: Colors.white, fontSize: 14),
+                decoration: appDialogInputDecoration(
+                  labelText:
+                      '${'workout.weight'.tr()} (${'workout.kg'.tr()})',
+                  hintText: 'workout.weight_hint'.tr(),
+                  icon: Icons.fitness_center,
+                  errorText: weightError,
                 ),
               ),
+            ],
+          ),
+          actions: [
+            AppDialogCancelButton(
+              label: 'workout.cancel'.tr(),
+              onPressed: () => Navigator.pop(context, false),
             ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _weightController,
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
-              style: const TextStyle(color: Colors.white, fontSize: 14),
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: AppColors.inputFill,
-                labelText: '${'workout.weight'.tr()} (${'workout.kg'.tr()})',
-                labelStyle:
-                    const TextStyle(color: AppColors.accent, fontSize: 12),
-                hintText: 'workout.weight_hint'.tr(),
-                hintStyle:
-                    const TextStyle(color: AppColors.textMuted, fontSize: 14),
-                errorText: weightError,
-                prefixIcon: const Icon(Icons.fitness_center,
-                    color: AppColors.accent, size: 16),
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide.none,
-                ),
-              ),
+            AppDialogConfirmButton(
+              label: confirmLabel,
+              onPressed: () {
+                // Проверка повторов и веса — ошибки показываем под полями
+                final reps = int.tryParse(_repsController.text.trim());
+                final weight = double.tryParse(_weightController.text.trim());
+                setDialogState(() {
+                  repsError = (reps == null || reps <= 0)
+                      ? 'workout.reps_required'.tr()
+                      : null;
+                  weightError = (weight == null || weight < 0)
+                      ? 'workout.weight_required'.tr()
+                      : null;
+                });
+                if (repsError != null || weightError != null) return;
+                Navigator.pop(context, true);
+              },
             ),
           ],
-          ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            ),
-            child: Text(
-              'workout.cancel'.tr(),
-              style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              // Проверка повторов и веса — ошибки показываем под полями
-              final reps = int.tryParse(_repsController.text.trim());
-              final weight = double.tryParse(_weightController.text.trim());
-              setDialogState(() {
-                repsError = (reps == null || reps <= 0)
-                    ? 'workout.reps_required'.tr()
-                    : null;
-                weightError = (weight == null || weight < 0)
-                    ? 'workout.weight_required'.tr()
-                    : null;
-              });
-              if (repsError != null || weightError != null) return;
-              Navigator.pop(context, true);
-            },
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              textStyle: const TextStyle(fontSize: 13),
-            ),
-            child: Text(confirmLabel),
-          ),
-        ],
-      ),
       ),
     );
 
@@ -2203,35 +2088,12 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
 
     final result = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(
-            color: AppColors.success, // ← Зелёная рамка (успех)
-            width: 1,
-          ),
-        ),
+      builder: (context) => AppDialog(
+        title: 'workout.finish_workout_confirm'.tr(),
+        icon: Icons.check_circle,
+        iconColor: AppColors.success,
+        borderColor: AppColors.success, // ← Зелёная рамка (успех)
         insetPadding: const EdgeInsets.symmetric(horizontal: 16),
-        title: Row(
-          children: [
-            const Icon(
-              Icons.check_circle,
-              color: AppColors.success,
-              size: 28,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                'workout.finish_workout_confirm'.tr(),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
-        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -2240,81 +2102,65 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
               'workout.finish_workout_message'.tr(),
               style: const TextStyle(
                 color: AppColors.textMuted,
-                fontSize: 14,
+                fontSize: 13,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 10),
             // Статистика тренировки
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppColors.panel,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Column(
-                children: [
-                  // Упражнения
-                  _buildStatRowWithComparison(
-                    Icons.fitness_center,
-                    'history.exercises'.tr(),
-                    totalExercises,
-                    previousExercises,
-                  ),
-                  const SizedBox(height: 2),
-
-                  // Подходы
-                  _buildStatRowWithComparison(
-                    Icons.repeat,
-                    'history.sets'.tr(),
-                    totalSets,
-                    previousSets,
-                  ),
-                  const SizedBox(height: 2),
-
-                  // ← НОВОЕ: Повторения
-                  _buildStatRowWithComparison(
-                    Icons.fitness_center,
-                    'history.reps'.tr(),
-                    totalReps,
-                    previousReps,
-                  ),
-                  const SizedBox(height: 2),
-
-                  // Объём
-                  _buildVolumeComparison(
-                    totalVolume,
-                    previousVolume,
-                  ),
-                  const SizedBox(height: 2),
-
-                  // Длительность
-                  if (_workout!.startedAt != null)
-                    _buildDurationComparison(
-                      _elapsedSeconds,
-                      previousDuration,
-                    ),
-                ],
-              ),
+            // Упражнения
+            _buildStatRowWithComparison(
+              Icons.fitness_center,
+              'history.exercises'.tr(),
+              totalExercises,
+              previousExercises,
             ),
+            const SizedBox(height: 6),
+
+            // Подходы
+            _buildStatRowWithComparison(
+              Icons.repeat,
+              'history.sets'.tr(),
+              totalSets,
+              previousSets,
+            ),
+            const SizedBox(height: 6),
+
+            // Повторения
+            _buildStatRowWithComparison(
+              Icons.fitness_center,
+              'history.reps'.tr(),
+              totalReps,
+              previousReps,
+            ),
+            const SizedBox(height: 6),
+
+            // Объём
+            _buildVolumeComparison(
+              totalVolume,
+              previousVolume,
+            ),
+
+            // Длительность
+            if (_workout!.startedAt != null) ...[
+              const SizedBox(height: 6),
+              _buildDurationComparison(
+                _elapsedSeconds,
+                previousDuration,
+              ),
+            ],
           ],
         ),
         actions: [
           // Кнопка "Отмена"
-          TextButton(
+          AppDialogCancelButton(
+            label: 'workout.cancel'.tr(),
             onPressed: () => Navigator.pop(context, false),
-            child: Text(
-              'workout.cancel'.tr(),
-              style: const TextStyle(color: AppColors.textMuted),
-            ),
           ),
           // Кнопка "Завершить" (зелёная)
-          ElevatedButton(
+          AppDialogConfirmButton(
+            label: 'workout.finish'.tr(),
+            color: AppColors.success,
             onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.success, // ← Зелёный
-              foregroundColor: Colors.white,
-            ),
-            child: Text('workout.finish'.tr()),
           ),
         ],
       ),
@@ -2358,34 +2204,10 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
       List<Map<String, dynamic>> incomplete) async {
     final result = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(
-            color: AppColors.dialogBorder,
-            width: 1,
-          ),
-        ),
-        title: Row(
-          children: [
-            const Icon(
-              Icons.warning_rounded,
-              color: AppColors.warning,
-              size: 28,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                'workout.incomplete_exercises'.tr(),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
-        ),
+      builder: (context) => AppDialog(
+        title: 'workout.incomplete_exercises'.tr(),
+        icon: Icons.warning_rounded,
+        iconColor: AppColors.warning,
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -2394,10 +2216,10 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
               'workout.incomplete_exercises_warning'.tr(),
               style: const TextStyle(
                 color: AppColors.textMuted,
-                fontSize: 14,
+                fontSize: 13,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 10),
             // Список незавершенных упражнений
             Container(
               constraints: const BoxConstraints(maxHeight: 200),
@@ -2405,10 +2227,11 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                 child: Column(
                   children: incomplete.map((item) {
                     return Container(
-                      margin: const EdgeInsets.only(bottom: 8),
-                      padding: const EdgeInsets.all(12),
+                      margin: const EdgeInsets.only(bottom: 6),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 8),
                       decoration: BoxDecoration(
-                        color: AppColors.panel,
+                        color: AppColors.surfaceInset,
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Row(
@@ -2416,7 +2239,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                           const Icon(
                             Icons.fitness_center,
                             color: AppColors.accent,
-                            size: 16,
+                            size: 14,
                           ),
                           const SizedBox(width: 8),
                           Expanded(
@@ -2428,7 +2251,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 14,
+                                    fontSize: 13,
                                   ),
                                 ),
                                 const SizedBox(height: 2),
@@ -2436,7 +2259,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                                   item['issue'],
                                   style: const TextStyle(
                                     color: AppColors.textMuted,
-                                    fontSize: 12,
+                                    fontSize: 11,
                                   ),
                                 ),
                               ],
@@ -2453,21 +2276,16 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
         ),
         actions: [
           // Кнопка "Вернуться"
-          TextButton(
+          AppDialogCancelButton(
+            label: 'workout.go_back'.tr(),
+            color: AppColors.accent,
             onPressed: () => Navigator.pop(context, false),
-            child: Text(
-              'workout.go_back'.tr(),
-              style: const TextStyle(color: AppColors.accent),
-            ),
           ),
           // Кнопка "Всё равно завершить"
-          ElevatedButton(
+          AppDialogConfirmButton(
+            label: 'workout.finish_anyway'.tr(),
+            color: AppColors.success,
             onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.success,
-              foregroundColor: Colors.white,
-            ),
-            child: Text('workout.finish_anyway'.tr()),
           ),
         ],
       ),
@@ -2513,14 +2331,14 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
     final isIncrease = difference != null && difference > 0;
 
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
-        color: AppColors.panel,
+        color: AppColors.surfaceInset,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
         children: [
-          Icon(icon, color: AppColors.success, size: 24),
+          Icon(icon, color: AppColors.success, size: 18),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
@@ -2530,10 +2348,10 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                   label,
                   style: const TextStyle(
                     color: AppColors.textMuted,
-                    fontSize: 12,
+                    fontSize: 11,
                   ),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 2),
                 Row(
                   children: [
                     if (previous != null) ...[
@@ -2541,20 +2359,20 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                         '$previous',
                         style: const TextStyle(
                           color: AppColors.textMuted,
-                          fontSize: 10,
+                          fontSize: 11,
                           decoration: TextDecoration.lineThrough,
                         ),
                       ),
-                      const SizedBox(width: 6),
+                      const SizedBox(width: 4),
                       const Icon(Icons.arrow_forward,
-                          color: AppColors.accent, size: 16),
-                      const SizedBox(width: 6),
+                          color: AppColors.accent, size: 12),
+                      const SizedBox(width: 4),
                     ],
                     Text(
                       '$current',
                       style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 10,
+                        fontSize: 13,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -2597,15 +2415,15 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
     final isIncrease = difference != null && difference > 0;
 
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
-        color: AppColors.panel,
+        color: AppColors.surfaceInset,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
         children: [
-          const Icon(Icons.monitor_weight, color: AppColors.volume, size: 24),
-          const SizedBox(width: 12),
+          const Icon(Icons.monitor_weight, color: AppColors.volume, size: 18),
+          const SizedBox(width: 10),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -2614,10 +2432,10 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                   'workout.total_volume_short'.tr(),
                   style: const TextStyle(
                     color: AppColors.textMuted,
-                    fontSize: 12,
+                    fontSize: 11,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 2),
                 Row(
                   children: [
                     if (previous != null) ...[
@@ -2628,7 +2446,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                               .replaceAll(' ${'workout.t'.tr()}', ''),
                           style: const TextStyle(
                             color: AppColors.textMuted,
-                            fontSize: 12,
+                            fontSize: 11,
                             decoration: TextDecoration.lineThrough,
                           ),
                           overflow: TextOverflow.ellipsis,
@@ -2636,7 +2454,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                       ),
                       const SizedBox(width: 4),
                       const Icon(Icons.arrow_forward,
-                          color: AppColors.volume, size: 14),
+                          color: AppColors.volume, size: 12),
                       const SizedBox(width: 4),
                     ],
                     Flexible(
@@ -2644,7 +2462,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                         _formatVolume(current),
                         style: const TextStyle(
                           color: Colors.white,
-                          fontSize: 12,
+                          fontSize: 13,
                           fontWeight: FontWeight.bold,
                         ),
                         overflow: TextOverflow.ellipsis,
@@ -2694,15 +2512,15 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
     final isFaster = difference != null && difference < 0;
 
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
-        color: AppColors.panel,
+        color: AppColors.surfaceInset,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
         children: [
-          const Icon(Icons.timer, color: AppColors.success, size: 24),
-          const SizedBox(width: 12),
+          const Icon(Icons.timer, color: AppColors.success, size: 18),
+          const SizedBox(width: 10),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -2711,10 +2529,10 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                   'workout.duration'.tr(),
                   style: const TextStyle(
                     color: AppColors.textMuted,
-                    fontSize: 12,
+                    fontSize: 11,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 2),
                 Row(
                   children: [
                     if (previousSeconds != null) ...[
@@ -2722,25 +2540,25 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                         _formatDuration(previousSeconds),
                         style: const TextStyle(
                           color: AppColors.textMuted,
-                          fontSize: 16,
+                          fontSize: 11,
                           decoration: TextDecoration.lineThrough,
                         ),
                       ),
-                      const SizedBox(width: 6),
+                      const SizedBox(width: 4),
                       const Icon(Icons.arrow_forward,
-                          color: AppColors.accent, size: 16),
-                      const SizedBox(width: 6),
+                          color: AppColors.accent, size: 12),
+                      const SizedBox(width: 4),
                     ],
                     Text(
                       _formatDuration(currentSeconds),
                       style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 18,
+                        fontSize: 13,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     if (difference != null && difference != 0) ...[
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 6),
                       Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 6, vertical: 2),
@@ -2755,7 +2573,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                           children: [
                             Icon(
                               isFaster ? Icons.flash_on : Icons.schedule,
-                              size: 14,
+                              size: 12,
                               color: isFaster
                                   ? AppColors.improvement
                                   : AppColors.danger,
@@ -2767,7 +2585,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                                 color: isFaster
                                     ? AppColors.improvement
                                     : AppColors.danger,
-                                fontSize: 12,
+                                fontSize: 10,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -2824,90 +2642,42 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
     // Заполняем поле текущим названием
     _workoutNameController.text = _workout?.name ?? '';
 
+    // Ошибку пустого названия показываем прямо под полем
+    String? nameError;
+
     final result = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(
-            color: AppColors.dialogBorder,
-            width: 1,
-          ),
-        ),
-        title: Text(
-          'workout.edit_workout_name_dialog_title'.tr(),
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Иконка
-            Container(
-              padding: const EdgeInsets.all(12),
-              margin: const EdgeInsets.only(bottom: 16),
-              decoration: BoxDecoration(
-                color: AppColors.accent.withOpacity(0.2),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.edit,
-                color: AppColors.accent,
-                size: 32,
-              ),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AppDialog(
+          title: 'workout.edit_workout_name_dialog_title'.tr(),
+          content: TextField(
+            controller: _workoutNameController,
+            autofocus: true,
+            style: const TextStyle(color: Colors.white, fontSize: 14),
+            decoration: appDialogInputDecoration(
+              hintText: 'workout.workout_name_hint'.tr(),
+              icon: Icons.fitness_center,
+              errorText: nameError,
             ),
-
-            // Поле "Название тренировки"
-            TextField(
-              controller: _workoutNameController,
-              autofocus: true,
-              style: const TextStyle(color: Colors.white),
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: AppColors.inputFill,
-                hintText: 'workout.workout_name_hint'.tr(),
-                hintStyle: const TextStyle(color: AppColors.textMuted),
-                prefixIcon: const Icon(
-                  Icons.fitness_center,
-                  color: AppColors.accent,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-              ),
+          ),
+          actions: [
+            AppDialogCancelButton(
+              label: 'workout.cancel'.tr(),
+              onPressed: () => Navigator.pop(context, false),
+            ),
+            AppDialogConfirmButton(
+              label: 'workout.save'.tr(),
+              onPressed: () {
+                if (_workoutNameController.text.trim().isEmpty) {
+                  setDialogState(() =>
+                      nameError = 'workout.workout_name_required'.tr());
+                  return;
+                }
+                Navigator.pop(context, true);
+              },
             ),
           ],
         ),
-        actions: [
-          // Кнопка "Отмена"
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(
-              'workout.cancel'.tr(),
-              style: const TextStyle(color: AppColors.textMuted),
-            ),
-          ),
-          // Кнопка "Сохранить"
-          ElevatedButton(
-            onPressed: () {
-              if (_workoutNameController.text.trim().isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('workout.workout_name_required'.tr()),
-                    backgroundColor: AppColors.danger,
-                  ),
-                );
-                return;
-              }
-              Navigator.pop(context, true);
-            },
-            child: Text('workout.save'.tr()),
-          ),
-        ],
       ),
     );
 

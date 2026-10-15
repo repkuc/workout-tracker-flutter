@@ -137,7 +137,10 @@
     "continue_workout": "Продолжить тренировку",
     "add_one_more": "+1",
     "hours_short": "ч",
-    "minutes_short": "м"
+    "minutes_short": "м",
+    "seconds_short": "с",
+    "paused": "ПАУЗА",
+    "reps_unit": "повт."
   },
   "nav": {
     "home": "Главная",

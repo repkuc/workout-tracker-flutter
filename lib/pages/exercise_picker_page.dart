@@ -21,14 +21,14 @@ class _ExercisePickerPageState extends State<ExercisePickerPage> {
   bool _isLoading = true;
   String _selectedGroup = 'all';
 
-  final List<Map<String, String>> _groups = [
-    {'key': 'all', 'icon': '💪'},
-    {'key': 'chest', 'icon': '🫁'},
-    {'key': 'back', 'icon': '🔙'},
-    {'key': 'legs', 'icon': '🦵'},
-    {'key': 'shoulders', 'icon': '💪'},
-    {'key': 'arms', 'icon': '🦾'},
-    {'key': 'abs', 'icon': '⚡'},
+  final List<String> _groups = [
+    'all',
+    'chest',
+    'back',
+    'legs',
+    'shoulders',
+    'arms',
+    'abs',
   ];
 
   @override
@@ -115,7 +115,7 @@ class _ExercisePickerPageState extends State<ExercisePickerPage> {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 itemCount: _groups.length,
                 itemBuilder: (context, index) {
-                  final key = _groups[index]['key']!;
+                  final key = _groups[index];
                   final isSelected = _selectedGroup == key;
 
                   return GestureDetector(
@@ -153,19 +153,21 @@ class _ExercisePickerPageState extends State<ExercisePickerPage> {
                                       : AppColors.textMuted,
                                   size: 20,
                                 )
-                              : Image.asset(
-                                  'assets/images/muscles/$key.png',
-                                  width: 22,
-                                  height: 22,
-                                  color: isSelected
-                                      ? AppColors.accent
-                                      : AppColors.textMuted,
-                                  errorBuilder: (_, __, ___) => Icon(
-                                    Icons.fitness_center,
-                                    color: isSelected
-                                        ? AppColors.accent
-                                        : AppColors.textMuted,
-                                    size: 20,
+                              // Картинка в своих цветах, как в списке упражнений;
+                              // невыбранные вкладки — полупрозрачные
+                              : Opacity(
+                                  opacity: isSelected ? 1.0 : 0.5,
+                                  child: Image.asset(
+                                    'assets/images/muscles/$key.png',
+                                    width: 22,
+                                    height: 22,
+                                    errorBuilder: (_, __, ___) => Icon(
+                                      Icons.fitness_center,
+                                      color: isSelected
+                                          ? AppColors.accent
+                                          : AppColors.textMuted,
+                                      size: 20,
+                                    ),
                                   ),
                                 ),
                           if (isSelected) ...[
