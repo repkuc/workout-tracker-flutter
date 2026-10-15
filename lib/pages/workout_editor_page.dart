@@ -1241,123 +1241,13 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
     _repsController.clear();
     _weightController.clear();
 
-    // Ошибки валидации показываем прямо под полями (SnackBar рисовался бы за фоном диалога)
-    String? repsError;
-    String? weightError;
-
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(
-            color: AppColors.dialogBorder,
-            width: 1,
-          ),
-        ),
-        title: Text(
-          'workout.add_set_dialog_title'.tr(),
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        // Прокрутка — чтобы при открытой клавиатуре на низком экране
-        // (например, складные телефоны) поля не наезжали на кнопки
-        content: SingleChildScrollView(
-          child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Поле "Повторы"
-            TextField(
-              controller: _repsController,
-              autofocus: true,
-              keyboardType: TextInputType.number,
-              style: const TextStyle(color: Colors.white),
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: AppColors.inputFill,
-                hintText: 'workout.reps_hint'.tr(),
-                hintStyle: const TextStyle(color: AppColors.textMuted),
-                errorText: repsError,
-                labelText: 'workout.reps'.tr(),
-                labelStyle: const TextStyle(color: AppColors.accent),
-                prefixIcon: const Icon(
-                  Icons.repeat,
-                  color: AppColors.accent,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            // Поле "Вес"
-            TextField(
-              controller: _weightController,
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
-              style: const TextStyle(color: Colors.white),
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: AppColors.inputFill,
-                hintText: 'workout.weight_hint'.tr(),
-                hintStyle: const TextStyle(color: AppColors.textMuted),
-                errorText: weightError,
-                labelText: '${'workout.weight'.tr()} (${'workout.kg'.tr()})',
-                labelStyle: const TextStyle(color: AppColors.accent),
-                prefixIcon: const Icon(
-                  Icons.fitness_center,
-                  color: AppColors.accent,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
-          ],
-          ),
-        ),
-        actions: [
-          // Кнопка "Отмена"
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(
-              'workout.cancel'.tr(),
-              style: const TextStyle(color: AppColors.textMuted),
-            ),
-          ),
-          // Кнопка "Добавить"
-          ElevatedButton(
-            onPressed: () {
-              // Проверка повторов и веса — ошибки показываем под полями
-              final reps = int.tryParse(_repsController.text.trim());
-              final weight = double.tryParse(_weightController.text.trim());
-              setDialogState(() {
-                repsError = (reps == null || reps <= 0)
-                    ? 'workout.reps_required'.tr()
-                    : null;
-                weightError = (weight == null || weight < 0)
-                    ? 'workout.weight_required'.tr()
-                    : null;
-              });
-              if (repsError != null || weightError != null) return;
-
-              Navigator.pop(context, true);
-            },
-            child: Text('workout.add_set_button'.tr()),
-          ),
-        ],
-      ),
-      ),
+    final result = await _showSetFormDialog(
+      title: 'workout.add_set_dialog_title'.tr(),
+      confirmLabel: 'workout.add_set_button'.tr(),
     );
 
     // Если нажали "Добавить"
-    if (result == true) {
+    if (result) {
       await _addSet(exercise.id);
     }
   }
@@ -2026,6 +1916,26 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
     _repsController.text = set.reps.toString();
     _weightController.text = set.weight.toString();
 
+    final result = await _showSetFormDialog(
+      title: 'workout.edit_set_dialog_title'.tr(),
+      confirmLabel: 'workout.save'.tr(),
+      setNumber: setNumber,
+    );
+
+    // Если нажали "Сохранить"
+    if (result) {
+      await _updateSet(exercise.id, set.id);
+    }
+  }
+
+  // Общий диалог подхода (повторы + вес) для «Добавить подход» и «Изменить подход»,
+  // чтобы оба диалога выглядели одинаково. Значения берутся из _repsController / _weightController.
+  // setNumber — если задан, сверху показывается плашка «Подход #N».
+  Future<bool> _showSetFormDialog({
+    required String title,
+    required String confirmLabel,
+    int? setNumber,
+  }) async {
     // Ошибки валидации показываем прямо под полями (SnackBar рисовался бы за фоном диалога)
     String? repsError;
     String? weightError;
@@ -2043,7 +1953,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
         contentPadding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
         actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
         title: Text(
-          'workout.edit_set_dialog_title'.tr(),
+          title,
           style: const TextStyle(
             color: Colors.white,
             fontSize: 15,
@@ -2056,31 +1966,33 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
           child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              margin: const EdgeInsets.only(bottom: 10),
-              decoration: BoxDecoration(
-                color: AppColors.accent.withOpacity(0.15),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppColors.accent, width: 1),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.fitness_center,
-                      color: AppColors.accent, size: 14),
-                  const SizedBox(width: 6),
-                  Text(
-                    '${'workout.add_set_button'.tr()} #$setNumber',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
+            if (setNumber != null)
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                margin: const EdgeInsets.only(bottom: 10),
+                decoration: BoxDecoration(
+                  color: AppColors.accent.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: AppColors.accent, width: 1),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.fitness_center,
+                        color: AppColors.accent, size: 14),
+                    const SizedBox(width: 6),
+                    Text(
+                      '${'workout.add_set_button'.tr()} #$setNumber',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
             TextField(
               controller: _repsController,
               autofocus: true,
@@ -2092,6 +2004,9 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                 labelText: 'workout.reps'.tr(),
                 labelStyle:
                     const TextStyle(color: AppColors.accent, fontSize: 12),
+                hintText: 'workout.reps_hint'.tr(),
+                hintStyle:
+                    const TextStyle(color: AppColors.textMuted, fontSize: 14),
                 errorText: repsError,
                 prefixIcon: const Icon(Icons.repeat,
                     color: AppColors.accent, size: 16),
@@ -2115,6 +2030,9 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                 labelText: '${'workout.weight'.tr()} (${'workout.kg'.tr()})',
                 labelStyle:
                     const TextStyle(color: AppColors.accent, fontSize: 12),
+                hintText: 'workout.weight_hint'.tr(),
+                hintStyle:
+                    const TextStyle(color: AppColors.textMuted, fontSize: 14),
                 errorText: weightError,
                 prefixIcon: const Icon(Icons.fitness_center,
                     color: AppColors.accent, size: 16),
@@ -2160,17 +2078,14 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               textStyle: const TextStyle(fontSize: 13),
             ),
-            child: Text('workout.save'.tr()),
+            child: Text(confirmLabel),
           ),
         ],
       ),
       ),
     );
 
-    // Если нажали "Сохранить"
-    if (result == true) {
-      await _updateSet(exercise.id, set.id);
-    }
+    return result == true;
   }
 
   // Обновить подход
