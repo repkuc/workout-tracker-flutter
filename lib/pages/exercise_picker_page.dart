@@ -4,6 +4,7 @@ import '../models/exercise_template.dart';
 import '../services/exercise_library_service.dart';
 import '../theme/app_colors.dart';
 import '../widgets/page_header.dart';
+import '../widgets/app_dialog.dart';
 
 class ExercisePickerPage extends StatefulWidget {
   const ExercisePickerPage({super.key});
@@ -351,121 +352,103 @@ class _ExercisePickerPageState extends State<ExercisePickerPage> {
   Future<void> _showAddCustomDialog() async {
     final nameController = TextEditingController();
     String selectedGroup = '';
+    // Ошибку пустого названия показываем прямо под полем
+    String? nameError;
 
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
-          backgroundColor: AppColors.surface,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-            side: const BorderSide(color: AppColors.dialogBorder, width: 1),
-          ),
-          titlePadding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-          contentPadding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-          actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-          title: Text(
-            'workout.add_custom_exercise'.tr(),
-            style: const TextStyle(
-                color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 8),
-                TextField(
-                  controller: nameController,
-                  autofocus: true,
-                  style: const TextStyle(color: Colors.white, fontSize: 14),
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: AppColors.inputFill,
-                    hintText: 'workout.exercise_name_hint'.tr(),
-                    hintStyle: const TextStyle(color: AppColors.textMuted),
-                    prefixIcon: const Icon(Icons.fitness_center,
-                        color: AppColors.accent, size: 18),
-                    contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 10),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
+        builder: (context, setDialogState) => AppDialog(
+          title: 'workout.add_custom_exercise'.tr(),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 8),
+              TextField(
+                controller: nameController,
+                autofocus: true,
+                style: const TextStyle(color: Colors.white, fontSize: 14),
+                // Начали печатать — убираем ошибку
+                onChanged: (_) {
+                  if (nameError != null) {
+                    setDialogState(() => nameError = null);
+                  }
+                },
+                decoration: appDialogInputDecoration(
+                  labelText: 'workout.exercise_name'.tr(),
+                  hintText: 'workout.exercise_name_hint'.tr(),
+                  icon: Icons.fitness_center,
+                  errorText: nameError,
                 ),
-                const SizedBox(height: 14),
-                Text(
-                  'workout.muscle_groups'.tr(),
-                  style: const TextStyle(
-                      color: AppColors.textMuted, fontSize: 11, letterSpacing: 1),
-                ),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 6,
-                  runSpacing: 6,
-                  children: [
-                    'chest',
-                    'back',
-                    'legs',
-                    'shoulders',
-                    'arms',
-                    'abs'
-                  ].map((key) {
-                    final isSelected = selectedGroup == key;
-                    return GestureDetector(
-                      onTap: () => setDialogState(() {
-                        selectedGroup = isSelected ? '' : key;
-                      }),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
+              ),
+              const SizedBox(height: 14),
+              Text(
+                'workout.muscle_groups'.tr(),
+                style: const TextStyle(
+                    color: AppColors.textMuted, fontSize: 11, letterSpacing: 1),
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                children: [
+                  'chest',
+                  'back',
+                  'legs',
+                  'shoulders',
+                  'arms',
+                  'abs'
+                ].map((key) {
+                  final isSelected = selectedGroup == key;
+                  return GestureDetector(
+                    onTap: () => setDialogState(() {
+                      selectedGroup = isSelected ? '' : key;
+                    }),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? AppColors.accent.withOpacity(0.2)
+                            : AppColors.surfaceInset,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
                           color: isSelected
-                              ? AppColors.accent.withOpacity(0.2)
-                              : AppColors.surfaceInset,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: isSelected
-                                ? AppColors.accent
-                                : AppColors.chipBorder,
-                          ),
-                        ),
-                        child: Text(
-                          'workout.muscle_$key'.tr(),
-                          style: TextStyle(
-                            color: isSelected
-                                ? AppColors.accent
-                                : AppColors.textMuted,
-                            fontSize: 12,
-                          ),
+                              ? AppColors.accent
+                              : AppColors.chipBorder,
                         ),
                       ),
-                    );
-                  }).toList(),
-                ),
-              ],
-            ),
+                      child: Text(
+                        'workout.muscle_$key'.tr(),
+                        style: TextStyle(
+                          color: isSelected
+                              ? AppColors.accent
+                              : AppColors.textMuted,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ],
           ),
           actions: [
-            TextButton(
+            AppDialogCancelButton(
+              label: 'workout.cancel'.tr(),
               onPressed: () => Navigator.pop(context, false),
-              child: Text('workout.cancel'.tr(),
-                  style: const TextStyle(color: AppColors.textMuted)),
             ),
-            ElevatedButton(
+            AppDialogConfirmButton(
+              label: 'workout.add_exercise'.tr(),
               onPressed: () {
                 if (nameController.text.trim().isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                        content: Text('workout.exercise_name_required'.tr()),
-                        backgroundColor: AppColors.danger),
-                  );
+                  setDialogState(() =>
+                      nameError = 'workout.exercise_name_required'.tr());
                   return;
                 }
                 Navigator.pop(context, true);
               },
-              child: Text('workout.add_exercise'.tr()),
             ),
           ],
         ),

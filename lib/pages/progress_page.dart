@@ -6,6 +6,7 @@ import '../widgets/volume_chart_card.dart';
 import '../widgets/exercise_progress_card.dart';
 import '../widgets/body_weight_chart_card.dart';
 import '../theme/app_colors.dart';
+import '../widgets/app_dialog.dart';
 
 class ProgressPage extends StatefulWidget {
   const ProgressPage({super.key});
@@ -149,92 +150,57 @@ class _ProgressPageState extends State<ProgressPage> {
   Future<void> _showAddWeightDialog() async {
     final controller = TextEditingController();
 
+    // Ошибку неверного веса показываем прямо под полем
+    String? weightError;
+
     final result = await showDialog<double>(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: AppColors.dialogBorder, width: 1),
-        ),
-        titlePadding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
-        contentPadding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-        actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-        title: Text(
-          'progress.add_weight_title'.tr(),
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 15,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 8),
-            TextField(
-              controller: controller,
-              autofocus: true,
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
-              style: const TextStyle(color: Colors.white, fontSize: 14),
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: AppColors.inputFill,
-                labelText: 'progress.weight_kg'.tr(),
-                labelStyle: const TextStyle(
-                  color: AppColors.accent,
-                  fontSize: 12,
-                ),
-                prefixIcon: const Icon(
-                  Icons.monitor_weight,
-                  color: AppColors.accent,
-                  size: 18,
-                ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 10,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide.none,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AppDialog(
+          title: 'progress.add_weight_title'.tr(),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 8),
+              TextField(
+                controller: controller,
+                autofocus: true,
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
+                style: const TextStyle(color: Colors.white, fontSize: 14),
+                // Начали печатать — убираем ошибку
+                onChanged: (_) {
+                  if (weightError != null) {
+                    setDialogState(() => weightError = null);
+                  }
+                },
+                decoration: appDialogInputDecoration(
+                  labelText: 'progress.weight_kg'.tr(),
+                  icon: Icons.monitor_weight,
+                  errorText: weightError,
                 ),
               ),
+            ],
+          ),
+          actions: [
+            AppDialogCancelButton(
+              label: 'workout.cancel'.tr(),
+              onPressed: () => Navigator.pop(context, null),
+            ),
+            AppDialogConfirmButton(
+              label: 'progress.save_weight'.tr(),
+              onPressed: () {
+                final weight = double.tryParse(controller.text.trim());
+                if (weight == null || weight <= 0) {
+                  setDialogState(
+                      () => weightError = 'progress.weight_invalid'.tr());
+                  return;
+                }
+                Navigator.pop(context, weight);
+              },
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, null),
-            style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            ),
-            child: Text(
-              'workout.cancel'.tr(),
-              style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              final weight = double.tryParse(controller.text.trim());
-              if (weight == null || weight <= 0) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('progress.weight_invalid'.tr()),
-                    backgroundColor: AppColors.danger,
-                  ),
-                );
-                return;
-              }
-              Navigator.pop(context, weight);
-            },
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              textStyle: const TextStyle(fontSize: 13),
-            ),
-            child: Text('progress.save_weight'.tr()),
-          ),
-        ],
       ),
     );
 

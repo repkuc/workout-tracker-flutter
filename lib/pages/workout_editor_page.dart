@@ -1504,7 +1504,14 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                 controller: _exerciseNameController,
                 autofocus: true,
                 style: const TextStyle(color: Colors.white, fontSize: 14),
+                // Начали печатать — убираем ошибку
+                onChanged: (_) {
+                  if (nameError != null) {
+                    setDialogState(() => nameError = null);
+                  }
+                },
                 decoration: appDialogInputDecoration(
+                  labelText: 'workout.exercise_name'.tr(),
                   hintText: 'workout.exercise_name_hint'.tr(),
                   icon: Icons.fitness_center,
                   errorText: nameError,
@@ -1516,6 +1523,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                 controller: _targetMuscleController,
                 style: const TextStyle(color: Colors.white, fontSize: 14),
                 decoration: appDialogInputDecoration(
+                  labelText: 'workout.target_muscle'.tr(),
                   hintText: 'workout.target_muscle_hint'.tr(),
                   icon: Icons.radio_button_checked,
                   iconColor: AppColors.iconNeutral,
@@ -2654,7 +2662,14 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
             controller: _workoutNameController,
             autofocus: true,
             style: const TextStyle(color: Colors.white, fontSize: 14),
+            // Начали печатать — убираем ошибку
+            onChanged: (_) {
+              if (nameError != null) {
+                setDialogState(() => nameError = null);
+              }
+            },
             decoration: appDialogInputDecoration(
+              labelText: 'workout.workout_name'.tr(),
               hintText: 'workout.workout_name_hint'.tr(),
               icon: Icons.fitness_center,
               errorText: nameError,

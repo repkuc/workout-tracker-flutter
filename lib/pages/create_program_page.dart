@@ -20,6 +20,7 @@ import '../models/exercise_template.dart';
 import 'exercise_picker_page.dart';
 import '../theme/app_colors.dart';
 import '../widgets/page_header.dart';
+import '../widgets/app_dialog.dart';
 
 class CreateProgramPage extends StatefulWidget {
   const CreateProgramPage({super.key});
@@ -279,53 +280,44 @@ class _CreateProgramPageState extends State<CreateProgramPage> {
   Future<void> _showViewWorkoutDayDialog(ProgramWorkout workout) async {
     showDialog(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: AppColors.dialogBorder, width: 1),
-        ),
-        title: Text(
-          workout.name,
-          style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-        ),
+      builder: (dialogContext) => AppDialog(
+        title: workout.name,
         content: SizedBox(
           width: double.maxFinite,
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: workout.exercises.map((ex) {
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 6),
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: AppColors.surfaceInset,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          ex.name,
-                          style: const TextStyle(color: Colors.white, fontSize: 13),
-                        ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: workout.exercises.map((ex) {
+              return Container(
+                margin: const EdgeInsets.only(bottom: 6),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceInset,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        ex.name,
+                        style: const TextStyle(color: Colors.white, fontSize: 13),
                       ),
-                      Text(
-                        '${ex.targetSets} ${'programs.sets_short'.tr()}',
-                        style: const TextStyle(color: AppColors.accent, fontSize: 12, fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-                );
-              }).toList(),
-            ),
+                    ),
+                    Text(
+                      '${ex.targetSets} ${'programs.sets_short'.tr()}',
+                      style: const TextStyle(color: AppColors.accent, fontSize: 12, fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
           ),
         ),
         actions: [
-          TextButton(
+          AppDialogCancelButton(
+            label: 'workout.close'.tr(),
+            color: AppColors.accent,
             onPressed: () => Navigator.pop(dialogContext),
-            child: Text('workout.close'.tr(), style: const TextStyle(color: AppColors.accent)),
           ),
         ],
       ),
@@ -340,144 +332,137 @@ class _CreateProgramPageState extends State<CreateProgramPage> {
         ? List.from(existingWorkout.exercises)
         : [];
 
+    // Ошибку пустого названия дня показываем прямо под полем
+    String? nameError;
+
     final result = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
       builder: (dialogContext) => StatefulBuilder(
-        builder: (dialogContext, setDialogState) => AlertDialog(
-          backgroundColor: AppColors.surface,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-            side: const BorderSide(color: AppColors.dialogBorder, width: 1),
-          ),
-          title: Text(
-            'programs.new_workout_day'.tr(),
-            style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-          ),
+        builder: (dialogContext, setDialogState) => AppDialog(
+          // Для уже существующего дня — «Редактировать», для нового — «Новый»
+          title: existingWorkout != null
+              ? 'programs.edit_workout_day'.tr()
+              : 'programs.new_workout_day'.tr(),
           content: SizedBox(
             width: double.maxFinite,
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  TextField(
-                    controller: dayNameController,
-                    autofocus: true,
-                    style: const TextStyle(color: Colors.white, fontSize: 14),
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: AppColors.inputFill,
-                      hintText: 'programs.day_name_hint'.tr(),
-                      hintStyle: const TextStyle(color: AppColors.textMuted),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide.none,
-                      ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 8),
+                TextField(
+                  controller: dayNameController,
+                  autofocus: true,
+                  style: const TextStyle(color: Colors.white, fontSize: 14),
+                  // Начали печатать — убираем ошибку
+                  onChanged: (_) {
+                    if (nameError != null) {
+                      setDialogState(() => nameError = null);
+                    }
+                  },
+                  decoration: appDialogInputDecoration(
+                    labelText: 'programs.day_name_label'.tr(),
+                    hintText: 'programs.day_name_hint'.tr(),
+                    errorText: nameError,
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Text(
+                  'programs.exercises'.tr(),
+                  style: const TextStyle(color: AppColors.textMuted, fontSize: 11, letterSpacing: 1),
+                ),
+                const SizedBox(height: 8),
+                ...dayExercises.map((ex) {
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 6),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: AppColors.surfaceInset,
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                  ),
-                  const SizedBox(height: 14),
-                  Text(
-                    'programs.exercises'.tr(),
-                    style: const TextStyle(color: AppColors.textMuted, fontSize: 11, letterSpacing: 1),
-                  ),
-                  const SizedBox(height: 8),
-                  ...dayExercises.map((ex) {
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 6),
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: AppColors.surfaceInset,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              ex.name,
-                              style: const TextStyle(color: Colors.white, fontSize: 13),
-                            ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            ex.name,
+                            style: const TextStyle(color: Colors.white, fontSize: 13),
                           ),
-                          Text(
-                            '${ex.targetSets} ${'programs.sets_short'.tr()}',
-                            style: const TextStyle(color: AppColors.accent, fontSize: 12, fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(width: 8),
-                          GestureDetector(
-                            onTap: () {
-                              setDialogState(() {
-                                dayExercises.remove(ex);
-                              });
-                            },
-                            child: const Icon(Icons.close, color: AppColors.danger, size: 16),
-                          ),
-                        ],
-                      ),
+                        ),
+                        Text(
+                          '${ex.targetSets} ${'programs.sets_short'.tr()}',
+                          style: const TextStyle(color: AppColors.accent, fontSize: 12, fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(width: 8),
+                        GestureDetector(
+                          onTap: () {
+                            setDialogState(() {
+                              dayExercises.remove(ex);
+                            });
+                          },
+                          child: const Icon(Icons.close, color: AppColors.danger, size: 16),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+                const SizedBox(height: 8),
+                GestureDetector(
+                  onTap: () async {
+                    final template = await Navigator.push<ExerciseTemplate>(
+                      dialogContext,
+                      MaterialPageRoute(builder: (context) => const ExercisePickerPage()),
                     );
-                  }).toList(),
-                  const SizedBox(height: 8),
-                  GestureDetector(
-                    onTap: () async {
-                      final template = await Navigator.push<ExerciseTemplate>(
-                        dialogContext,
-                        MaterialPageRoute(builder: (context) => const ExercisePickerPage()),
-                      );
 
-                      if (template != null) {
-                        final lang = dialogContext.locale.languageCode;
-                        setDialogState(() {
-                          dayExercises.add(ProgramExercise(
-                            name: template.getName(lang),
-                            targetMuscle: template.muscleGroup,
-                            targetSets: 3,
-                          ));
-                        });
-                      }
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      decoration: BoxDecoration(
-                        color: AppColors.accent.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: AppColors.accent.withOpacity(0.4)),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(Icons.add, color: AppColors.accent, size: 16),
-                          const SizedBox(width: 4),
-                          Text(
-                            'workout.add_exercise'.tr(),
-                            style: const TextStyle(color: AppColors.accent, fontSize: 12, fontWeight: FontWeight.bold),
-                          ),
-                        ],
-                      ),
+                    if (template != null) {
+                      final lang = dialogContext.locale.languageCode;
+                      setDialogState(() {
+                        dayExercises.add(ProgramExercise(
+                          name: template.getName(lang),
+                          targetMuscle: template.muscleGroup,
+                          targetSets: 3,
+                        ));
+                      });
+                    }
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    decoration: BoxDecoration(
+                      color: AppColors.accent.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: AppColors.accent.withOpacity(0.4)),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.add, color: AppColors.accent, size: 16),
+                        const SizedBox(width: 4),
+                        Text(
+                          'workout.add_exercise'.tr(),
+                          style: const TextStyle(color: AppColors.accent, fontSize: 12, fontWeight: FontWeight.bold),
+                        ),
+                      ],
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
           actions: [
-            TextButton(
+            AppDialogCancelButton(
+              label: 'workout.cancel'.tr(),
               onPressed: () => Navigator.pop(dialogContext, false),
-              child: Text('workout.cancel'.tr(), style: const TextStyle(color: AppColors.textMuted)),
             ),
-            ElevatedButton(
+            AppDialogConfirmButton(
+              label: 'workout.save'.tr(),
               onPressed: () {
                 if (dayNameController.text.trim().isEmpty) {
-                  ScaffoldMessenger.of(dialogContext).showSnackBar(
-                    SnackBar(
-                      content: Text('programs.day_name_required'.tr()),
-                      backgroundColor: AppColors.danger,
-                    ),
-                  );
+                  setDialogState(
+                      () => nameError = 'programs.day_name_required'.tr());
                   return;
                 }
                 Navigator.pop(dialogContext, true);
               },
-              child: Text('workout.save'.tr()),
             ),
           ],
         ),
