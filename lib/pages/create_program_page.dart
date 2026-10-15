@@ -93,7 +93,7 @@ class _CreateProgramPageState extends State<CreateProgramPage> {
           style: const TextStyle(color: Colors.white, fontSize: 14),
           decoration: InputDecoration(
             filled: true,
-            fillColor: AppColors.inputFill,
+            fillColor: AppColors.inputFillOnPage,
             hintText: 'programs.program_name_hint'.tr(),
             hintStyle: const TextStyle(color: AppColors.textMuted),
             contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -121,7 +121,7 @@ class _CreateProgramPageState extends State<CreateProgramPage> {
           style: const TextStyle(color: Colors.white, fontSize: 14),
           decoration: InputDecoration(
             filled: true,
-            fillColor: AppColors.inputFill,
+            fillColor: AppColors.inputFillOnPage,
             hintText: 'programs.schedule_hint'.tr(),
             hintStyle: const TextStyle(color: AppColors.textMuted),
             contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),

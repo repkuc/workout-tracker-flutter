@@ -84,7 +84,7 @@ class _ExercisePickerPageState extends State<ExercisePickerPage> {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Container(
                 decoration: BoxDecoration(
-                  color: AppColors.surface,
+                  color: AppColors.inputFillOnPage,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: TextField(

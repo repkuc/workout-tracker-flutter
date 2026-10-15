@@ -10,7 +10,11 @@ abstract final class AppColors {
   static const Color background = Color(0xFF0F172A); // фон экранов, нижняя навигация, нижние панели
   static const Color surface = Color(0xFF1E293B); // карточки, диалоги, bottom sheet, невыбранные чипы
   static const Color surfaceInset = Color(0xFF0F172A); // вложенные блоки и чипы внутри карточек/диалогов
-  static const Color inputFill = Color(0xFF0F172A); // заливка полей ввода
+  // Поле ввода должно отличаться от того, на чём лежит:
+  // внутри диалогов/карточек (фон surface) — inputFill,
+  // прямо на фоне экрана (background) — inputFillOnPage.
+  static const Color inputFill = Color(0xFF0F172A); // заливка полей в диалогах и карточках
+  static const Color inputFillOnPage = Color(0xFF1E293B); // заливка полей прямо на фоне экрана
   static const Color divider = Color(0xFF0F172A); // разделители внутри карточек
   static const Color chipBorder = Color(0xFF374151); // рамка невыбранного чипа
 
