@@ -28,6 +28,7 @@ import '../theme/app_colors.dart';
 import '../widgets/page_header.dart';
 import '../widgets/app_dialog.dart';
 import '../widgets/app_bottom_sheet.dart';
+import '../widgets/exercise_info_button.dart';
 
 class ProgramDetailsPage extends StatefulWidget {
   // Экран получает не саму программу, а только её ID.
@@ -411,6 +412,7 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
                             child: Text(ex.name,
                                 style: const TextStyle(
                                     color: Colors.white, fontSize: 13))),
+                        ExerciseInfoButton(name: ex.name),
                         Text(
                           '${ex.targetSets} ${'programs.sets_short'.tr()}',
                           style: const TextStyle(
@@ -747,6 +749,8 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
               ],
             ),
           ),
+          // Демо упражнения; нажатие не сворачивает карточку дня
+          ExerciseInfoButton(name: ex.name),
           const SizedBox(width: 8),
           Text(
             '${ex.targetSets} ${'programs.sets_short'.tr()}',

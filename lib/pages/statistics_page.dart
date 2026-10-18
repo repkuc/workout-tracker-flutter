@@ -6,6 +6,7 @@ import '../models/workout_models.dart';
 import 'body_measurements_page.dart'; // Импортируем страницу замеров тела
 import '../theme/app_colors.dart';
 import '../widgets/tab_header.dart';
+import '../widgets/exercise_info_button.dart';
 
 class StatisticsPage extends StatefulWidget {
   const StatisticsPage({super.key});
@@ -363,8 +364,10 @@ class _OverviewTabState extends State<_OverviewTab> {
               final i = entry.key;
               final ex = entry.value;
               final color = i < 3 ? medals[i] : AppColors.medalNone;
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 8),
+              // Высота строки = область нажатия кнопки ⓘ, чтобы строки
+              // с кнопкой и без неё были одинаковыми
+              return SizedBox(
+                height: 40,
                 child: Row(
                   children: [
                     Container(
@@ -388,6 +391,7 @@ class _OverviewTabState extends State<_OverviewTab> {
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1),
                     ),
+                    ExerciseInfoButton(name: ex.key),
                     Text(_formatVolume(ex.value),
                         style: const TextStyle(
                             color: AppColors.volume,
@@ -445,8 +449,9 @@ class _OverviewTabState extends State<_OverviewTab> {
                 style: const TextStyle(color: AppColors.textMuted, fontSize: 11))
           else ...[
             ...visible.map((entry) {
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 8),
+              // Высота строки = область нажатия кнопки ⓘ (как в топе упражнений)
+              return SizedBox(
+                height: 40,
                 child: Row(
                   children: [
                     Expanded(
@@ -456,6 +461,7 @@ class _OverviewTabState extends State<_OverviewTab> {
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1),
                     ),
+                    ExerciseInfoButton(name: entry.key),
                     Text('${entry.value} ${'workout.kg'.tr()}',
                         style: const TextStyle(
                             color: AppColors.record,

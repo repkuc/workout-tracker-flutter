@@ -208,7 +208,8 @@
   "privacy": "Privacy Policy",
   "support": "Support",
   "donate_title": "Buy me a coffee ☕",
-  "donate_subtitle": "Support app development"
+  "donate_subtitle": "Support app development",
+  "exercise_photos_credit": "Exercise photos: free-exercise-db (public domain)"
 },
 "calendar": {
   "mon": "Mo",
@@ -270,6 +271,9 @@
   "delete_confirm": "Delete measurement?",
   "delete_message": "The entry for {date} will be deleted.",
   "need_more_data": "Need at least 2 entries for the chart"
+},
+"exercise_demo": {
+  "show": "How to do it"
 }
 
 }

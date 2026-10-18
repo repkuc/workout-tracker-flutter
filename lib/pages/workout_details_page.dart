@@ -5,6 +5,7 @@ import '../models/workout_models.dart';
 import 'workout_editor_page.dart';
 import '../theme/app_colors.dart';
 import '../widgets/page_header.dart';
+import '../widgets/exercise_info_button.dart';
 
 class WorkoutDetailsPage extends StatefulWidget {
   final String workoutId;
@@ -197,6 +198,7 @@ class _WorkoutDetailsPageState extends State<WorkoutDetailsPage> {
                   ],
                 ),
               ),
+              ExerciseInfoButton(name: exercise.name),
               Text(_formatVolume(volume), style: const TextStyle(color: AppColors.volume, fontSize: 12, fontWeight: FontWeight.w600)),
             ],
           ),

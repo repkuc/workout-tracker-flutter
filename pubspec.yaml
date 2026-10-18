@@ -70,6 +70,7 @@ flutter:
     - assets/translations/
     - assets/images/muscles/
     - assets/exercises/
+    - assets/exercise_images/
     - assets/sounds/
 
   # To add assets to your application, add an assets section, like this:

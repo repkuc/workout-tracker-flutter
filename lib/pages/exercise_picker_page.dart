@@ -5,6 +5,7 @@ import '../services/exercise_library_service.dart';
 import '../theme/app_colors.dart';
 import '../widgets/page_header.dart';
 import '../widgets/app_dialog.dart';
+import '../widgets/exercise_info_button.dart';
 
 class ExercisePickerPage extends StatefulWidget {
   const ExercisePickerPage({super.key});
@@ -287,6 +288,9 @@ class _ExercisePickerPageState extends State<ExercisePickerPage> {
             // Иконка пользовательского упражнения
             if (exercise.isCustom)
               const Icon(Icons.person, color: AppColors.textMuted, size: 16),
+
+            // Демо упражнения; нажатие не выбирает упражнение
+            ExerciseInfoButton(templateId: exercise.id, name: name),
 
             const Icon(Icons.add_circle_outline,
                 color: AppColors.accent, size: 20),

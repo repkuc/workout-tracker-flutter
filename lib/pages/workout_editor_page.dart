@@ -11,6 +11,7 @@ import 'package:audioplayers/audioplayers.dart';
 import '../theme/app_colors.dart';
 import '../widgets/app_dialog.dart';
 import '../widgets/app_bottom_sheet.dart';
+import '../widgets/exercise_info_button.dart';
 
 class WorkoutEditorPage extends StatefulWidget {
   final String workoutId;
@@ -735,6 +736,8 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                   ),
                 ),
               ),
+              // Демо упражнения (не сворачивает карточку)
+              ExerciseInfoButton(name: exercise.name),
               // Кнопка редактирования
               IconButton(
                 icon: const Icon(
@@ -2122,6 +2125,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                               ],
                             ),
                           ),
+                          ExerciseInfoButton(name: item['name']),
                         ],
                       ),
                     );

@@ -4,6 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'services/workout_service.dart';
 import 'pages/main_page.dart';
 import 'services/exercise_library_service.dart';
+import 'services/exercise_image_service.dart';
 import 'theme/app_colors.dart';
 
 void main() async {
@@ -16,6 +17,9 @@ void main() async {
 
   final exerciseLibrary = ExerciseLibraryService(); // Получаем доступ к сервису библиотеки упражнений
   await exerciseLibrary.migrateExistingExercises(); // Выполняем миграцию упражнений из истории в библиотеку
+
+  // Заранее строим поиск демо-картинок упражнений, чтобы кнопка ⓘ сразу знала, показываться ли
+  await ExerciseImageService().init();
 
   runApp(
     EasyLocalization(

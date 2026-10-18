@@ -208,7 +208,8 @@
   "privacy": "Privātuma politika",
   "support": "Atbalsts",
   "donate_title": "Iecienīt kafiju ☕",
-  "donate_subtitle": "Atbalstīt lietotnes izstrādi"
+  "donate_subtitle": "Atbalstīt lietotnes izstrādi",
+  "exercise_photos_credit": "Vingrinājumu foto: free-exercise-db (publiskais domēns)"
 },
 "calendar": {
   "mon": "P",
@@ -270,6 +271,9 @@
   "delete_confirm": "Dzēst mērījumu?",
   "delete_message": "Ieraksts par {date} tiks dzēsts.",
   "need_more_data": "Nepieciešami vismaz 2 ieraksti diagrammai"
+},
+"exercise_demo": {
+  "show": "Kā izpildīt"
 }
 
 }

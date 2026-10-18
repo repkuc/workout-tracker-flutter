@@ -192,6 +192,15 @@ class _SettingsPageState extends State<SettingsPage> {
                         },
                       ),
                     ]),
+                    // Источник демо-картинок упражнений (public domain)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                      child: Text(
+                        'settings.exercise_photos_credit'.tr(),
+                        style: const TextStyle(
+                            color: AppColors.textMuted, fontSize: 11),
+                      ),
+                    ),
                     const SizedBox(height: 32),
                   ],
                 ),

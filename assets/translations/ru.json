@@ -208,7 +208,8 @@
   "privacy": "Политика конфиденциальности",
   "support": "Поддержка",
   "donate_title": "Угостить кофе ☕",
-  "donate_subtitle": "Поддержать разработку приложения"
+  "donate_subtitle": "Поддержать разработку приложения",
+  "exercise_photos_credit": "Фото упражнений: free-exercise-db (общественное достояние)"
 },
 "calendar": {
   "mon": "Пн",
@@ -270,5 +271,8 @@
   "delete_confirm": "Удалить замер?",
   "delete_message": "Запись за {date} будет удалена.",
   "need_more_data": "Нужно минимум 2 записи для графика"
+},
+"exercise_demo": {
+  "show": "Как выполнять"
 }
 }

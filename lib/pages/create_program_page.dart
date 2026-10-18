@@ -21,6 +21,7 @@ import 'exercise_picker_page.dart';
 import '../theme/app_colors.dart';
 import '../widgets/page_header.dart';
 import '../widgets/app_dialog.dart';
+import '../widgets/exercise_info_button.dart';
 
 class CreateProgramPage extends StatefulWidget {
   const CreateProgramPage({super.key});
@@ -303,6 +304,7 @@ class _CreateProgramPageState extends State<CreateProgramPage> {
                         style: const TextStyle(color: Colors.white, fontSize: 13),
                       ),
                     ),
+                    ExerciseInfoButton(name: ex.name),
                     Text(
                       '${ex.targetSets} ${'programs.sets_short'.tr()}',
                       style: const TextStyle(color: AppColors.accent, fontSize: 12, fontWeight: FontWeight.bold),
@@ -389,6 +391,7 @@ class _CreateProgramPageState extends State<CreateProgramPage> {
                             style: const TextStyle(color: Colors.white, fontSize: 13),
                           ),
                         ),
+                        ExerciseInfoButton(name: ex.name),
                         Text(
                           '${ex.targetSets} ${'programs.sets_short'.tr()}',
                           style: const TextStyle(color: AppColors.accent, fontSize: 12, fontWeight: FontWeight.bold),
