@@ -291,34 +291,6 @@ class WorkoutService {
     return true;
   }
 
-  // Обновить упражнение (название, целевую мышцу)
-  Future<bool> updateExercise(
-    String workoutId,
-    String exerciseId, {
-    String? name,
-    String? targetMuscle,
-  }) async {
-    final workouts = await loadAllWorkouts();
-    final wIndex = workouts.indexWhere((w) => w.id == workoutId);
-
-    if (wIndex == -1) return false;
-
-    final eIndex =
-        workouts[wIndex].exercises.indexWhere((e) => e.id == exerciseId);
-    if (eIndex == -1) return false;
-
-    // Обновляем только те поля, которые переданы
-    if (name != null) {
-      workouts[wIndex].exercises[eIndex].name = name;
-    }
-    if (targetMuscle != null) {
-      workouts[wIndex].exercises[eIndex].targetMuscle = targetMuscle;
-    }
-
-    await saveAllWorkouts(workouts);
-    return true;
-  }
-
   // Переключить статус завершенности упражнения
   Future<bool> toggleExerciseCompleted(
       String workoutId, String exerciseId, bool isCompleted) async {

@@ -54,10 +54,6 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
     return EdgeInsets.fromLTRB(15, 5, 15, buttonsHeight + 10);
   }
 
-  // Контроллеры для формы добавления упражнения
-  final _exerciseNameController = TextEditingController();
-  final _targetMuscleController = TextEditingController();
-
   // Контроллеры для формы добавления подхода
   final _repsController = TextEditingController();
   final _weightController = TextEditingController();
@@ -73,8 +69,6 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
 
   @override
   void dispose() {
-    _exerciseNameController.dispose();
-    _targetMuscleController.dispose();
     _repsController.dispose();
     _weightController.dispose();
     _workoutNameController.dispose();
@@ -738,16 +732,6 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
               ),
               // Демо упражнения (не сворачивает карточку)
               ExerciseInfoButton(name: exercise.name),
-              // Кнопка редактирования
-              IconButton(
-                icon: const Icon(
-                  Icons.edit,
-                  color: AppColors.accent,
-                  size: 16,
-                ),
-                onPressed: () => _showEditExerciseDialog(exercise),
-                tooltip: 'workout.edit_exercise'.tr(),
-              ),
             ],
           ),
           children: [
@@ -1353,113 +1337,6 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                 Text('$name - ${'workout.add_exercise'.tr().toLowerCase()}!'),
             backgroundColor: AppColors.success,
             margin: _snackBarMargin(),
-          ),
-        );
-      }
-    }
-  }
-
-  // Показать диалог редактирования упражнения
-  Future<void> _showEditExerciseDialog(Exercise exercise) async {
-    // Заполняем поля текущими значениями
-    _exerciseNameController.text = exercise.name;
-    _targetMuscleController.text = exercise.targetMuscle;
-
-    // Ошибку пустого названия показываем прямо под полем
-    String? nameError;
-
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) => AppDialog(
-          title: 'workout.edit_exercise_dialog_title'.tr(),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Поле "Название упражнения"
-              TextField(
-                controller: _exerciseNameController,
-                autofocus: true,
-                style: const TextStyle(color: Colors.white, fontSize: 14),
-                // Начали печатать — убираем ошибку
-                onChanged: (_) {
-                  if (nameError != null) {
-                    setDialogState(() => nameError = null);
-                  }
-                },
-                decoration: appDialogInputDecoration(
-                  labelText: 'workout.exercise_name'.tr(),
-                  hintText: 'workout.exercise_name_hint'.tr(),
-                  icon: Icons.fitness_center,
-                  errorText: nameError,
-                ),
-              ),
-              const SizedBox(height: 8),
-              // Поле "Целевая мышца"
-              TextField(
-                controller: _targetMuscleController,
-                style: const TextStyle(color: Colors.white, fontSize: 14),
-                decoration: appDialogInputDecoration(
-                  labelText: 'workout.target_muscle'.tr(),
-                  hintText: 'workout.target_muscle_hint'.tr(),
-                  icon: Icons.radio_button_checked,
-                  iconColor: AppColors.iconNeutral,
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            // Кнопка "Отмена"
-            AppDialogCancelButton(
-              label: 'workout.cancel'.tr(),
-              onPressed: () => Navigator.pop(context, false),
-            ),
-            // Кнопка "Сохранить"
-            AppDialogConfirmButton(
-              label: 'workout.save'.tr(),
-              onPressed: () {
-                if (_exerciseNameController.text.trim().isEmpty) {
-                  setDialogState(() =>
-                      nameError = 'workout.exercise_name_required'.tr());
-                  return;
-                }
-                Navigator.pop(context, true);
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-
-    // Если нажали "Сохранить"
-    if (result == true) {
-      await _updateExercise(exercise.id);
-    }
-  }
-
-  // Обновить упражнение
-  Future<void> _updateExercise(String exerciseId) async {
-    final name = _exerciseNameController.text.trim();
-    final muscle = _targetMuscleController.text.trim();
-
-    final success = await _service.updateExercise(
-      widget.workoutId,
-      exerciseId,
-      name: name,
-      targetMuscle: muscle,
-    );
-
-    if (success) {
-      await _loadWorkout(); // ← Перезагружаем тренировку
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('workout.exercise_updated'.tr()),
-            backgroundColor: AppColors.success, // ← Зелёный (успех)
-            behavior: SnackBarBehavior.floating,
-            margin: _snackBarMargin(),
-            duration: const Duration(seconds: 2),
           ),
         );
       }
