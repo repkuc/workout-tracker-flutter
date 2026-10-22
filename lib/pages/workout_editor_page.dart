@@ -12,6 +12,7 @@ import '../theme/app_colors.dart';
 import '../widgets/app_dialog.dart';
 import '../widgets/app_bottom_sheet.dart';
 import '../widgets/exercise_info_button.dart';
+import '../widgets/step_button.dart';
 
 class WorkoutEditorPage extends StatefulWidget {
   final String workoutId;
@@ -1226,9 +1227,16 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
 
   // Показать диалог добавления подхода
   Future<void> _showAddSetDialog(Exercise exercise) async {
-    // Очищаем поля
-    _repsController.clear();
-    _weightController.clear();
+    // Если у упражнения уже есть подходы — подставляем значения последнего,
+    // иначе поля пустые
+    if (exercise.sets.isNotEmpty) {
+      final lastSet = exercise.sets.last;
+      _repsController.text = lastSet.reps.toString();
+      _weightController.text = _formatWeight(lastSet.weight);
+    } else {
+      _repsController.clear();
+      _weightController.clear();
+    }
 
     final result = await _showSetFormDialog(
       title: 'workout.add_set_dialog_title'.tr(),
@@ -1277,7 +1285,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
 // Добавить подход в базу
   Future<void> _addSet(String exerciseId) async {
     final reps = int.parse(_repsController.text.trim());
-    final weight = double.parse(_weightController.text.trim());
+    final weight = _parseWeight(_weightController.text)!;
 
     final success = await _service.addSet(
       widget.workoutId,
@@ -1590,7 +1598,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
       Exercise exercise, WorkoutSet set, int setNumber) async {
     // Заполняем поля текущими значениями
     _repsController.text = set.reps.toString();
-    _weightController.text = set.weight.toString();
+    _weightController.text = _formatWeight(set.weight);
 
     final result = await _showSetFormDialog(
       title: 'workout.edit_set_dialog_title'.tr(),
@@ -1651,31 +1659,61 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                     ],
                   ),
                 ),
-              TextField(
-                controller: _repsController,
-                autofocus: true,
-                keyboardType: TextInputType.number,
-                style: const TextStyle(color: Colors.white, fontSize: 14),
-                decoration: appDialogInputDecoration(
-                  labelText: 'workout.reps'.tr(),
-                  hintText: 'workout.reps_hint'.tr(),
-                  icon: Icons.repeat,
-                  errorText: repsError,
+              // Без autofocus: клавиатура появляется только по тапу в поле,
+              // а в зале значения обычно меняют кнопками − / +
+              _buildSetStepperRow(
+                field: TextField(
+                  controller: _repsController,
+                  keyboardType: TextInputType.number,
+                  style: const TextStyle(color: Colors.white, fontSize: 14),
+                  // Начали печатать — убираем ошибку
+                  onChanged: (_) {
+                    if (repsError != null) {
+                      setDialogState(() => repsError = null);
+                    }
+                  },
+                  decoration: appDialogInputDecoration(
+                    labelText: 'workout.reps'.tr(),
+                    hintText: 'workout.reps_hint'.tr(),
+                    icon: Icons.repeat,
+                    errorText: repsError,
+                  ),
                 ),
+                onStep: (delta) {
+                  final changed = _stepReps(delta);
+                  if (repsError != null) {
+                    setDialogState(() => repsError = null);
+                  }
+                  return changed;
+                },
               ),
               const SizedBox(height: 8),
-              TextField(
-                controller: _weightController,
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
-                style: const TextStyle(color: Colors.white, fontSize: 14),
-                decoration: appDialogInputDecoration(
-                  labelText:
-                      '${'workout.weight'.tr()} (${'workout.kg'.tr()})',
-                  hintText: 'workout.weight_hint'.tr(),
-                  icon: Icons.fitness_center,
-                  errorText: weightError,
+              _buildSetStepperRow(
+                field: TextField(
+                  controller: _weightController,
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
+                  style: const TextStyle(color: Colors.white, fontSize: 14),
+                  onChanged: (_) {
+                    if (weightError != null) {
+                      setDialogState(() => weightError = null);
+                    }
+                  },
+                  decoration: appDialogInputDecoration(
+                    labelText:
+                        '${'workout.weight'.tr()} (${'workout.kg'.tr()})',
+                    hintText: 'workout.weight_hint'.tr(),
+                    icon: Icons.fitness_center,
+                    errorText: weightError,
+                  ),
                 ),
+                onStep: (delta) {
+                  final changed = _stepWeight(delta);
+                  if (weightError != null) {
+                    setDialogState(() => weightError = null);
+                  }
+                  return changed;
+                },
               ),
             ],
           ),
@@ -1689,7 +1727,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
               onPressed: () {
                 // Проверка повторов и веса — ошибки показываем под полями
                 final reps = int.tryParse(_repsController.text.trim());
-                final weight = double.tryParse(_weightController.text.trim());
+                final weight = _parseWeight(_weightController.text);
                 setDialogState(() {
                   repsError = (reps == null || reps <= 0)
                       ? 'workout.reps_required'.tr()
@@ -1710,10 +1748,98 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
     return result == true;
   }
 
+  // Шаги кнопок − / + в диалоге подхода
+  static const int _repsStep = 1;
+  static const double _weightStep = 2.5;
+
+  // Строка поля подхода: [ − ] [ поле ] [ + ].
+  // onStep получает -1 или +1 и возвращает true, если значение изменилось.
+  Widget _buildSetStepperRow({
+    required Widget field,
+    required bool Function(int delta) onStep,
+  }) {
+    return Row(
+      // Кнопки остаются на уровне поля, даже когда под ним появляется ошибка
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        StepButton(
+          icon: Icons.remove,
+          semanticLabel: 'workout.decrease'.tr(),
+          onStep: () => onStep(-1),
+        ),
+        const SizedBox(width: 4),
+        Expanded(child: field),
+        const SizedBox(width: 4),
+        StepButton(
+          icon: Icons.add,
+          semanticLabel: 'workout.increase'.tr(),
+          onStep: () => onStep(1),
+        ),
+      ],
+    );
+  }
+
+  // Вес из поля: принимаем и «.», и «,» (латышская / русская клавиатура)
+  double? _parseWeight(String text) {
+    return double.tryParse(text.trim().replaceAll(',', '.'));
+  }
+
+  // Вес без лишнего «.0» (50, а не 50.0; 52.5 остаётся 52.5),
+  // с округлением до 2 знаков, чтобы не было «хвостов» вроде 21.700000000000003
+  String _formatWeight(double weight) {
+    final rounded = (weight * 100).round() / 100;
+    if (rounded == rounded.roundToDouble()) {
+      return rounded.toInt().toString();
+    }
+    return rounded.toString();
+  }
+
+  // Записать текст в поле, курсор — в конец
+  void _setFieldText(TextEditingController controller, String text) {
+    controller.value = TextEditingValue(
+      text: text,
+      selection: TextSelection.collapsed(offset: text.length),
+    );
+  }
+
+  // Повторы ± 1, минимум 1. Пустое поле: «+» ставит 1, «−» ничего не делает.
+  bool _stepReps(int delta) {
+    final current = int.tryParse(_repsController.text.trim());
+    final int next;
+    if (current == null) {
+      if (delta < 0) return false;
+      next = _repsStep;
+    } else {
+      next = (current + delta * _repsStep).clamp(1, 9999);
+    }
+    final text = next.toString();
+    if (text == _repsController.text) return false;
+    _setFieldText(_repsController, text);
+    return true;
+  }
+
+  // Вес ± 2.5 кг, минимум 0 (вес тела). Ниже 2.5 и «−» → 0.
+  // Пустое поле: «+» ставит 2.5, «−» ничего не делает.
+  // Нестандартный вес (19.2) просто сдвигается на шаг: 19.2 + 2.5 = 21.7.
+  bool _stepWeight(int delta) {
+    final current = _parseWeight(_weightController.text);
+    final double next;
+    if (current == null) {
+      if (delta < 0) return false;
+      next = _weightStep;
+    } else {
+      next = (current + delta * _weightStep).clamp(0, 9999).toDouble();
+    }
+    final text = _formatWeight(next);
+    if (text == _weightController.text) return false;
+    _setFieldText(_weightController, text);
+    return true;
+  }
+
   // Обновить подход
   Future<void> _updateSet(String exerciseId, String setId) async {
     final reps = int.parse(_repsController.text.trim());
-    final weight = double.parse(_weightController.text.trim());
+    final weight = _parseWeight(_weightController.text)!;
 
     final success = await _service.updateSet(
       widget.workoutId,

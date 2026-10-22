@@ -62,6 +62,8 @@
     "weight_hint": "Например: 80.5",
     "reps_required": "Введите количество повторов",
     "weight_required": "Введите вес",
+    "increase": "Увеличить",
+    "decrease": "Уменьшить",
     "kg": "кг",
     "delete_exercise": "Удалить упражнение",
     "delete_exercise_confirm": "Вы уверены?",
