@@ -29,6 +29,8 @@ import '../widgets/page_header.dart';
 import '../widgets/app_dialog.dart';
 import '../widgets/app_bottom_sheet.dart';
 import '../widgets/exercise_info_button.dart';
+import '../widgets/weekday_selector.dart';
+import '../widgets/exercise_plan_editor.dart';
 
 class ProgramDetailsPage extends StatefulWidget {
   // Экран получает не саму программу, а только её ID.
@@ -58,6 +60,8 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
   // ID дней программы, карточки которых сейчас раскрыты (список упражнений).
   // Изначально все свёрнуты; раскрытыми могут быть несколько одновременно.
   final Set<String> _expandedDayIds = {};
+  // Описание программы раскрыто полностью (иначе — первые 2 строки).
+  bool _descriptionExpanded = false;
 
   @override
   void initState() {
@@ -130,6 +134,7 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               _buildScheduleInfo(),
+                              _buildDescription(),
                               const SizedBox(height: 16),
                               _buildWorkoutsHeader(),
                               const SizedBox(height: 8),
@@ -162,24 +167,81 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
     );
   }
 
-  // Блок с расписанием программы (если оно заполнено).
+  // Дни недели программы: «Пн · Ср · Пт», все 7 — «Каждый день», не выбраны — ничего.
   Widget _buildScheduleInfo() {
-    if (_program!.schedule.isEmpty) return const SizedBox.shrink();
+    final days = formatScheduleDays(_program!.scheduleDays);
+    if (days.isEmpty) return const SizedBox.shrink();
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'programs.schedule'.tr(),
-          style: const TextStyle(
-              color: AppColors.textMuted, fontSize: 11, letterSpacing: 1),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          _program!.schedule,
-          style: const TextStyle(color: Colors.white, fontSize: 14),
-        ),
-      ],
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          const Icon(Icons.calendar_today, color: AppColors.accent, size: 14),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text(
+              days,
+              style: const TextStyle(
+                  color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Описание программы: свёрнуто до 2 строк, «Показать ещё / Свернуть»
+  // появляется, только если текст в 2 строки не помещается.
+  Widget _buildDescription() {
+    final text = _program!.description.trim();
+    if (text.isEmpty) return const SizedBox.shrink();
+
+    const style = TextStyle(color: AppColors.textSoft, fontSize: 13, height: 1.35);
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Меряем, длиннее ли текст двух строк
+        final painter = TextPainter(
+          text: TextSpan(text: text, style: style),
+          maxLines: 2,
+          textDirection: Directionality.of(context),
+          textScaler: MediaQuery.textScalerOf(context),
+        )..layout(maxWidth: constraints.maxWidth);
+        final overflows = painter.didExceedMaxLines;
+        painter.dispose();
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              text,
+              style: style,
+              maxLines: _descriptionExpanded ? null : 2,
+              overflow: _descriptionExpanded
+                  ? TextOverflow.visible
+                  : TextOverflow.ellipsis,
+            ),
+            if (overflows)
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => setState(
+                    () => _descriptionExpanded = !_descriptionExpanded),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  child: Text(
+                    _descriptionExpanded
+                        ? 'programs.show_less'.tr()
+                        : 'programs.show_more'.tr(),
+                    style: const TextStyle(
+                        color: AppColors.accent,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+          ],
+        );
+      },
     );
   }
 
@@ -233,10 +295,12 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
     );
   }
 
-  // Диалог редактирования названия и расписания программы.
+  // Диалог редактирования названия, дней недели и описания программы.
   Future<void> _showEditProgramMetaDialog() async {
     final nameController = TextEditingController(text: _program!.name);
-    final scheduleController = TextEditingController(text: _program!.schedule);
+    final descriptionController =
+        TextEditingController(text: _program!.description);
+    List<int> scheduleDays = List.of(_program!.scheduleDays);
 
     // Ошибку пустого названия показываем прямо под полем
     String? nameError;
@@ -246,36 +310,55 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) => AppDialog(
           title: 'programs.edit_program'.tr(),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(height: 8),
-              TextField(
-                controller: nameController,
-                autofocus: true,
-                style: const TextStyle(color: Colors.white, fontSize: 14),
-                // Начали печатать — убираем ошибку
-                onChanged: (_) {
-                  if (nameError != null) {
-                    setDialogState(() => nameError = null);
-                  }
-                },
-                decoration: appDialogInputDecoration(
-                  labelText: 'programs.program_name_label'.tr(),
-                  hintText: 'programs.program_name_hint'.tr(),
-                  errorText: nameError,
+          // Фиксированная ширина нужна WeekdaySelector (LayoutBuilder внутри AlertDialog)
+          content: SizedBox(
+            width: double.maxFinite,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 8),
+                TextField(
+                  controller: nameController,
+                  autofocus: true,
+                  style: const TextStyle(color: Colors.white, fontSize: 14),
+                  // Начали печатать — убираем ошибку
+                  onChanged: (_) {
+                    if (nameError != null) {
+                      setDialogState(() => nameError = null);
+                    }
+                  },
+                  decoration: appDialogInputDecoration(
+                    labelText: 'programs.program_name_label'.tr(),
+                    hintText: 'programs.program_name_hint'.tr(),
+                    errorText: nameError,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: scheduleController,
-                style: const TextStyle(color: Colors.white, fontSize: 14),
-                decoration: appDialogInputDecoration(
-                  labelText: 'programs.schedule_label'.tr(),
-                  hintText: 'programs.schedule_hint'.tr(),
+                const SizedBox(height: 12),
+                Text(
+                  'programs.schedule_label'.tr(),
+                  style: const TextStyle(color: AppColors.accent, fontSize: 12),
                 ),
-              ),
-            ],
+                const SizedBox(height: 6),
+                WeekdaySelector(
+                  selectedDays: scheduleDays,
+                  onChanged: (days) => setDialogState(() => scheduleDays = days),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: descriptionController,
+                  minLines: 2,
+                  maxLines: 6,
+                  keyboardType: TextInputType.multiline,
+                  textCapitalization: TextCapitalization.sentences,
+                  style: const TextStyle(color: Colors.white, fontSize: 14),
+                  decoration: appDialogInputDecoration(
+                    labelText: 'programs.description_label'.tr(),
+                    hintText: 'programs.description_hint'.tr(),
+                  ),
+                ),
+              ],
+            ),
           ),
           actions: [
             AppDialogCancelButton(
@@ -302,7 +385,8 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
       await _programService.updateProgramMeta(
         widget.programId,
         name: nameController.text.trim(),
-        schedule: scheduleController.text.trim(),
+        description: descriptionController.text.trim(),
+        scheduleDays: scheduleDays,
       );
       await _loadProgram();
     }
@@ -351,8 +435,11 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
       {ProgramWorkout? existingWorkout}) async {
     final dayNameController =
         TextEditingController(text: existingWorkout?.name ?? '');
-    final List<ProgramExercise> dayExercises =
-        existingWorkout != null ? List.from(existingWorkout.exercises) : [];
+    // Копии упражнений: план повторов меняется прямо в них, и при «Отмене»
+    // сохранённый день остаётся нетронутым
+    final List<ProgramExercise> dayExercises = existingWorkout != null
+        ? existingWorkout.exercises.map((e) => e.copy()).toList()
+        : [];
 
     // Ошибку пустого названия дня показываем прямо под полем
     String? nameError;
@@ -366,6 +453,9 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
           title: existingWorkout != null
               ? 'programs.edit_workout_day'.tr()
               : 'programs.new_workout_day'.tr(),
+          // Узкие поля по бокам — больше места для «повторы от — до»
+          insetPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
           content: SizedBox(
             width: double.maxFinite,
             child: Column(
@@ -401,32 +491,31 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
                 ...dayExercises.map((ex) {
                   return Container(
                     margin: const EdgeInsets.only(bottom: 6),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 8),
+                    padding: const EdgeInsets.fromLTRB(10, 4, 8, 4),
                     decoration: BoxDecoration(
                         color: AppColors.surfaceInset,
                         borderRadius: BorderRadius.circular(8)),
-                    child: Row(
+                    // Первая строка — название, ниже — подходы и «повторы от — до»
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Expanded(
-                            child: Text(ex.name,
-                                style: const TextStyle(
-                                    color: Colors.white, fontSize: 13))),
-                        ExerciseInfoButton(name: ex.name),
-                        Text(
-                          '${ex.targetSets} ${'programs.sets_short'.tr()}',
-                          style: const TextStyle(
-                              color: AppColors.accent,
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold),
+                        Row(
+                          children: [
+                            Expanded(
+                                child: Text(ex.name,
+                                    style: const TextStyle(
+                                        color: Colors.white, fontSize: 13))),
+                            ExerciseInfoButton(name: ex.name),
+                            const SizedBox(width: 8),
+                            GestureDetector(
+                              onTap: () => setDialogState(
+                                  () => dayExercises.remove(ex)),
+                              child: const Icon(Icons.close,
+                                  color: AppColors.danger, size: 16),
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 8),
-                        GestureDetector(
-                          onTap: () =>
-                              setDialogState(() => dayExercises.remove(ex)),
-                          child: const Icon(Icons.close,
-                              color: AppColors.danger, size: 16),
-                        ),
+                        ExercisePlanEditor(key: ObjectKey(ex), exercise: ex),
                       ],
                     ),
                   );
@@ -489,6 +578,10 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
                       () => nameError = 'programs.day_name_required'.tr());
                   return;
                 }
+                // Одно заполненное поле — для обоих, «от» не больше «до»
+                for (final ex in dayExercises) {
+                  ex.normalizeRepsRange();
+                }
                 Navigator.pop(dialogContext, true);
               },
             ),
@@ -499,14 +592,11 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
 
     if (result == true) {
       if (existingWorkout != null) {
-        // Редактирование существующего дня — сначала удаляем старую версию,
-        // затем добавляем обновлённую. ProgramService не имеет отдельного
-        // метода "обновить день", поэтому используем комбинацию удалить+добавить,
-        // сохраняя тот же id чтобы связь с историей (programWorkoutName)
-        // осталась корректной, если имя дня не поменяли.
-        await _programService.removeWorkoutFromProgram(
-            widget.programId, existingWorkout.id);
-        await _programService.addWorkoutToProgram(
+        // Редактирование существующего дня — заменяем его на том же месте
+        // (порядок дней важен) и с тем же id. История и «Повторить» ищут
+        // тренировки дня по programId + названию дня (programWorkoutName),
+        // поэтому связь сохраняется, если название дня не поменяли.
+        await _programService.updateWorkoutInProgram(
           widget.programId,
           ProgramWorkout(
             id: existingWorkout.id,
@@ -752,8 +842,11 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
           // Демо упражнения; нажатие не сворачивает карточку дня
           ExerciseInfoButton(name: ex.name),
           const SizedBox(width: 8),
+          // С планом повторов — «4 × 8–12» (или «3 × 10»), без него — «4 подх.»
           Text(
-            '${ex.targetSets} ${'programs.sets_short'.tr()}',
+            ex.repsRangeText != null
+                ? '${ex.targetSets} × ${ex.repsRangeText}'
+                : '${ex.targetSets} ${'programs.sets_short'.tr()}',
             style: const TextStyle(
                 color: AppColors.accent,
                 fontSize: 12,

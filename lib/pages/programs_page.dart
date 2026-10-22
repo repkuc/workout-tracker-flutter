@@ -16,6 +16,7 @@ import 'create_program_page.dart';
 import 'program_details_page.dart';
 import '../theme/app_colors.dart';
 import '../widgets/tab_header.dart';
+import '../widgets/weekday_selector.dart';
 
 // StatefulWidget — потому что страница должна загружать данные асинхронно
 // и обновлять экран когда данные придут (в отличие от StatelessWidget).
@@ -198,8 +199,8 @@ class _ProgramsPageState extends State<ProgramsPage> {
               ],
             ),
 
-            // Показываем расписание только если оно заполнено.
-            if (program.schedule.isNotEmpty) ...[
+            // Дни недели («Пн · Ср · Пт» / «Каждый день») — только если выбраны.
+            if (program.scheduleDays.isNotEmpty) ...[
               const SizedBox(height: 4),
               Row(
                 children: [
@@ -207,7 +208,7 @@ class _ProgramsPageState extends State<ProgramsPage> {
                       color: AppColors.textMuted, size: 12),
                   const SizedBox(width: 4),
                   Text(
-                    program.schedule,
+                    formatScheduleDays(program.scheduleDays),
                     style:
                         const TextStyle(color: AppColors.textMuted, fontSize: 11),
                   ),

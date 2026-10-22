@@ -22,6 +22,8 @@ import '../theme/app_colors.dart';
 import '../widgets/page_header.dart';
 import '../widgets/app_dialog.dart';
 import '../widgets/exercise_info_button.dart';
+import '../widgets/weekday_selector.dart';
+import '../widgets/exercise_plan_editor.dart';
 
 class CreateProgramPage extends StatefulWidget {
   const CreateProgramPage({super.key});
@@ -35,14 +37,17 @@ class _CreateProgramPageState extends State<CreateProgramPage> {
   final _uuid = const Uuid();
 
   final _nameController = TextEditingController();
-  final _scheduleController = TextEditingController();
+  final _descriptionController = TextEditingController();
+
+  // Выбранные дни недели (1 = Пн … 7 = Вс)
+  List<int> _scheduleDays = [];
 
   final List<ProgramWorkout> _workouts = [];
 
   @override
   void dispose() {
     _nameController.dispose();
-    _scheduleController.dispose();
+    _descriptionController.dispose();
     super.dispose();
   }
 
@@ -63,6 +68,8 @@ class _CreateProgramPageState extends State<CreateProgramPage> {
                     _buildNameField(),
                     const SizedBox(height: 16),
                     _buildScheduleField(),
+                    const SizedBox(height: 16),
+                    _buildDescriptionField(),
                     const SizedBox(height: 20),
                     _buildWorkoutsSection(),
                   ],
@@ -108,6 +115,7 @@ class _CreateProgramPageState extends State<CreateProgramPage> {
     );
   }
 
+  // Дни недели — 7 переключателей Пн … Вс
   Widget _buildScheduleField() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -117,13 +125,36 @@ class _CreateProgramPageState extends State<CreateProgramPage> {
           style: const TextStyle(color: AppColors.textMuted, fontSize: 11, letterSpacing: 1),
         ),
         const SizedBox(height: 8),
+        WeekdaySelector(
+          selectedDays: _scheduleDays,
+          unselectedColor: AppColors.inputFillOnPage,
+          onChanged: (days) => setState(() => _scheduleDays = days),
+        ),
+      ],
+    );
+  }
+
+  // Описание программы — многострочное (рекомендации, как подбирать вес и т.п.)
+  Widget _buildDescriptionField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'programs.description'.tr(),
+          style: const TextStyle(color: AppColors.textMuted, fontSize: 11, letterSpacing: 1),
+        ),
+        const SizedBox(height: 8),
         TextField(
-          controller: _scheduleController,
+          controller: _descriptionController,
+          minLines: 2,
+          maxLines: 6,
+          keyboardType: TextInputType.multiline,
+          textCapitalization: TextCapitalization.sentences,
           style: const TextStyle(color: Colors.white, fontSize: 14),
           decoration: InputDecoration(
             filled: true,
             fillColor: AppColors.inputFillOnPage,
-            hintText: 'programs.schedule_hint'.tr(),
+            hintText: 'programs.description_hint'.tr(),
             hintStyle: const TextStyle(color: AppColors.textMuted),
             contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             border: OutlineInputBorder(
@@ -265,7 +296,8 @@ class _CreateProgramPageState extends State<CreateProgramPage> {
 
     final program = await _service.createProgram(
       name: name,
-      schedule: _scheduleController.text.trim(),
+      description: _descriptionController.text.trim(),
+      scheduleDays: _scheduleDays,
     );
 
     for (final workout in _workouts) {
@@ -305,8 +337,11 @@ class _CreateProgramPageState extends State<CreateProgramPage> {
                       ),
                     ),
                     ExerciseInfoButton(name: ex.name),
+                    // С планом повторов — «4 × 8–12», без него — «4 подх.»
                     Text(
-                      '${ex.targetSets} ${'programs.sets_short'.tr()}',
+                      ex.repsRangeText != null
+                          ? '${ex.targetSets} × ${ex.repsRangeText}'
+                          : '${ex.targetSets} ${'programs.sets_short'.tr()}',
                       style: const TextStyle(color: AppColors.accent, fontSize: 12, fontWeight: FontWeight.bold),
                     ),
                   ],
@@ -330,8 +365,10 @@ class _CreateProgramPageState extends State<CreateProgramPage> {
   Future<void> _showAddWorkoutDayDialog({ProgramWorkout? existingWorkout, int? existingIndex}) async {
     final dayNameController = TextEditingController(text: existingWorkout?.name ?? '');
 
+    // Копии упражнений: план повторов меняется прямо в них, и при «Отмене»
+    // исходный день остаётся нетронутым
     final List<ProgramExercise> dayExercises = existingWorkout != null
-        ? List.from(existingWorkout.exercises)
+        ? existingWorkout.exercises.map((e) => e.copy()).toList()
         : [];
 
     // Ошибку пустого названия дня показываем прямо под полем
@@ -346,6 +383,8 @@ class _CreateProgramPageState extends State<CreateProgramPage> {
           title: existingWorkout != null
               ? 'programs.edit_workout_day'.tr()
               : 'programs.new_workout_day'.tr(),
+          // Узкие поля по бокам — больше места для «повторы от — до»
+          insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
           content: SizedBox(
             width: double.maxFinite,
             child: Column(
@@ -378,33 +417,36 @@ class _CreateProgramPageState extends State<CreateProgramPage> {
                 ...dayExercises.map((ex) {
                   return Container(
                     margin: const EdgeInsets.only(bottom: 6),
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    padding: const EdgeInsets.fromLTRB(10, 4, 8, 4),
                     decoration: BoxDecoration(
                       color: AppColors.surfaceInset,
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Row(
+                    // Первая строка — название, ниже — подходы и «повторы от — до»
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Expanded(
-                          child: Text(
-                            ex.name,
-                            style: const TextStyle(color: Colors.white, fontSize: 13),
-                          ),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                ex.name,
+                                style: const TextStyle(color: Colors.white, fontSize: 13),
+                              ),
+                            ),
+                            ExerciseInfoButton(name: ex.name),
+                            const SizedBox(width: 8),
+                            GestureDetector(
+                              onTap: () {
+                                setDialogState(() {
+                                  dayExercises.remove(ex);
+                                });
+                              },
+                              child: const Icon(Icons.close, color: AppColors.danger, size: 16),
+                            ),
+                          ],
                         ),
-                        ExerciseInfoButton(name: ex.name),
-                        Text(
-                          '${ex.targetSets} ${'programs.sets_short'.tr()}',
-                          style: const TextStyle(color: AppColors.accent, fontSize: 12, fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(width: 8),
-                        GestureDetector(
-                          onTap: () {
-                            setDialogState(() {
-                              dayExercises.remove(ex);
-                            });
-                          },
-                          child: const Icon(Icons.close, color: AppColors.danger, size: 16),
-                        ),
+                        ExercisePlanEditor(key: ObjectKey(ex), exercise: ex),
                       ],
                     ),
                   );
@@ -463,6 +505,10 @@ class _CreateProgramPageState extends State<CreateProgramPage> {
                   setDialogState(
                       () => nameError = 'programs.day_name_required'.tr());
                   return;
+                }
+                // Одно заполненное поле — для обоих, «от» не больше «до»
+                for (final ex in dayExercises) {
+                  ex.normalizeRepsRange();
                 }
                 Navigator.pop(dialogContext, true);
               },

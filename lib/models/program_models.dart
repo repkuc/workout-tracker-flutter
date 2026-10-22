@@ -14,6 +14,11 @@ class ProgramExercise {
   // Планируемое количество подходов для этого упражнения.
   int targetSets;
 
+  // План повторов «от — до» (например 8–12). null — плана повторов нет.
+  // Правило: оба null, либо 1 ≤ repsMin ≤ repsMax ≤ 100 (см. normalizeRepsRange).
+  int? repsMin;
+  int? repsMax;
+
   // Конструктор создает объект ProgramExercise и заполняет его поля.
   ProgramExercise({
     // required означает, что name обязательно нужно передать при создании объекта.
@@ -24,7 +29,40 @@ class ProgramExercise {
 
     // Если targetSets не передали, по умолчанию будет 3 подхода.
     this.targetSets = 3,
+
+    // По умолчанию плана повторов нет.
+    this.repsMin,
+    this.repsMax,
   });
+
+  // Копия упражнения — чтобы диалог дня мог менять план повторов,
+  // не трогая исходный объект, пока пользователь не нажал «Сохранить».
+  ProgramExercise copy() => ProgramExercise(
+    name: name,
+    targetMuscle: targetMuscle,
+    targetSets: targetSets,
+    repsMin: repsMin,
+    repsMax: repsMax,
+  );
+
+  // Привести план повторов к правилу: значения 1…100 (0 и меньше — «нет плана»),
+  // если заполнено только одно — берём его для обоих, «от» не больше «до».
+  void normalizeRepsRange() {
+    int? clean(int? v) => (v == null || v < 1) ? null : (v > 100 ? 100 : v);
+    var min = clean(repsMin);
+    var max = clean(repsMax);
+    min ??= max;
+    max ??= min;
+    if (min != null && max != null && min > max) max = min;
+    repsMin = min;
+    repsMax = max;
+  }
+
+  // Текст плана повторов: «8–12», «10» (если от = до) или null, если плана нет.
+  String? get repsRangeText {
+    if (repsMin == null || repsMax == null) return null;
+    return repsMin == repsMax ? '$repsMin' : '$repsMin–$repsMax';
+  }
 
   // Метод превращает объект ProgramExercise в Map, чтобы его можно было сохранить как JSON.
   Map<String, dynamic> toJson() => {
@@ -36,6 +74,10 @@ class ProgramExercise {
 
     // Ключ 'targetSets' в JSON получит значение из поля targetSets.
     'targetSets': targetSets,
+
+    // План повторов; null тоже сохраняем — старые версии приложения его просто игнорируют.
+    'repsMin': repsMin,
+    'repsMax': repsMax,
   };
 
   // Фабричный конструктор создает ProgramExercise из Map, например после чтения JSON.
@@ -48,7 +90,11 @@ class ProgramExercise {
 
     // Берем значение по ключу 'targetSets'; если его нет или там null, используем 3.
     targetSets: json['targetSets'] ?? 3,
-  );
+
+    // В старых данных плана повторов нет — будет null.
+    repsMin: (json['repsMin'] as num?)?.toInt(),
+    repsMax: (json['repsMax'] as num?)?.toInt(),
+  )..normalizeRepsRange();
 }
 
 // Модель одного тренировочного дня внутри программы.
@@ -128,11 +174,13 @@ class TrainingProgram {
   // Название программы, например "Сила 3 раза в неделю".
   String name;
 
-  // Описание программы: цель, уровень сложности, примечания.
+  // Описание программы (многострочное): рекомендации, как подбирать вес и т.п.
   String description;
 
-  // Текстовое расписание, например "Пн/Ср/Пт".
-  String schedule;
+  // Дни недели тренировок: 1 = Пн … 7 = Вс, по возрастанию. Пусто — дни не выбраны.
+  // Раньше расписание было свободным текстом (поле 'schedule') — при чтении
+  // старых данных он переносится в начало описания (см. fromJson).
+  List<int> scheduleDays;
 
   // Список тренировок, которые входят в программу.
   List<ProgramWorkout> workouts;
@@ -151,15 +199,16 @@ class TrainingProgram {
     // Если description не передали, описание будет пустым.
     this.description = '',
 
-    // Если schedule не передали, расписание будет пустым.
-    this.schedule = '',
+    // Дни недели можно не передавать — тогда пустой список.
+    List<int>? scheduleDays,
 
     // workouts можно не передавать; ниже тогда будет создан пустой список.
     List<ProgramWorkout>? workouts,
 
     // По умолчанию считаем программу пользовательской.
     this.isCustom = true,
-  }) : workouts = workouts ?? [];
+  })  : scheduleDays = scheduleDays ?? [],
+        workouts = workouts ?? [];
   // Если workouts равен null, initializer list запишет в поле пустой список.
 
   // Метод превращает TrainingProgram в Map для дальнейшего сохранения как JSON.
@@ -173,8 +222,8 @@ class TrainingProgram {
     // Сохраняем описание программы.
     'description': description,
 
-    // Сохраняем расписание программы.
-    'schedule': schedule,
+    // Сохраняем дни недели. Старое текстовое 'schedule' больше не пишем.
+    'scheduleDays': scheduleDays,
 
     // Превращаем каждую тренировку в Map и собираем все тренировки в List.
     'workouts': workouts.map((w) => w.toJson()).toList(),
@@ -191,11 +240,19 @@ class TrainingProgram {
     // Берем name из JSON; если значения нет, используем пустую строку.
     name: json['name'] ?? '',
 
-    // Берем description из JSON; если значения нет, используем пустую строку.
-    description: json['description'] ?? '',
+    // Описание + перенос старого текстового расписания (см. _migrateDescription).
+    description: _migrateDescription(
+      json['schedule'] as String?,
+      json['description'] as String? ?? '',
+    ),
 
-    // Берем schedule из JSON; если значения нет, используем пустую строку.
-    schedule: json['schedule'] ?? '',
+    // Дни недели: только 1…7, без повторов, по возрастанию. В старых данных их нет.
+    scheduleDays: ((json['scheduleDays'] as List?) ?? [])
+        .map((d) => (d as num).toInt())
+        .where((d) => d >= 1 && d <= 7)
+        .toSet()
+        .toList()
+      ..sort(),
 
     // Берем список workouts из JSON и приводим его к List?, потому что он может отсутствовать.
     workouts: (json['workouts'] as List?)
@@ -208,4 +265,16 @@ class TrainingProgram {
     // Берем isCustom из JSON; если значения нет, считаем программу пользовательской.
     isCustom: json['isCustom'] ?? true,
   );
+
+  // Миграция старого текстового расписания: если оно было ("Пн/Ср/Пт"),
+  // ставим его в начало описания (дальше пустая строка и старое описание),
+  // чтобы ничего не потерялось. Новые данные поле 'schedule' не пишут,
+  // поэтому миграция срабатывает один раз и при повторном чтении ничего не меняет.
+  // Работает и для программ из старых бэкапов — импорт тоже идёт через fromJson.
+  static String _migrateDescription(String? oldSchedule, String description) {
+    final schedule = oldSchedule?.trim() ?? '';
+    if (schedule.isEmpty) return description;
+    if (description.trim().isEmpty) return schedule;
+    return '$schedule\n\n$description';
+  }
 }

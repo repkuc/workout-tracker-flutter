@@ -124,6 +124,9 @@ class BackupService {
 
   // Импорт программ тренировок. Проверяем по id программы чтобы не
   // создавать дубликаты при повторном импорте одного и того же бэкапа.
+  // Дни недели, описание и план повторов читает fromJson; в старом бэкапе
+  // их нет — тогда берутся значения по умолчанию, а текстовое расписание
+  // переносится в описание (миграция в TrainingProgram.fromJson).
   Future<void> _importPrograms(List jsonList) async {
     final existing = await _programService.loadAllPrograms();
     final existingIds = existing.map((p) => p.id).toSet();

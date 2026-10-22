@@ -79,14 +79,14 @@ class ProgramService {
   Future<TrainingProgram> createProgram({
     required String name,
     String description = '',
-    String schedule = '',
+    List<int> scheduleDays = const [],
   }) async {
     // Создаём объект новой программы с уникальным ID.
     final program = TrainingProgram(
       id: _uuid.v4(),
       name: name,
       description: description,
-      schedule: schedule,
+      scheduleDays: List.of(scheduleDays)..sort(),
       isCustom: true,
     );
 
@@ -130,6 +130,23 @@ class ProgramService {
     return true;
   }
 
+  // Заменить тренировочный день программы на том же месте (поиск по id).
+  // Порядок дней сохраняется — в отличие от удаления и повторного добавления.
+  Future<bool> updateWorkoutInProgram(String programId, ProgramWorkout workout) async {
+    final programs = await loadAllPrograms();
+
+    final index = programs.indexWhere((p) => p.id == programId);
+    if (index == -1) return false;
+
+    final dayIndex = programs[index].workouts.indexWhere((w) => w.id == workout.id);
+    if (dayIndex == -1) return false;
+
+    programs[index].workouts[dayIndex] = workout;
+
+    await saveAllPrograms(programs);
+    return true;
+  }
+
   // Удалить тренировочный день из программы.
   Future<bool> removeWorkoutFromProgram(String programId, String workoutId) async {
     final programs = await loadAllPrograms();
@@ -143,12 +160,12 @@ class ProgramService {
     return true;
   }
 
-  // Обновить основную информацию о программе (название, описание, расписание).
+  // Обновить основную информацию о программе (название, описание, дни недели).
   Future<bool> updateProgramMeta(
     String programId, {
     String? name,
     String? description,
-    String? schedule,
+    List<int>? scheduleDays,
   }) async {
     final programs = await loadAllPrograms();
 
@@ -158,7 +175,9 @@ class ProgramService {
     // Обновляем только те поля, которые реально передали (не null).
     if (name != null) programs[index].name = name;
     if (description != null) programs[index].description = description;
-    if (schedule != null) programs[index].schedule = schedule;
+    if (scheduleDays != null) {
+      programs[index].scheduleDays = List.of(scheduleDays)..sort();
+    }
 
     await saveAllPrograms(programs);
     return true;
