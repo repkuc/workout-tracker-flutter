@@ -11,6 +11,10 @@ class ProgramExercise {
   // Целевая мышечная группа, например "Грудь", "Спина", "Ноги".
   String targetMuscle;
 
+  // id шаблона из библиотеки упражнений. null — ещё не привязано,
+  // тогда упражнение узнаём по name.
+  String? templateId;
+
   // Планируемое количество подходов для этого упражнения.
   int targetSets;
 
@@ -27,6 +31,9 @@ class ProgramExercise {
     // Если targetMuscle не передали, по умолчанию будет пустая строка.
     this.targetMuscle = '',
 
+    // id шаблона необязателен (в старых данных его нет).
+    this.templateId,
+
     // Если targetSets не передали, по умолчанию будет 3 подхода.
     this.targetSets = 3,
 
@@ -40,6 +47,7 @@ class ProgramExercise {
   ProgramExercise copy() => ProgramExercise(
     name: name,
     targetMuscle: targetMuscle,
+    templateId: templateId,
     targetSets: targetSets,
     repsMin: repsMin,
     repsMax: repsMax,
@@ -72,6 +80,9 @@ class ProgramExercise {
     // Ключ 'targetMuscle' в JSON получит значение из поля targetMuscle.
     'targetMuscle': targetMuscle,
 
+    // id шаблона; null тоже сохраняем — старые версии приложения его игнорируют.
+    'templateId': templateId,
+
     // Ключ 'targetSets' в JSON получит значение из поля targetSets.
     'targetSets': targetSets,
 
@@ -87,6 +98,9 @@ class ProgramExercise {
 
     // Берем значение по ключу 'targetMuscle'; если его нет или там null, используем пустую строку.
     targetMuscle: json['targetMuscle'] ?? '',
+
+    // В старых данных id шаблона нет — будет null (заполняет миграция).
+    templateId: json['templateId'],
 
     // Берем значение по ключу 'targetSets'; если его нет или там null, используем 3.
     targetSets: json['targetSets'] ?? 3,

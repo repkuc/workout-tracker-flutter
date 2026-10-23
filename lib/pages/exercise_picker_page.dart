@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../models/exercise_template.dart';
 import '../services/exercise_library_service.dart';
+import '../services/exercise_catalog_service.dart';
 import '../theme/app_colors.dart';
 import '../widgets/page_header.dart';
 import '../widgets/app_dialog.dart';
@@ -48,7 +49,11 @@ class _ExercisePickerPageState extends State<ExercisePickerPage> {
 
   Future<void> _loadExercises() async {
     setState(() => _isLoading = true);
-    final exercises = await _libraryService.getAllExercises();
+    // Свои упражнения с названием встроенного (дубликаты от старой миграции) скрываем
+    final catalog = ExerciseCatalogService();
+    final exercises = (await _libraryService.getAllExercises())
+        .where((e) => !catalog.isBuiltInDuplicate(e))
+        .toList();
     setState(() {
       _exercises = exercises;
       _isLoading = false;

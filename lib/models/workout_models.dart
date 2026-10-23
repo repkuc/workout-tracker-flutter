@@ -39,7 +39,11 @@ class Exercise {
   final String id; // Уникальный идентификатор упражнения
   final String workoutId; // Идентификатор тренировки
   String name; // Название упражнения
-  String targetMuscle; // Целевая мышца
+  String targetMuscle; // Целевая мышца (переведённый текст на момент добавления)
+  // id шаблона из библиотеки (встроенный 'chest_1' или пользовательский 'custom_…').
+  // null — ещё не привязано; name остаётся «снимком» и запасным вариантом.
+  String? templateId;
+  String? muscleGroup; // Ключ группы мышц ('chest'); null — неизвестно
   List<WorkoutSet> sets; // Сеты упражнения
   int position; // Позиция упражнения в тренировке
   bool isCompleted; // Завершено ли упражнение
@@ -57,6 +61,8 @@ class Exercise {
     required this.workoutId,
     required this.name,
     this.targetMuscle = '', // По умолчанию пустая строка
+    this.templateId,
+    this.muscleGroup,
     List<WorkoutSet>? sets,
     this.position = 0,
     this.isCompleted = false, // По умолчанию упражнение не завершено
@@ -78,6 +84,8 @@ class Exercise {
     'workoutId': workoutId,
     'name': name,
     'targetMuscle': targetMuscle,
+    'templateId': templateId,
+    'muscleGroup': muscleGroup,
     'sets': sets.map((s) => s.toJson()).toList(),
     'position': position,
     'isCompleted': isCompleted,
@@ -93,6 +101,9 @@ class Exercise {
     workoutId: json['workoutId'],
     name: json['name'],
     targetMuscle: json['targetMuscle'] ?? '',
+    // В старых данных этих полей нет — будет null (заполняет миграция)
+    templateId: json['templateId'],
+    muscleGroup: json['muscleGroup'],
     sets: (json['sets'] as List?)
         ?.map((s) => WorkoutSet.fromJson(s))
         .toList() ??

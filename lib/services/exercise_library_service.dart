@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/exercise_template.dart';
+import 'exercise_catalog_service.dart';
 import 'workout_service.dart';
 
 
@@ -10,7 +11,7 @@ import 'workout_service.dart';
 // Этот файл содержит логику работы с базой упражнений: чтение встроенных упражнений,
 // работу с пользовательскими упражнениями, поиск и перенос упражнений из истории.
 class ExerciseLibraryService {
-  static const List<String> _validGroups = ['chest', 'back', 'legs', 'shoulders', 'arms', 'abs'];
+  static const List<String> validGroups = ['chest', 'back', 'legs', 'shoulders', 'arms', 'abs'];
   // Ключ для хранения списка пользовательских упражнений в SharedPreferences.
   static const String _customKey = 'wt.custom_exercises.v1';
   // Ключ, по которому запоминается, была ли выполнена однажды миграция упражнений из истории.
@@ -56,7 +57,7 @@ class ExerciseLibraryService {
     // Преобразуем каждый элемент в объект ExerciseTemplate.
     return jsonList.map((e) {
   final template = ExerciseTemplate.fromJson(e);
-  if (!_validGroups.contains(template.muscleGroup)) {
+  if (!validGroups.contains(template.muscleGroup)) {
     return ExerciseTemplate(
       id: template.id,
       nameRu: template.nameRu,
@@ -89,6 +90,7 @@ class ExerciseLibraryService {
       _customKey,
       json.encode(exercises.map((e) => e.toJson()).toList()),
     );
+    await ExerciseCatalogService().reload();
   }
 
   // Добавить своё упражнение в пользовательскую базу.
@@ -122,6 +124,7 @@ class ExerciseLibraryService {
       _customKey,
       json.encode(existing.map((e) => e.toJson()).toList()),
     );
+    await ExerciseCatalogService().reload();
   }
 
   // Поиск упражнений по названию и опциональной группе мышц.
@@ -162,7 +165,9 @@ class ExerciseLibraryService {
     final workoutService = WorkoutService();
     final workouts = await workoutService.getCompletedWorkouts();
     final builtIn = await getBuiltInExercises();
-    final builtInNames = builtIn.map((e) => e.nameRu.toLowerCase()).toSet();
+    // Названия на всех трёх языках (раньше сравнивали только nameRu,
+    // и английские / латышские названия попадали в базу как свои упражнения)
+    final builtInNames = builtIn.expand(ExerciseCatalogService.namesOf).toSet();
 
     // Собираем уникальные названия из истории
     final Map<String, String> uniqueExercises = {}; // name → targetMuscle
@@ -176,15 +181,17 @@ class ExerciseLibraryService {
 
     // Добавляем только те которых нет в встроенной базе
     final custom = await getCustomExercises();
-    final customNames = custom.map((e) => e.nameRu.toLowerCase()).toSet();
+    final customNames = custom.expand(ExerciseCatalogService.namesOf).toSet();
 
     for (final entry in uniqueExercises.entries) {
       final name = entry.key;
       final muscle = entry.value;
 
       // Пропускаем если уже есть в базе
-      if (builtInNames.contains(name.toLowerCase())) continue;
-      if (customNames.contains(name.toLowerCase())) continue;
+      final key = ExerciseCatalogService.normalize(name);
+      if (builtInNames.contains(key)) continue;
+      if (customNames.contains(key)) continue;
+      customNames.add(key);
 
       custom.add(ExerciseTemplate(
         id: 'migrated_${DateTime.now().millisecondsSinceEpoch}_${custom.length}',

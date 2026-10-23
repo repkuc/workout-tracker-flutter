@@ -3,12 +3,14 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'workout_service.dart';
 import 'body_weight_service.dart';
 // Новые сервисы которые ещё не были подключены к бэкапу.
 import 'body_measurement_service.dart';
 import 'program_service.dart';
 import 'exercise_library_service.dart';
+import 'exercise_id_migration.dart';
 import '../models/body_measurement_entry.dart';
 import '../models/exercise_template.dart';
 import '../models/program_models.dart';
@@ -108,6 +110,14 @@ class BackupService {
       if (decoded['programs'] != null) {
         await _importPrograms(decoded['programs'] as List);
       }
+    }
+
+    // Привязать импортированные упражнения к id шаблона (заполняет только пустые
+    // поля). Ошибка миграции не отменяет уже выполненный импорт.
+    try {
+      await ExerciseIdMigration().run(force: true);
+    } catch (e) {
+      debugPrint('Exercise id migration after import failed: $e');
     }
 
     return imported;

@@ -5,6 +5,8 @@ import 'services/workout_service.dart';
 import 'pages/main_page.dart';
 import 'services/exercise_library_service.dart';
 import 'services/exercise_image_service.dart';
+import 'services/exercise_catalog_service.dart';
+import 'services/exercise_id_migration.dart';
 import 'theme/app_colors.dart';
 
 void main() async {
@@ -17,6 +19,15 @@ void main() async {
 
   final exerciseLibrary = ExerciseLibraryService(); // Получаем доступ к сервису библиотеки упражнений
   await exerciseLibrary.migrateExistingExercises(); // Выполняем миграцию упражнений из истории в библиотеку
+
+  // Каталог упражнений (id ↔ названия) и разовая привязка упражнений к id шаблона
+  await ExerciseCatalogService().init();
+  try {
+    await ExerciseIdMigration().run();
+  } catch (e) {
+    // Флаг не ставится — попробуем снова при следующем запуске
+    debugPrint('Exercise id migration failed: $e');
+  }
 
   // Заранее строим поиск демо-картинок упражнений, чтобы кнопка ⓘ сразу знала, показываться ли
   await ExerciseImageService().init();
