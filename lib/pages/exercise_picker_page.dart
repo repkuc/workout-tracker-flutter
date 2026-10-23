@@ -466,26 +466,35 @@ class _ExercisePickerPageState extends State<ExercisePickerPage> {
 
     if (result == true) {
       final name = nameController.text.trim();
-      await _libraryService.addCustomExercise(
+
+      // Такое упражнение уже есть (встроенное — на любом языке, или своё):
+      // не создаём дубликат, а берём существующее
+      final catalog = ExerciseCatalogService();
+      final existing = catalog.templateById(catalog.idForName(name));
+      if (existing != null) {
+        if (mounted) {
+          final lang = context.locale.languageCode;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('workout.exercise_already_in_library'
+                  .tr(namedArgs: {'name': existing.getName(lang)})),
+              backgroundColor: AppColors.snackbarNeutral,
+            ),
+          );
+          Navigator.pop(context, existing);
+        }
+        return;
+      }
+
+      final newExercise = await _libraryService.addCustomExercise(
         nameRu: name,
         nameLv: name,
         nameEn: name,
         muscleGroup: selectedGroup,
       );
-      await _loadExercises();
 
-      // Сразу возвращаем добавленное упражнение
-      if (mounted) {
-        final newExercise = ExerciseTemplate(
-          id: 'custom_temp',
-          nameRu: name,
-          nameLv: name,
-          nameEn: name,
-          muscleGroup: selectedGroup,
-          isCustom: true,
-        );
-        Navigator.pop(context, newExercise);
-      }
+      // Сразу возвращаем добавленное упражнение (с настоящим id)
+      if (mounted) Navigator.pop(context, newExercise);
     }
   }
 }

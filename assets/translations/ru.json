@@ -56,6 +56,7 @@
     "add_exercise_dialog_title": "Добавить упражнение",
     "exercise_name_hint": "Например: Жим лёжа",
     "exercise_name_required": "Введите название упражнения",
+    "exercise_already_in_library": "Это упражнение уже есть в библиотеке: {name}",
     "add_set_button": "Добавить подход",
     "add_set_dialog_title": "Добавить подход",
     "reps_hint": "Например: 10",

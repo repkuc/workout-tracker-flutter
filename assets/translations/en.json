@@ -56,6 +56,7 @@
     "add_exercise_dialog_title": "Add Exercise",
     "exercise_name_hint": "e.g. Bench Press",
     "exercise_name_required": "Enter exercise name",
+    "exercise_already_in_library": "This exercise is already in the library: {name}",
     "add_set_button": "Add Set",
     "add_set_dialog_title": "Add Set",
     "reps_hint": "e.g. 10",

@@ -257,12 +257,16 @@ class WorkoutService {
   // === РАБОТА С УПРАЖНЕНИЯМИ ===
 
   // Добавить упражнение в тренировку.
+  // templateId / muscleGroup — id шаблона и ключ группы мышц (name и
+  // targetMuscle остаются «снимком» на языке добавления).
   // plannedSets / plannedRepsMin / plannedRepsMax — план из дня программы
   // (только для Начать / Повторить); при ручном добавлении остаются null.
   Future<bool> addExercise(
     String workoutId, {
     required String name,
     String targetMuscle = '',
+    String? templateId,
+    String? muscleGroup,
     int? plannedSets,
     int? plannedRepsMin,
     int? plannedRepsMax,
@@ -277,6 +281,8 @@ class WorkoutService {
       workoutId: workoutId,
       name: name,
       targetMuscle: targetMuscle,
+      templateId: templateId,
+      muscleGroup: muscleGroup,
       position: workouts[index].exercises.length,
       plannedSets: plannedSets,
       plannedRepsMin: plannedRepsMin,
@@ -490,6 +496,8 @@ class WorkoutService {
         workoutId: newWorkout.id,
         name: exercise.name,
         targetMuscle: exercise.targetMuscle,
+        templateId: exercise.templateId,
+        muscleGroup: exercise.muscleGroup,
         position: exercise.position,
         copiedFromExerciseId:
             exercise.id, // ← НОВОЕ: сохраняем ID оригинального упражнения

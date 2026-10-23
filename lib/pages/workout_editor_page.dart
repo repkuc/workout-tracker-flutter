@@ -1344,6 +1344,9 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
       widget.workoutId,
       name: name,
       targetMuscle: targetMuscle,
+      templateId: template.id,
+      muscleGroup:
+          template.muscleGroup.isNotEmpty ? template.muscleGroup : null,
     );
 
     if (success) {

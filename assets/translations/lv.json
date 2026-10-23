@@ -56,6 +56,7 @@
     "add_exercise_dialog_title": "Pievienot vingrinājumu",
     "exercise_name_hint": "Piemēram: Guļus spiešana",
     "exercise_name_required": "Ievadiet vingrinājuma nosaukumu",
+    "exercise_already_in_library": "Šis vingrinājums jau ir bibliotēkā: {name}",
     "add_set_button": "Pievienot sēriju",
     "add_set_dialog_title": "Pievienot sēriju",
     "reps_hint": "Piemēram: 10",

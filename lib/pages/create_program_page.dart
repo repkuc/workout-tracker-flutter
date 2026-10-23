@@ -465,6 +465,7 @@ class _CreateProgramPageState extends State<CreateProgramPage> {
                         dayExercises.add(ProgramExercise(
                           name: template.getName(lang),
                           targetMuscle: template.muscleGroup,
+                          templateId: template.id,
                           targetSets: 3,
                         ));
                       });

@@ -93,8 +93,8 @@ class ExerciseLibraryService {
     await ExerciseCatalogService().reload();
   }
 
-  // Добавить своё упражнение в пользовательскую базу.
-  Future<void> addCustomExercise({
+  // Добавить своё упражнение в пользовательскую базу. Возвращает созданный шаблон.
+  Future<ExerciseTemplate> addCustomExercise({
     required String nameRu,
     required String nameLv,
     required String nameEn,
@@ -125,6 +125,7 @@ class ExerciseLibraryService {
       json.encode(existing.map((e) => e.toJson()).toList()),
     );
     await ExerciseCatalogService().reload();
+    return newExercise;
   }
 
   // Поиск упражнений по названию и опциональной группе мышц.

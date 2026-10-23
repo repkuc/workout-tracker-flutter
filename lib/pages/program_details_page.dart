@@ -10,6 +10,8 @@ import '../models/program_models.dart';
 // Подключаем сервис программ — чтобы заново загрузить программу по ID
 // (на случай если что-то изменилось, например через другой экран).
 import '../services/program_service.dart';
+import '../services/exercise_catalog_service.dart';
+import '../services/exercise_library_service.dart';
 
 // Подключаем сервис тренировок — он нам нужен чтобы создать
 // настоящую Workout на основе шаблона ProgramWorkout.
@@ -535,6 +537,7 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
                         dayExercises.add(ProgramExercise(
                           name: template.getName(lang),
                           targetMuscle: template.muscleGroup,
+                          templateId: template.id,
                           targetSets: 3,
                         ));
                       });
@@ -872,6 +875,22 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
     return '${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year}';
   }
 
+  // id шаблона упражнения программы (если вдруг нет — ищем по названию)
+  String? _templateIdOf(ProgramExercise exercise) =>
+      exercise.templateId ?? ExerciseCatalogService().idForName(exercise.name);
+
+  // Ключ группы мышц для тренировки: из программы, иначе из шаблона
+  String? _muscleGroupOf(ProgramExercise exercise) {
+    if (ExerciseLibraryService.validGroups.contains(exercise.targetMuscle)) {
+      return exercise.targetMuscle;
+    }
+    final group = ExerciseCatalogService()
+            .templateById(_templateIdOf(exercise))
+            ?.muscleGroup ??
+        '';
+    return group.isEmpty ? null : group;
+  }
+
   // Начать тренировку с нуля по шаблону программы (когда истории ещё нет).
   Future<void> _startWorkoutFromTemplate(ProgramWorkout template) async {
     // Создаём новую тренировку, сразу указывая programId и название дня —
@@ -894,6 +913,8 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
         targetMuscle: exercise.targetMuscle.isNotEmpty
             ? 'workout.muscle_${exercise.targetMuscle}'.tr()
             : '',
+        templateId: _templateIdOf(exercise),
+        muscleGroup: _muscleGroupOf(exercise),
         plannedSets: exercise.targetSets,
         plannedRepsMin: exercise.repsMin,
         plannedRepsMax: exercise.repsMax,
@@ -915,9 +936,10 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
   // Повторить тренировку: берём АКТУАЛЬНЫЙ список упражнений из шаблона программы
 
   // Повторить тренировку: берём АКТУАЛЬНЫЙ список упражнений из шаблона программы
-  // (а не из старой тренировки), но для каждого упражнения — если оно
-  // называется так же как в прошлой тренировке — подтягиваем оттуда подходы
-  // (вес и повторы), чтобы не вводить всё заново руками.
+  // (а не из старой тренировки), но для каждого упражнения — если это то же
+  // упражнение, что в прошлой тренировке (по identityKey: id шаблона, иначе
+  // название на любом языке) — подтягиваем оттуда подходы (вес и повторы),
+  // чтобы не вводить всё заново руками.
   Future<void> _repeatWorkoutFromTemplate(
     ProgramWorkout template,
     Workout lastWorkout,
@@ -939,12 +961,16 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
     // Идём по упражнениям из АКТУАЛЬНОГО шаблона программы, а не из старой тренировки.
     // Это значит: если упражнение убрали из шаблона — оно не попадёт сюда.
     // Если добавили новое — оно попадёт, просто без истории весов.
+    final catalog = ExerciseCatalogService();
     for (final templateExercise in template.exercises) {
-      // Пытаемся найти в прошлой тренировке упражнение с таким же названием.
+      // Ищем в прошлой тренировке то же упражнение — по id шаблона, а не по
+      // тексту названия: день мог быть собран на другом языке.
+      final key = catalog.identityKey(
+          templateId: templateExercise.templateId, name: templateExercise.name);
       Exercise? matchingOld;
       try {
         matchingOld = lastWorkout.exercises.firstWhere(
-          (e) => e.name == templateExercise.name,
+          (e) => catalog.identityKey(templateId: e.templateId, name: e.name) == key,
         );
       } catch (e) {
         // Совпадения нет — это новое упражнение в шаблоне, добавим его пустым.
@@ -959,6 +985,8 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
         targetMuscle: templateExercise.targetMuscle.isNotEmpty
             ? 'workout.muscle_${templateExercise.targetMuscle}'.tr()
             : '',
+        templateId: _templateIdOf(templateExercise),
+        muscleGroup: _muscleGroupOf(templateExercise),
         plannedSets: templateExercise.targetSets,
         plannedRepsMin: templateExercise.repsMin,
         plannedRepsMax: templateExercise.repsMax,
