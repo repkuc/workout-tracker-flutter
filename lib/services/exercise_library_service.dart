@@ -82,6 +82,15 @@ class ExerciseLibraryService {
     return [...builtIn, ...custom];
   }
 
+  // Сохранить весь список пользовательских упражнений (нужно импорту бэкапа).
+  Future<void> saveCustomExercises(List<ExerciseTemplate> exercises) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(
+      _customKey,
+      json.encode(exercises.map((e) => e.toJson()).toList()),
+    );
+  }
+
   // Добавить своё упражнение в пользовательскую базу.
   Future<void> addCustomExercise({
     required String nameRu,
