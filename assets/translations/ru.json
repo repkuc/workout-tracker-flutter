@@ -64,6 +64,8 @@
     "weight_required": "Введите вес",
     "increase": "Увеличить",
     "decrease": "Уменьшить",
+    "goal": "Цель",
+    "sets_done": "Выполнено подходов",
     "kg": "кг",
     "delete_exercise": "Удалить упражнение",
     "delete_exercise_confirm": "Вы уверены?",
@@ -260,7 +262,8 @@
   "show_more": "Показать ещё",
   "show_less": "Свернуть",
   "sets_label": "Подходы",
-  "reps_from_label": "Повторы от",
+  "reps_label": "Повторы",
+  "reps_from": "от",
   "reps_to": "до"
 },
 "measurements": {

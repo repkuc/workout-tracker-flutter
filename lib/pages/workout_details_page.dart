@@ -6,6 +6,7 @@ import 'workout_editor_page.dart';
 import '../theme/app_colors.dart';
 import '../widgets/page_header.dart';
 import '../widgets/exercise_info_button.dart';
+import '../widgets/exercise_goal.dart';
 
 class WorkoutDetailsPage extends StatefulWidget {
   final String workoutId;
@@ -195,6 +196,11 @@ class _WorkoutDetailsPageState extends State<WorkoutDetailsPage> {
                     Text(exercise.name, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600)),
                     if (exercise.targetMuscle.isNotEmpty)
                       Text(exercise.targetMuscle, style: const TextStyle(color: AppColors.textMuted, fontSize: 11)),
+                    // Цель из программы и итог «выполнено / план» (только если план был)
+                    if (exercise.hasPlan) ...[
+                      const SizedBox(height: 3),
+                      ExerciseGoalLine(exercise: exercise),
+                    ],
                   ],
                 ),
               ),

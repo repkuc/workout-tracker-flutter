@@ -64,6 +64,8 @@
     "weight_required": "Enter weight",
     "increase": "Increase",
     "decrease": "Decrease",
+    "goal": "Goal",
+    "sets_done": "Sets done",
     "kg": "kg",
     "delete_exercise": "Delete exercise",
     "delete_exercise_confirm": "Are you sure?",
@@ -260,7 +262,8 @@
   "show_more": "Show more",
   "show_less": "Show less",
   "sets_label": "Sets",
-  "reps_from_label": "Reps from",
+  "reps_label": "Reps",
+  "reps_from": "from",
   "reps_to": "to"
 },
 "measurements": {

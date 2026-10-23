@@ -64,6 +64,8 @@
     "weight_required": "Ievadiet svaru",
     "increase": "Palielināt",
     "decrease": "Samazināt",
+    "goal": "Mērķis",
+    "sets_done": "Izpildītās pieejas",
     "kg": "kg",
     "delete_exercise": "Dzēst vingrinājumu",
     "delete_exercise_confirm": "Vai esat pārliecināts?",
@@ -260,7 +262,8 @@
   "show_more": "Rādīt vairāk",
   "show_less": "Rādīt mazāk",
   "sets_label": "Pieejas",
-  "reps_from_label": "Atkārtojumi no",
+  "reps_label": "Atkārtojumi",
+  "reps_from": "no",
   "reps_to": "līdz"
 },
 "measurements": {

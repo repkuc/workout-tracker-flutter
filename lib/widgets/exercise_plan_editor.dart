@@ -6,15 +6,15 @@ import '../theme/app_colors.dart';
 import 'step_button.dart';
 
 // План упражнения программы для диалога дня:
-//      Подходы [−][3][+]
-//   Повторы от [−][8][+]
-//           до [−][12][+]
+//   Подходы [−][3][+]
+//   ПОВТОРЫ ───────────
+//        от [−][8][+]
+//        до [−][12][+]
 // Пишет значения прямо в exercise.targetSets / repsMin / repsMax (диалог дня
 // работает с копией упражнения). Окончательно правило 1 ≤ от ≤ до ≤ 100 применяет
 // exercise.normalizeRepsRange() при сохранении дня.
 // Подписи — одна колонка общей ширины (по самой длинной), всегда в одну строку;
 // если места мало, подпись немного уменьшается, а не переносится.
-// На широком экране группы встают в одну строку (Wrap).
 class ExercisePlanEditor extends StatefulWidget {
   final ProgramExercise exercise;
 
@@ -223,16 +223,42 @@ class _ExercisePlanEditorState extends State<ExercisePlanEditor> {
     );
   }
 
+  // Заголовок блока повторов: «Повторы» и тонкая линия до края —
+  // отделяет повторы от подходов
+  Widget _buildRepsHeading() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 4, bottom: 2),
+      child: Row(
+        children: [
+          Text(
+            'programs.reps_label'.tr(),
+            maxLines: 1,
+            softWrap: false,
+            style: const TextStyle(
+              color: AppColors.textMuted,
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.5,
+            ),
+          ),
+          const SizedBox(width: 8),
+          const Expanded(
+            child: Divider(height: 1, thickness: 1, color: AppColors.chipBorder),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final setsLabel = 'programs.sets_label'.tr();
-    final fromLabel = 'programs.reps_from_label'.tr();
+    final fromLabel = 'programs.reps_from'.tr();
     final toLabel = 'programs.reps_to'.tr();
     final labelWidth = _labelWidth(context, [setsLabel, fromLabel, toLabel]);
 
-    return Wrap(
-      spacing: 8,
-      crossAxisAlignment: WrapCrossAlignment.center,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildGroup(
           label: setsLabel,
@@ -240,6 +266,7 @@ class _ExercisePlanEditorState extends State<ExercisePlanEditor> {
           value: _buildSetsValue(),
           onStep: _stepSets,
         ),
+        _buildRepsHeading(),
         _buildGroup(
           label: fromLabel,
           labelWidth: labelWidth,

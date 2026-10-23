@@ -93,6 +93,8 @@ class WorkoutService {
     // и это никак не повлияет на существующий функционал.
     String? programId,
     String? programWorkoutName,
+    // ID дня программы — по нему потом ищется история дня («Последний раз», «Повторить»)
+    String? programWorkoutId,
     String? programName,
     String? copiedFromWorkoutId,
   }) async {
@@ -108,6 +110,7 @@ class WorkoutService {
       // Workout просто сохранит null, как и раньше.
       programId: programId,
       programWorkoutName: programWorkoutName,
+      programWorkoutId: programWorkoutId,
       programName: programName,
       copiedFromWorkoutId: copiedFromWorkoutId,
     );
@@ -253,11 +256,16 @@ class WorkoutService {
 
   // === РАБОТА С УПРАЖНЕНИЯМИ ===
 
-  // Добавить упражнение в тренировку
+  // Добавить упражнение в тренировку.
+  // plannedSets / plannedRepsMin / plannedRepsMax — план из дня программы
+  // (только для Начать / Повторить); при ручном добавлении остаются null.
   Future<bool> addExercise(
     String workoutId, {
     required String name,
     String targetMuscle = '',
+    int? plannedSets,
+    int? plannedRepsMin,
+    int? plannedRepsMax,
   }) async {
     final workouts = await loadAllWorkouts();
     final index = workouts.indexWhere((w) => w.id == workoutId);
@@ -270,6 +278,9 @@ class WorkoutService {
       name: name,
       targetMuscle: targetMuscle,
       position: workouts[index].exercises.length,
+      plannedSets: plannedSets,
+      plannedRepsMin: plannedRepsMin,
+      plannedRepsMax: plannedRepsMax,
     );
 
     workouts[index].exercises.add(exercise);
@@ -689,26 +700,55 @@ class WorkoutService {
     return sorted;
   }
 
-  // Найти последнюю завершённую тренировку конкретного дня программы.
-  // Используем programId + programWorkoutName вместе, потому что
-  // одна программа может иметь несколько разных дней с разными названиями —
-  // нам нужно найти именно тот день, а не любую тренировку этой программы.
+  // Относится ли тренировка к этому дню программы.
+  // Сначала по ID дня; у старых тренировок (без programWorkoutId) — по названию дня,
+  // как раньше, чтобы их история не потерялась.
+  bool _belongsToProgramDay(
+      Workout w, String programId, String dayId, String dayName) {
+    if (w.programId != programId) return false;
+    if (w.programWorkoutId != null) return w.programWorkoutId == dayId;
+    return w.programWorkoutName == dayName;
+  }
+
+  // Найти последнюю завершённую тренировку конкретного дня программы
+  // (для «Последний раз» и источника подходов в «Повторить»).
   Future<Workout?> getLastWorkoutForProgramDay(
-    String programId,
-    String programWorkoutName,
-  ) async {
+    String programId, {
+    required String dayId,
+    required String dayName,
+  }) async {
     // getCompletedWorkouts() уже возвращает список отсортированный
     // от новых к старым, поэтому первое совпадение и будет последним по времени.
     final completed = await getCompletedWorkouts();
 
-    try {
-      return completed.firstWhere(
-        (w) => w.programId == programId && w.programWorkoutName == programWorkoutName,
-      );
-    } catch (e) {
-      // Если ни одна тренировка не подошла под условие — значит этот день
-      // программы ещё ни разу не выполнялся.
-      return null;
+    for (final w in completed) {
+      if (_belongsToProgramDay(w, programId, dayId, dayName)) return w;
     }
+    // Если ни одна тренировка не подошла под условие — значит этот день
+    // программы ещё ни разу не выполнялся.
+    return null;
+  }
+
+  // Привязать старые тренировки дня (созданные до появления programWorkoutId,
+  // найденные по названию дня) к ID дня. Вызывается перед сохранением
+  // отредактированного дня — после переименования история дня не теряется.
+  // Возвращает количество привязанных тренировок.
+  Future<int> linkOldWorkoutsToProgramDay(
+    String programId, {
+    required String dayId,
+    required String dayName,
+  }) async {
+    final workouts = await loadAllWorkouts();
+    int linked = 0;
+    for (final w in workouts) {
+      if (w.programId == programId &&
+          w.programWorkoutId == null &&
+          w.programWorkoutName == dayName) {
+        w.programWorkoutId = dayId;
+        linked++;
+      }
+    }
+    if (linked > 0) await saveAllWorkouts(workouts);
+    return linked;
   }
 }

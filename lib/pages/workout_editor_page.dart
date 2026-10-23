@@ -13,6 +13,7 @@ import '../widgets/app_dialog.dart';
 import '../widgets/app_bottom_sheet.dart';
 import '../widgets/exercise_info_button.dart';
 import '../widgets/step_button.dart';
+import '../widgets/exercise_goal.dart';
 
 class WorkoutEditorPage extends StatefulWidget {
   final String workoutId;
@@ -735,6 +736,15 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
               ExerciseInfoButton(name: exercise.name),
             ],
           ),
+          // Цель из программы второй строкой под названием («🎯 4 × 8–12  2 / 4»).
+          // У упражнений без плана подзаголовка нет — карточка как раньше.
+          subtitle: exercise.hasPlan
+              ? Padding(
+                  // Отступ = иконка 16 + промежуток 8, чтобы цель стояла под названием
+                  padding: const EdgeInsets.only(left: 24, bottom: 2),
+                  child: ExerciseGoalLine(exercise: exercise),
+                )
+              : null,
           children: [
             // Целевая мышца (если есть и не завершено)
             if (exercise.targetMuscle.isNotEmpty && !exercise.isCompleted) ...[

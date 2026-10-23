@@ -44,6 +44,12 @@ class Exercise {
   int position; // Позиция упражнения в тренировке
   bool isCompleted; // Завершено ли упражнение
   String? copiedFromExerciseId; // Идентификатор упражнения, из которого было скопировано (если применимо)
+  // План из дня программы — «снимок» на момент Начать / Повторить, чтобы
+  // поздние правки программы не меняли прошлые тренировки. null — плана нет
+  // (упражнение добавлено вручную или тренировка не из программы).
+  int? plannedSets; // Сколько подходов запланировано
+  int? plannedRepsMin; // Повторы «от» (null — без плана повторов)
+  int? plannedRepsMax; // Повторы «до»
 
   // Конструктор
   Exercise({
@@ -55,7 +61,16 @@ class Exercise {
     this.position = 0,
     this.isCompleted = false, // По умолчанию упражнение не завершено
     this.copiedFromExerciseId,
+    this.plannedSets,
+    this.plannedRepsMin,
+    this.plannedRepsMax,
   }) : sets = sets ?? []; // Инициализация пустым списком, если не передан
+
+  // Есть ли у упражнения цель из программы
+  bool get hasPlan => plannedSets != null;
+
+  // Сколько подходов отмечено выполненными
+  int get doneSetsCount => sets.where((s) => s.isDone).length;
 
   // Конвертация в JSON для сохранения
   Map<String, dynamic> toJson() => {
@@ -67,6 +82,9 @@ class Exercise {
     'position': position,
     'isCompleted': isCompleted,
     'copiedFromExerciseId': copiedFromExerciseId,
+    'plannedSets': plannedSets,
+    'plannedRepsMin': plannedRepsMin,
+    'plannedRepsMax': plannedRepsMax,
   };
 
   // Создание из JSON
@@ -82,6 +100,10 @@ class Exercise {
     position: json['position'] ?? 0,
     isCompleted: json['isCompleted'] ?? false,
     copiedFromExerciseId: json['copiedFromExerciseId'],
+    // В старых данных плана нет — будет null
+    plannedSets: (json['plannedSets'] as num?)?.toInt(),
+    plannedRepsMin: (json['plannedRepsMin'] as num?)?.toInt(),
+    plannedRepsMax: (json['plannedRepsMax'] as num?)?.toInt(),
   );
 }
 
@@ -101,6 +123,10 @@ class Workout {
   int totalPausedSeconds; // Общее количество секунд, проведенных на паузе
   String? programId; // Идентификатор программы, если тренировка связана с программой
   String? programWorkoutName; // Название тренировки в программе, если применимо
+  // ID дня программы (ProgramWorkout.id). Связь с днём ищется по нему, а не по
+  // названию — переименование дня не теряет историю. У старых тренировок null:
+  // для них остаётся поиск по programWorkoutName (см. getLastWorkoutForProgramDay).
+  String? programWorkoutId;
   // Название самой программы на момент создания тренировки — сохраняем "снимок",
   // а не ищем программу заново по ID каждый раз. Так бейдж в истории останется
   // корректным даже если позже программу переименуют или удалят.
@@ -125,6 +151,7 @@ class Workout {
     List<Exercise>? exercises,
     this.programId,
     this.programWorkoutName,
+    this.programWorkoutId,
     this.programName,
   }) : exercises = exercises ?? [], // Инициализация пустым списком, если не передан
       muscleGroups = muscleGroups ?? []; // Инициализация пустым списком, если не передан
@@ -146,6 +173,7 @@ class Workout {
     'totalPausedSeconds': totalPausedSeconds,
     'programId': programId,
     'programWorkoutName': programWorkoutName,
+    'programWorkoutId': programWorkoutId,
     'programName': programName,
     'muscleGroups': muscleGroups,
   };
@@ -166,6 +194,7 @@ class Workout {
     totalPausedSeconds: json['totalPausedSeconds'] ?? 0,
     programId: json['programId'],
     programWorkoutName: json['programWorkoutName'],
+    programWorkoutId: json['programWorkoutId'],
     programName: json['programName'],
     muscleGroups: (json['muscleGroups'] as List?)
     ?.map((e) => e.toString())

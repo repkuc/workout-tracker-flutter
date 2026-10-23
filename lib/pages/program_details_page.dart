@@ -52,7 +52,7 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
   // Программа которую мы показываем. null пока не загрузилась.
   TrainingProgram? _program;
   bool _isLoading = true;
-  // Map: название дня программы → последняя тренировка этого дня (если была).
+  // Map: ID дня программы → последняя тренировка этого дня (если была).
   // Загружаем один раз при открытии экрана, чтобы для каждой карточки
   // дня сразу знать показывать "Начать" или "Повторить", не делая
   // отдельный запрос на каждую карточку при построении списка.
@@ -83,21 +83,22 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
   Future<void> _loadProgram() async {
     final program = await _programService.getProgram(widget.programId);
 
-    // Для каждого дня программы ищем — была ли уже тренировка с таким названием
-    // дня внутри этой же программы. Складываем результаты в Map для быстрого
-    // доступа при отрисовке карточек.
+    // Для каждого дня программы ищем — была ли уже тренировка этого дня
+    // внутри этой же программы (по ID дня, у старых тренировок — по названию).
+    // Складываем результаты в Map для быстрого доступа при отрисовке карточек.
     final Map<String, Workout> lastWorkouts = {};
     if (program != null) {
       for (final workout in program.workouts) {
         final last = await _workoutService.getLastWorkoutForProgramDay(
           program.id,
-          workout.name,
+          dayId: workout.id,
+          dayName: workout.name,
         );
         // Добавляем в Map только если действительно нашли прошлую тренировку —
         // иначе для этого дня в Map не будет записи, и мы будем знать
         // что нужно показать "Начать", а не "Повторить".
         if (last != null) {
-          lastWorkouts[workout.name] = last;
+          lastWorkouts[workout.id] = last;
         }
       }
     }
@@ -594,8 +595,14 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
       if (existingWorkout != null) {
         // Редактирование существующего дня — заменяем его на том же месте
         // (порядок дней важен) и с тем же id. История и «Повторить» ищут
-        // тренировки дня по programId + названию дня (programWorkoutName),
-        // поэтому связь сохраняется, если название дня не поменяли.
+        // тренировки дня по ID дня. Старые тренировки (без ID дня, найденные
+        // по старому названию) сначала привязываем к ID — тогда переименование
+        // дня не теряет их историю.
+        await _workoutService.linkOldWorkoutsToProgramDay(
+          widget.programId,
+          dayId: existingWorkout.id,
+          dayName: existingWorkout.name,
+        );
         await _programService.updateWorkoutInProgram(
           widget.programId,
           ProgramWorkout(
@@ -655,7 +662,7 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
 
   // Карточка одного тренировочного дня с кнопкой "Начать"/"Повторить".
   Widget _buildWorkoutCard(ProgramWorkout workout) {
-    final lastWorkout = _lastWorkoutsByDay[workout.name];
+    final lastWorkout = _lastWorkoutsByDay[workout.id];
     final hasHistory = lastWorkout != null;
     final hasExercises = workout.exercises.isNotEmpty;
     final isExpanded = _expandedDayIds.contains(workout.id);
@@ -874,10 +881,12 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
       name: template.name,
       programId: _program!.id,
       programWorkoutName: template.name,
+      programWorkoutId: template.id, // Связь с днём по ID — переживает переименование дня
       programName: _program!.name, // Сохраняем "снимок" названия программы
     );
 
     // Добавляем каждое упражнение из шаблона, пока без подходов.
+    // План (подходы, повторы) копируем «снимком» — это цель на карточке упражнения.
     for (final exercise in template.exercises) {
       await _workoutService.addExercise(
         workout.id,
@@ -885,6 +894,9 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
         targetMuscle: exercise.targetMuscle.isNotEmpty
             ? 'workout.muscle_${exercise.targetMuscle}'.tr()
             : '',
+        plannedSets: exercise.targetSets,
+        plannedRepsMin: exercise.repsMin,
+        plannedRepsMax: exercise.repsMax,
       );
     }
 
@@ -916,6 +928,7 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
       name: template.name,
       programId: _program!.id,
       programWorkoutName: template.name,
+      programWorkoutId: template.id, // Связь с днём по ID — переживает переименование дня
       programName: _program!.name, // Сохраняем "снимок" названия программы
       // Сохраняем связь с прошлой тренировкой — это то же поле что
       // используется в обычном copyWorkout(), нужно для сравнения
@@ -938,13 +951,17 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
         matchingOld = null;
       }
 
-      // Добавляем упражнение в новую тренировку.
+      // Добавляем упражнение в новую тренировку вместе с планом из шаблона
+      // (цель на карточке; подходы не создаём — они подтягиваются ниже, как раньше).
       await _workoutService.addExercise(
         workout.id,
         name: templateExercise.name,
         targetMuscle: templateExercise.targetMuscle.isNotEmpty
             ? 'workout.muscle_${templateExercise.targetMuscle}'.tr()
             : '',
+        plannedSets: templateExercise.targetSets,
+        plannedRepsMin: templateExercise.repsMin,
+        plannedRepsMax: templateExercise.repsMax,
       );
 
       // Если нашли совпадение по имени в прошлой тренировке — копируем
