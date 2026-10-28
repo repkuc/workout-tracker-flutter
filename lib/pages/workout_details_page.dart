@@ -5,6 +5,7 @@ import '../models/workout_models.dart';
 import 'workout_editor_page.dart';
 import '../theme/app_colors.dart';
 import '../widgets/page_header.dart';
+import '../widgets/exercise_display.dart';
 import '../widgets/exercise_info_button.dart';
 import '../widgets/exercise_goal.dart';
 
@@ -193,9 +194,9 @@ class _WorkoutDetailsPageState extends State<WorkoutDetailsPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(exercise.name, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600)),
-                    if (exercise.targetMuscle.isNotEmpty)
-                      Text(exercise.targetMuscle, style: const TextStyle(color: AppColors.textMuted, fontSize: 11)),
+                    Text(exerciseDisplayName(context, exercise), style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600)),
+                    if (exerciseMuscleLabel(context, exercise).isNotEmpty)
+                      Text(exerciseMuscleLabel(context, exercise), style: const TextStyle(color: AppColors.textMuted, fontSize: 11)),
                     // Цель из программы и итог «выполнено / план» (только если план был)
                     if (exercise.hasPlan) ...[
                       const SizedBox(height: 3),
@@ -204,7 +205,7 @@ class _WorkoutDetailsPageState extends State<WorkoutDetailsPage> {
                   ],
                 ),
               ),
-              ExerciseInfoButton(name: exercise.name),
+              ExerciseInfoButton(templateId: exercise.templateId, name: exercise.name),
               Text(_formatVolume(volume), style: const TextStyle(color: AppColors.volume, fontSize: 12, fontWeight: FontWeight.w600)),
             ],
           ),

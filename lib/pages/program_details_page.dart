@@ -29,6 +29,7 @@ import '../theme/app_colors.dart';
 import '../widgets/page_header.dart';
 import '../widgets/app_dialog.dart';
 import '../widgets/app_bottom_sheet.dart';
+import '../widgets/exercise_display.dart';
 import '../widgets/exercise_info_button.dart';
 import '../widgets/weekday_selector.dart';
 import '../widgets/exercise_plan_editor.dart';
@@ -507,10 +508,11 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
                         Row(
                           children: [
                             Expanded(
-                                child: Text(ex.name,
+                                child: Text(
+                                    programExerciseDisplayName(context, ex),
                                     style: const TextStyle(
                                         color: Colors.white, fontSize: 13))),
-                            ExerciseInfoButton(name: ex.name),
+                            ExerciseInfoButton(templateId: ex.templateId, name: ex.name),
                             const SizedBox(width: 8),
                             GestureDetector(
                               onTap: () => setDialogState(
@@ -838,11 +840,8 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
 
   // Одна строка упражнения в раскрытой карточке дня: название, мышца, подходы.
   Widget _buildDayExerciseRow(ProgramExercise ex) {
-    const muscleKeys = ['chest', 'back', 'legs', 'shoulders', 'arms', 'abs'];
     // В шаблоне хранится ключ мышцы (chest) — показываем перевод
-    final muscle = muscleKeys.contains(ex.targetMuscle)
-        ? 'workout.muscle_${ex.targetMuscle}'.tr()
-        : ex.targetMuscle;
+    final muscle = programExerciseMuscleLabel(context, ex);
 
     return Container(
       width: double.infinity,
@@ -859,7 +858,7 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  ex.name,
+                  programExerciseDisplayName(context, ex),
                   style: const TextStyle(color: Colors.white, fontSize: 13),
                 ),
                 if (muscle.isNotEmpty)
@@ -872,7 +871,7 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
             ),
           ),
           // Демо упражнения; нажатие не сворачивает карточку дня
-          ExerciseInfoButton(name: ex.name),
+          ExerciseInfoButton(templateId: ex.templateId, name: ex.name),
           const SizedBox(width: 8),
           // С планом повторов — «4 × 8–12» (или «3 × 10»), без него — «4 подх.»
           Text(

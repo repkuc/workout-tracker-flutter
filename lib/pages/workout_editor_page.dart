@@ -11,6 +11,7 @@ import 'package:audioplayers/audioplayers.dart';
 import '../theme/app_colors.dart';
 import '../widgets/app_dialog.dart';
 import '../widgets/app_bottom_sheet.dart';
+import '../widgets/exercise_display.dart';
 import '../widgets/exercise_info_button.dart';
 import '../widgets/step_button.dart';
 import '../widgets/exercise_goal.dart';
@@ -721,7 +722,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  exercise.name,
+                  exerciseDisplayName(context, exercise),
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 12,
@@ -733,7 +734,8 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                 ),
               ),
               // Демо упражнения (не сворачивает карточку)
-              ExerciseInfoButton(name: exercise.name),
+              ExerciseInfoButton(
+                  templateId: exercise.templateId, name: exercise.name),
             ],
           ),
           // Цель из программы второй строкой под названием («🎯 4 × 8–12  2 / 4»).
@@ -747,7 +749,8 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
               : null,
           children: [
             // Целевая мышца (если есть и не завершено)
-            if (exercise.targetMuscle.isNotEmpty && !exercise.isCompleted) ...[
+            if (exerciseMuscleLabel(context, exercise).isNotEmpty &&
+                !exercise.isCompleted) ...[
               Row(
                 children: [
                   const Icon(
@@ -757,7 +760,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    exercise.targetMuscle,
+                    exerciseMuscleLabel(context, exercise),
                     style: const TextStyle(
                       color: AppColors.textMuted,
                       fontSize: 10,
@@ -2063,7 +2066,9 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
       // Нет подходов
       if (exercise.sets.isEmpty) {
         incomplete.add({
-          'name': exercise.name,
+          'name': exerciseDisplayName(context, exercise),
+          'templateId': exercise.templateId,
+          'storedName': exercise.name,
           'issue': 'workout.no_sets'.tr(),
         });
         continue;
@@ -2073,7 +2078,9 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
       final incompleteSets = exercise.sets.where((s) => !s.isDone).length;
       if (incompleteSets > 0) {
         incomplete.add({
-          'name': exercise.name,
+          'name': exerciseDisplayName(context, exercise),
+          'templateId': exercise.templateId,
+          'storedName': exercise.name,
           'issue': '$incompleteSets ${'workout.incomplete_sets'.tr()}',
         });
       }
@@ -2148,7 +2155,9 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                               ],
                             ),
                           ),
-                          ExerciseInfoButton(name: item['name']),
+                          ExerciseInfoButton(
+                              templateId: item['templateId'],
+                              name: item['storedName']),
                         ],
                       ),
                     );

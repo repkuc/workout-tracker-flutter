@@ -20,6 +20,7 @@ import 'exercise_picker_page.dart';
 import '../theme/app_colors.dart';
 import '../widgets/page_header.dart';
 import '../widgets/app_dialog.dart';
+import '../widgets/exercise_display.dart';
 import '../widgets/exercise_info_button.dart';
 import '../widgets/weekday_selector.dart';
 import '../widgets/exercise_plan_editor.dart';
@@ -331,11 +332,11 @@ class _CreateProgramPageState extends State<CreateProgramPage> {
                   children: [
                     Expanded(
                       child: Text(
-                        ex.name,
+                        programExerciseDisplayName(context, ex),
                         style: const TextStyle(color: Colors.white, fontSize: 13),
                       ),
                     ),
-                    ExerciseInfoButton(name: ex.name),
+                    ExerciseInfoButton(templateId: ex.templateId, name: ex.name),
                     // С планом повторов — «4 × 8–12», без него — «4 подх.»
                     Text(
                       ex.repsRangeText != null
@@ -432,11 +433,11 @@ class _CreateProgramPageState extends State<CreateProgramPage> {
                           children: [
                             Expanded(
                               child: Text(
-                                ex.name,
+                                programExerciseDisplayName(context, ex),
                                 style: const TextStyle(color: Colors.white, fontSize: 13),
                               ),
                             ),
-                            ExerciseInfoButton(name: ex.name),
+                            ExerciseInfoButton(templateId: ex.templateId, name: ex.name),
                             const SizedBox(width: 8),
                             GestureDetector(
                               onTap: () {
