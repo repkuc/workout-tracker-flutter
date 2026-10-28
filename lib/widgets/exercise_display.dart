@@ -50,3 +50,17 @@ String programExerciseMuscleLabel(
   }
   return group;
 }
+
+// Подпись упражнения в статистике по его ключу (WorkoutService.exerciseKey):
+// шаблон из каталога — на текущем языке / текущее своё название,
+// иначе самое новое сохранённое название (latestNames), иначе текст ключа.
+String exerciseKeyLabel(
+    BuildContext context, String key, Map<String, String> latestNames) {
+  final fallback = latestNames[key] ??
+      (key.startsWith('name:') ? key.substring('name:'.length) : key);
+  return ExerciseCatalogService().displayName(
+    templateId: key,
+    name: fallback,
+    languageCode: context.locale.languageCode,
+  );
+}

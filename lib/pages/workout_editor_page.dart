@@ -37,7 +37,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
   Map<String, Exercise> _originalExercises =
       {}; // Храним оригинальные упражнения для сравнения
   Map<String, double> _personalRecords =
-      {}; // Храним личные рекорды для каждого упражнения
+      {}; // Храним личные рекорды для каждого упражнения (ключ — _service.exerciseKey)
   bool _recordsLoaded = false; // Флаг, что рекорды загружены
 
   Timer? _timer; // Таймер для отслеживания длительности тренировки
@@ -1030,7 +1030,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
 // Элемент списка подходов
   Widget _buildSetItem(Exercise exercise, WorkoutSet set, int index) {
     // ← НОВОЕ: проверяем является ли этот подход новым рекордом
-    double maxBefore = _personalRecords[exercise.name] ?? 0;
+    double maxBefore = _personalRecords[_service.exerciseKey(exercise)] ?? 0;
     for (int i = 0; i < index; i++) {
       final s = exercise.sets[i];
       if (s.isDone && s.weight > maxBefore) maxBefore = s.weight;
@@ -1177,7 +1177,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
           final set = exercise.sets[setIndex];
 
           // Максимальный вес ДО этого подхода (рекорд из истории + предыдущие подходы этой тренировки)
-          double maxBefore = _personalRecords[exercise.name] ?? 0;
+          double maxBefore = _personalRecords[_service.exerciseKey(exercise)] ?? 0;
           for (int i = 0; i < setIndex; i++) {
             final s = exercise.sets[i];
             if (s.isDone && s.weight > maxBefore) maxBefore = s.weight;
@@ -1193,7 +1193,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          '${'workout.new_record'.tr()} ${exercise.name} — ${set.weight} ${'workout.kg'.tr()}',
+                          '${'workout.new_record'.tr()} ${exerciseDisplayName(context, exercise)} — ${set.weight} ${'workout.kg'.tr()}',
                         ),
                       ),
                     ],

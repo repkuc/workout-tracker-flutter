@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart'; // для сохр�
 import 'package:uuid/uuid.dart'; // для генерации уникальных ID
 import '../models/workout_models.dart'; // импорт моделей
 import 'package:flutter/foundation.dart';
+import 'exercise_catalog_service.dart';
 
 // Сервис для работы с тренировками (аналог workouts.js)
 class WorkoutService {
@@ -143,6 +144,25 @@ class WorkoutService {
       return workout;
     }
     return null;
+  }
+
+  // Ключ «одного и того же упражнения» для статистики и рекордов:
+  // id шаблона, иначе id по названию на любом языке, иначе 'name:<название>'.
+  // Названия только для показа (exerciseKeyLabel), группируем всегда по ключу.
+  String exerciseKey(Exercise exercise) => ExerciseCatalogService()
+      .identityKey(templateId: exercise.templateId, name: exercise.name);
+
+  // Ключ упражнения → самое новое сохранённое название (запасная подпись
+  // для упражнений без шаблона в каталоге)
+  Future<Map<String, String>> getLatestExerciseNames() async {
+    final names = <String, String>{};
+    // Тренировки уже отсортированы от новых к старым
+    for (final workout in await getCompletedWorkouts()) {
+      for (final exercise in workout.exercises) {
+        names.putIfAbsent(exerciseKey(exercise), () => exercise.name);
+      }
+    }
+    return names;
   }
 
   // Получить список завершённых тренировок
@@ -603,7 +623,7 @@ class WorkoutService {
   }
 
   // Получить максимальный вес по каждому упражнению за период
-// Возвращает Map где ключ = название упражнения,
+// Возвращает Map где ключ = ключ упражнения (exerciseKey),
 // значение = список пар (дата, макс. вес)
   Future<Map<String, List<MapEntry<String, double>>>>
       getExerciseProgressByDate({
@@ -620,7 +640,7 @@ class WorkoutService {
           '${cutoff.day.toString().padLeft(2, '0')}';
     }
 
-    // Map: { "Жим лёжа": { "2024-03-15": 100.0, ... }, ... }
+    // Map: { "chest_1": { "2024-03-15": 100.0, ... }, ... }
     final Map<String, Map<String, double>> result = {};
 
     for (final workout in workouts) {
@@ -645,12 +665,13 @@ class WorkoutService {
 
         if (maxWeight == 0) continue;
 
-        // Добавляем в результат
-        result[exercise.name] ??= {};
+        // Добавляем в результат (одно упражнение на разных языках — одна линия)
+        final key = exerciseKey(exercise);
+        result[key] ??= {};
         // Если в этот день уже есть запись — берём максимум
-        final existing = result[exercise.name]![workout.date] ?? 0;
+        final existing = result[key]![workout.date] ?? 0;
         if (maxWeight > existing) {
-          result[exercise.name]![workout.date] = maxWeight;
+          result[key]![workout.date] = maxWeight;
         }
       }
     }
@@ -663,7 +684,7 @@ class WorkoutService {
     });
   }
 
-// Получить топ-N упражнений по количеству использований
+// Получить топ-N упражнений (ключи exerciseKey) по количеству использований
   Future<List<String>> getTopExercises({int limit = 5}) async {
     final workouts = await getCompletedWorkouts();
 
@@ -671,7 +692,8 @@ class WorkoutService {
     final Map<String, int> counts = {};
     for (final workout in workouts) {
       for (final exercise in workout.exercises) {
-        counts[exercise.name] = (counts[exercise.name] ?? 0) + 1;
+        final key = exerciseKey(exercise);
+        counts[key] = (counts[key] ?? 0) + 1;
       }
     }
 
@@ -682,7 +704,7 @@ class WorkoutService {
     return sorted.take(limit).map((e) => e.key).toList();
   }
 
-  // Получить максимальный вес по каждому упражнению (рекорды)
+  // Получить максимальный вес по каждому упражнению (рекорды), ключ — exerciseKey
   Future<Map<String, double>> getPersonalRecords() async {
     final workouts = await getCompletedWorkouts();
     final Map<String, double> records = {};
@@ -691,9 +713,10 @@ class WorkoutService {
       for (final exercise in workout.exercises) {
         for (final set in exercise.sets) {
           if (set.isDone && set.weight > 0) {
-            final current = records[exercise.name] ?? 0;
+            final key = exerciseKey(exercise);
+            final current = records[key] ?? 0;
             if (set.weight > current) {
-              records[exercise.name] = set.weight;
+              records[key] = set.weight;
             }
           }
         }

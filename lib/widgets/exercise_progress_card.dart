@@ -3,6 +3,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../services/workout_service.dart';
 import '../theme/app_colors.dart';
+import 'exercise_display.dart';
 
 class ExerciseProgressCard extends StatefulWidget {
   final int? selectedDays;
@@ -19,8 +20,12 @@ class ExerciseProgressCard extends StatefulWidget {
 class _ExerciseProgressCardState extends State<ExerciseProgressCard> {
   final _workoutService = WorkoutService();
 
-  // Все данные прогресса: { "Жим лёжа": [(дата, вес), ...], ... }
+  // Все данные прогресса по ключу упражнения (WorkoutService.exerciseKey):
+  // { "chest_1": [(дата, вес), ...], ... }. Подписи — exerciseKeyLabel,
+  // цвет — по порядку ключей, поэтому при смене языка он не меняется.
   Map<String, List<MapEntry<String, double>>> _allData = {};
+  // Ключ → самое новое сохранённое название (подпись без шаблона в каталоге)
+  Map<String, String> _latestNames = {};
   // Топ-5 упражнений — включены по умолчанию
   List<String> _topExercises = [];
   // Какие упражнения сейчас включены (видны на графике)
@@ -74,9 +79,12 @@ class _ExerciseProgressCardState extends State<ExerciseProgressCard> {
       days: widget.selectedDays,
     );
     final top = await _workoutService.getTopExercises(limit: 5);
+    final latestNames = await _workoutService.getLatestExerciseNames();
+    if (!mounted) return;
 
     setState(() {
       _allData = data;
+      _latestNames = latestNames;
       _topExercises = top;
       // По умолчанию включаем только топ-5
       _activeExercises = top.toSet();
@@ -84,7 +92,7 @@ class _ExerciseProgressCardState extends State<ExerciseProgressCard> {
     });
   }
 
-  // Получить цвет для упражнения по его индексу
+  // Получить цвет для упражнения по индексу его ключа
   Color _colorFor(String name) {
     final allNames = _allData.keys.toList();
     final index = allNames.indexOf(name) % _colors.length;
@@ -207,7 +215,7 @@ class _ExerciseProgressCardState extends State<ExerciseProgressCard> {
                     const SizedBox(width: 5),
                     Flexible(
                       child: Text(
-                        name,
+                        exerciseKeyLabel(context, name, _latestNames),
                         style: TextStyle(color: color, fontSize: 11),
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,

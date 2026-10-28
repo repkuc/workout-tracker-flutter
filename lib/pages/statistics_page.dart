@@ -6,6 +6,7 @@ import '../models/workout_models.dart';
 import 'body_measurements_page.dart'; // Импортируем страницу замеров тела
 import '../theme/app_colors.dart';
 import '../widgets/tab_header.dart';
+import '../widgets/exercise_display.dart';
 import '../widgets/exercise_info_button.dart';
 
 class StatisticsPage extends StatefulWidget {
@@ -112,8 +113,11 @@ class _OverviewTabState extends State<_OverviewTab> {
   double _totalVolume = 0;
   int _totalReps = 0;
   int _totalDuration = 0;
+  // Ключ — WorkoutService.exerciseKey (одно упражнение на разных языках — одна строка)
   List<MapEntry<String, double>> _topExercises = [];
   Map<String, double> _records = {};
+  // Ключ → самое новое сохранённое название (подпись, если шаблона нет в каталоге)
+  Map<String, String> _latestNames = {};
   bool _showAllTop = false;
   bool _showAllRecords = false;
 
@@ -164,8 +168,9 @@ class _OverviewTabState extends State<_OverviewTab> {
           if (set.isDone) {
             volume += set.weight * set.reps;
             reps += set.reps;
-            exerciseVolumes[exercise.name] =
-                (exerciseVolumes[exercise.name] ?? 0) + set.weight * set.reps;
+            final key = _service.exerciseKey(exercise);
+            exerciseVolumes[key] =
+                (exerciseVolumes[key] ?? 0) + set.weight * set.reps;
           }
         }
       }
@@ -175,6 +180,8 @@ class _OverviewTabState extends State<_OverviewTab> {
       ..sort((a, b) => b.value.compareTo(a.value)));
 
     final records = await _service.getPersonalRecords();
+    final latestNames = await _service.getLatestExerciseNames();
+    if (!mounted) return;
 
     setState(() {
       _totalWorkouts = workouts.length;
@@ -183,6 +190,7 @@ class _OverviewTabState extends State<_OverviewTab> {
       _totalDuration = duration;
       _topExercises = topAll;
       _records = records;
+      _latestNames = latestNames;
       _isLoading = false;
     });
   }
@@ -397,13 +405,14 @@ class _OverviewTabState extends State<_OverviewTab> {
                     ),
                     const SizedBox(width: 6),
                     Expanded(
-                      child: Text(ex.key,
+                      child: Text(exerciseKeyLabel(context, ex.key, _latestNames),
                           style: const TextStyle(
                               color: AppColors.textSoft, fontSize: 11),
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1),
                     ),
-                    ExerciseInfoButton(name: ex.key),
+                    ExerciseInfoButton(
+                        templateId: ex.key, name: _latestNames[ex.key]),
                     Text(_formatVolume(ex.value),
                         style: const TextStyle(
                             color: AppColors.volume,
@@ -467,13 +476,15 @@ class _OverviewTabState extends State<_OverviewTab> {
                 child: Row(
                   children: [
                     Expanded(
-                      child: Text(entry.key,
+                      child: Text(
+                          exerciseKeyLabel(context, entry.key, _latestNames),
                           style: const TextStyle(
                               color: AppColors.textSoft, fontSize: 11),
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1),
                     ),
-                    ExerciseInfoButton(name: entry.key),
+                    ExerciseInfoButton(
+                        templateId: entry.key, name: _latestNames[entry.key]),
                     Text('${entry.value} ${'workout.kg'.tr()}',
                         style: const TextStyle(
                             color: AppColors.record,
