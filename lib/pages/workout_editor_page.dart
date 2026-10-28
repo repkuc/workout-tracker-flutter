@@ -1322,18 +1322,22 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
 
   // Открыть библиотеку упражнений
   Future<void> _openExercisePicker() async {
-    final result = await Navigator.push<ExerciseTemplate>(
+    final result = await Navigator.push<PickedExercise>(
       context,
       MaterialPageRoute(builder: (context) => const ExercisePickerPage()),
     );
 
     if (result != null) {
-      await _addExerciseFromTemplate(result);
+      await _addExerciseFromTemplate(result.template,
+          alreadyInLibrary: result.alreadyInLibrary);
     }
   }
 
-// Добавить упражнение из шаблона библиотеки
-  Future<void> _addExerciseFromTemplate(ExerciseTemplate template) async {
+// Добавить упражнение из шаблона библиотеки.
+// alreadyInLibrary — введённое название уже было в библиотеке: показываем
+// одно сообщение об этом вместо «… добавлено!».
+  Future<void> _addExerciseFromTemplate(ExerciseTemplate template,
+      {bool alreadyInLibrary = false}) async {
     final lang = context.locale.languageCode;
     final name = template.getName(lang);
     final targetMuscle = template.muscleGroup.isNotEmpty
@@ -1354,9 +1358,12 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content:
-                Text('$name - ${'workout.add_exercise'.tr().toLowerCase()}!'),
-            backgroundColor: AppColors.success,
+            content: Text(alreadyInLibrary
+                ? alreadyInLibraryText(context, template)
+                : '$name - ${'workout.add_exercise'.tr().toLowerCase()}!'),
+            backgroundColor: alreadyInLibrary
+                ? AppColors.snackbarNeutral
+                : AppColors.success,
             margin: _snackBarMargin(),
           ),
         );

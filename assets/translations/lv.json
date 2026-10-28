@@ -209,7 +209,9 @@
   "support": "Atbalsts",
   "donate_title": "Iecienīt kafiju ☕",
   "donate_subtitle": "Atbalstīt lietotnes izstrādi",
-  "exercise_photos_credit": "Vingrinājumu foto: free-exercise-db (publiskais domēns)"
+  "exercise_photos_credit": "Vingrinājumu foto: free-exercise-db (publiskais domēns)",
+  "exercises": "Vingrinājumi",
+  "my_exercises_subtitle": "Apvienot, pārdēvēt un dzēst savus vingrinājumus"
 },
 "calendar": {
   "mon": "P",
@@ -290,6 +292,31 @@
 },
 "exercise_demo": {
   "show": "Kā izpildīt"
+},
+"my_exercises": {
+  "title": "Mani vingrinājumi",
+  "count": "Vingrinājumi: {count}",
+  "usage": "Treniņi: {workouts} · Programmas: {programs}",
+  "not_used": "Netiek izmantots",
+  "empty": "Savu vingrinājumu vēl nav",
+  "empty_hint": "Šeit parādīsies vingrinājumi, ko pats pievienosi vingrinājumu bibliotēkā.",
+  "merge": "Apvienot ar…",
+  "merge_into_title": "Apvienot ar…",
+  "merge_confirm_title": "Apvienot vingrinājumus?",
+  "merge_confirm_message": "«{source}»: treniņi ({workouts}) un programmas ({programs}) tiks pārcelti uz «{target}». To nevar atsaukt.",
+  "merge_button": "Apvienot",
+  "merged": "Apvienots ar «{name}»",
+  "rename": "Pārdēvēt",
+  "rename_title": "Pārdēvēt vingrinājumu",
+  "name_taken": "«{name}» jau ir bibliotēkā. Izmanto «Apvienot ar…».",
+  "renamed": "Vingrinājums pārdēvēts",
+  "change_group": "Mainīt muskuļu grupu",
+  "group_changed": "Muskuļu grupa mainīta",
+  "delete": "Dzēst",
+  "delete_used_hint": "Tiek izmantots treniņos vai programmās. Izmanto «Apvienot ar…».",
+  "delete_confirm_title": "Dzēst vingrinājumu?",
+  "delete_confirm_message": "«{name}» tiks izņemts no bibliotēkas.",
+  "deleted": "Vingrinājums dzēsts"
 }
 
 }

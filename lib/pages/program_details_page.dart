@@ -24,7 +24,6 @@ import 'workout_editor_page.dart';
 import '../models/workout_models.dart';
 
 import 'package:uuid/uuid.dart';
-import '../models/exercise_template.dart';
 import 'exercise_picker_page.dart';
 import '../theme/app_colors.dart';
 import '../widgets/page_header.dart';
@@ -446,6 +445,9 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
 
     // Ошибку пустого названия дня показываем прямо под полем
     String? nameError;
+    // «Такое упражнение уже есть в библиотеке» — тоже в самом диалоге:
+    // SnackBar оказался бы за его фоном
+    String? libraryNote;
 
     final result = await showDialog<bool>(
       context: context,
@@ -524,16 +526,36 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
                   );
                 }).toList(),
                 const SizedBox(height: 8),
+                if (libraryNote != null)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.info_outline,
+                            color: AppColors.textMuted, size: 14),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(libraryNote!,
+                              style: const TextStyle(
+                                  color: AppColors.textMuted, fontSize: 12)),
+                        ),
+                      ],
+                    ),
+                  ),
                 GestureDetector(
                   onTap: () async {
-                    final template = await Navigator.push<ExerciseTemplate>(
+                    final picked = await Navigator.push<PickedExercise>(
                       dialogContext,
                       MaterialPageRoute(
                           builder: (context) => const ExercisePickerPage()),
                     );
-                    if (template != null) {
+                    if (picked != null) {
+                      final template = picked.template;
                       final lang = dialogContext.locale.languageCode;
                       setDialogState(() {
+                        libraryNote = picked.alreadyInLibrary
+                            ? alreadyInLibraryText(dialogContext, template)
+                            : null;
                         dayExercises.add(ProgramExercise(
                           name: template.getName(lang),
                           targetMuscle: template.muscleGroup,

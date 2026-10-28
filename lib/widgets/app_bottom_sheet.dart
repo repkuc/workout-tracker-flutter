@@ -17,23 +17,26 @@ Future<T?> showAppBottomSheet<T>({
         topRight: Radius.circular(20),
       ),
     ),
+    // Прокрутка — если пунктов больше, чем помещается на низком экране
     builder: (sheetContext) => SafeArea(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // «Ручка» сверху — подсказка, что лист можно смахнуть вниз
-          Container(
-            width: 36,
-            height: 4,
-            margin: const EdgeInsets.only(top: 8, bottom: 8),
-            decoration: BoxDecoration(
-              color: AppColors.sheetHandle,
-              borderRadius: BorderRadius.circular(2),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // «Ручка» сверху — подсказка, что лист можно смахнуть вниз
+            Container(
+              width: 36,
+              height: 4,
+              margin: const EdgeInsets.only(top: 8, bottom: 8),
+              decoration: BoxDecoration(
+                color: AppColors.sheetHandle,
+                borderRadius: BorderRadius.circular(2),
+              ),
             ),
-          ),
-          ...builder(sheetContext),
-          const SizedBox(height: 8),
-        ],
+            ...builder(sheetContext),
+            const SizedBox(height: 8),
+          ],
+        ),
       ),
     ),
   );

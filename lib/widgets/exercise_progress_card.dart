@@ -44,6 +44,18 @@ class _ExerciseProgressCardState extends State<ExerciseProgressCard> {
   void initState() {
     super.initState();
     _loadData();
+    // Данные тренировок изменились (например, в «Моих упражнениях») — перечитываем
+    _workoutService.dataChanged.addListener(_onDataChanged);
+  }
+
+  @override
+  void dispose() {
+    _workoutService.dataChanged.removeListener(_onDataChanged);
+    super.dispose();
+  }
+
+  void _onDataChanged() {
+    if (mounted) _loadData();
   }
 
   @override

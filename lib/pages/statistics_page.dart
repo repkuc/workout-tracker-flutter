@@ -121,6 +121,18 @@ class _OverviewTabState extends State<_OverviewTab> {
   void initState() {
     super.initState();
     _loadStatistics();
+    // Данные тренировок изменились (например, в «Моих упражнениях») — перечитываем
+    _service.dataChanged.addListener(_onDataChanged);
+  }
+
+  @override
+  void dispose() {
+    _service.dataChanged.removeListener(_onDataChanged);
+    super.dispose();
+  }
+
+  void _onDataChanged() {
+    if (mounted) _loadStatistics();
   }
 
   Future<void> _loadStatistics() async {

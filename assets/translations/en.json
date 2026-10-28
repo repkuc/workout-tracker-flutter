@@ -209,7 +209,9 @@
   "support": "Support",
   "donate_title": "Buy me a coffee ☕",
   "donate_subtitle": "Support app development",
-  "exercise_photos_credit": "Exercise photos: free-exercise-db (public domain)"
+  "exercise_photos_credit": "Exercise photos: free-exercise-db (public domain)",
+  "exercises": "Exercises",
+  "my_exercises_subtitle": "Merge, rename and delete your own exercises"
 },
 "calendar": {
   "mon": "Mo",
@@ -290,6 +292,31 @@
 },
 "exercise_demo": {
   "show": "How to do it"
+},
+"my_exercises": {
+  "title": "My exercises",
+  "count": "Exercises: {count}",
+  "usage": "Workouts: {workouts} · Programs: {programs}",
+  "not_used": "Not used",
+  "empty": "No custom exercises yet",
+  "empty_hint": "Exercises you add yourself in the exercise library will appear here.",
+  "merge": "Merge into…",
+  "merge_into_title": "Merge into…",
+  "merge_confirm_title": "Merge exercises?",
+  "merge_confirm_message": "«{source}»: {workouts} workouts and {programs} programs will move to «{target}». This can't be undone.",
+  "merge_button": "Merge",
+  "merged": "Merged into «{name}»",
+  "rename": "Rename",
+  "rename_title": "Rename exercise",
+  "name_taken": "«{name}» is already in the library. Use \"Merge into…\" instead.",
+  "renamed": "Exercise renamed",
+  "change_group": "Change muscle group",
+  "group_changed": "Muscle group changed",
+  "delete": "Delete",
+  "delete_used_hint": "Used in workouts or programs. Use \"Merge into…\" instead.",
+  "delete_confirm_title": "Delete exercise?",
+  "delete_confirm_message": "«{name}» will be removed from the library.",
+  "deleted": "Exercise deleted"
 }
 
 }

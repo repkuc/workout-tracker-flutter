@@ -5,6 +5,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../theme/app_colors.dart';
 import '../widgets/tab_header.dart';
+import 'my_exercises_page.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -52,6 +53,21 @@ class _SettingsPageState extends State<SettingsPage> {
                       _buildLanguageItem(context, '🇱🇻', 'Latviešu', 'lv'),
                       _buildDivider(),
                       _buildLanguageItem(context, '🇬🇧', 'English', 'en'),
+                    ]),
+                    const SizedBox(height: 20),
+                    _buildSectionTitle('settings.exercises'.tr()),
+                    _buildCard(children: [
+                      _buildActionItem(
+                        icon: Icons.fitness_center,
+                        color: AppColors.accent,
+                        title: 'my_exercises.title'.tr(),
+                        subtitle: 'settings.my_exercises_subtitle'.tr(),
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const MyExercisesPage()),
+                        ),
+                      ),
                     ]),
                     const SizedBox(height: 20),
                     _buildSectionTitle('settings.data'.tr()),

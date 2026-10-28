@@ -8,8 +8,31 @@ import '../widgets/page_header.dart';
 import '../widgets/app_dialog.dart';
 import '../widgets/exercise_info_button.dart';
 
+// Результат выбора: шаблон и признак «такое упражнение уже было в библиотеке»
+// (пользователь ввёл название существующего). Сообщение об этом показывает
+// вызывающий экран — сам выбор только что закрылся, а у диалога дня программы
+// SnackBar оказался бы за его фоном.
+class PickedExercise {
+  final ExerciseTemplate template;
+  final bool alreadyInLibrary;
+
+  const PickedExercise(this.template, {this.alreadyInLibrary = false});
+}
+
 class ExercisePickerPage extends StatefulWidget {
-  const ExercisePickerPage({super.key});
+  // Свой заголовок (null — «Добавить упражнение»)
+  final String? title;
+  // id упражнения, которое не показываем (при объединении — само упражнение)
+  final String? excludeId;
+  // Показывать ли кнопку «Добавить своё упражнение»
+  final bool allowAddCustom;
+
+  const ExercisePickerPage({
+    super.key,
+    this.title,
+    this.excludeId,
+    this.allowAddCustom = true,
+  });
 
   @override
   State<ExercisePickerPage> createState() => _ExercisePickerPageState();
@@ -52,7 +75,7 @@ class _ExercisePickerPageState extends State<ExercisePickerPage> {
     // Свои упражнения с названием встроенного (дубликаты от старой миграции) скрываем
     final catalog = ExerciseCatalogService();
     final exercises = (await _libraryService.getAllExercises())
-        .where((e) => !catalog.isBuiltInDuplicate(e))
+        .where((e) => !catalog.isBuiltInDuplicate(e) && e.id != widget.excludeId)
         .toList();
     setState(() {
       _exercises = exercises;
@@ -83,7 +106,7 @@ class _ExercisePickerPageState extends State<ExercisePickerPage> {
         child: Column(
           children: [
             // Шапка
-            PageHeader(title: 'workout.add_exercise'.tr()),
+            PageHeader(title: widget.title ?? 'workout.add_exercise'.tr()),
 
             // Поиск
             Padding(
@@ -210,8 +233,9 @@ class _ExercisePickerPageState extends State<ExercisePickerPage> {
                       ? _buildEmpty()
                       : ListView.builder(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
-                          itemCount:
-                              _filtered.length + 1, // +1 для кнопки внизу
+                          // +1 для кнопки внизу
+                          itemCount: _filtered.length +
+                              (widget.allowAddCustom ? 1 : 0),
                           itemBuilder: (context, index) {
                             if (index == _filtered.length) {
                               return _buildAddCustomButton();
@@ -231,7 +255,7 @@ class _ExercisePickerPageState extends State<ExercisePickerPage> {
     final name = exercise.getName(lang);
 
     return GestureDetector(
-      onTap: () => Navigator.pop(context, exercise),
+      onTap: () => Navigator.pop(context, PickedExercise(exercise)),
       child: Container(
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -316,8 +340,10 @@ class _ExercisePickerPageState extends State<ExercisePickerPage> {
             'workout.no_exercises_found'.tr(),
             style: const TextStyle(color: AppColors.textMuted, fontSize: 14),
           ),
-          const SizedBox(height: 20),
-          _buildAddCustomButton(),
+          if (widget.allowAddCustom) ...[
+            const SizedBox(height: 20),
+            _buildAddCustomButton(),
+          ],
         ],
       ),
     );
@@ -473,15 +499,8 @@ class _ExercisePickerPageState extends State<ExercisePickerPage> {
       final existing = catalog.templateById(catalog.idForName(name));
       if (existing != null) {
         if (mounted) {
-          final lang = context.locale.languageCode;
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('workout.exercise_already_in_library'
-                  .tr(namedArgs: {'name': existing.getName(lang)})),
-              backgroundColor: AppColors.snackbarNeutral,
-            ),
-          );
-          Navigator.pop(context, existing);
+          Navigator.pop(
+              context, PickedExercise(existing, alreadyInLibrary: true));
         }
         return;
       }
@@ -494,7 +513,12 @@ class _ExercisePickerPageState extends State<ExercisePickerPage> {
       );
 
       // Сразу возвращаем добавленное упражнение (с настоящим id)
-      if (mounted) Navigator.pop(context, newExercise);
+      if (mounted) Navigator.pop(context, PickedExercise(newExercise));
     }
   }
 }
+
+// Сообщение «Такое упражнение уже есть в библиотеке: …» (название — на текущем языке)
+String alreadyInLibraryText(BuildContext context, ExerciseTemplate template) =>
+    'workout.exercise_already_in_library'
+        .tr(namedArgs: {'name': template.getName(context.locale.languageCode)});
