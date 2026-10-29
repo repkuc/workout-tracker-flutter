@@ -7,6 +7,7 @@ import 'services/exercise_library_service.dart';
 import 'services/exercise_image_service.dart';
 import 'services/exercise_catalog_service.dart';
 import 'services/exercise_id_migration.dart';
+import 'services/builtin_exercise_merge.dart';
 import 'theme/app_colors.dart';
 
 void main() async {
@@ -28,6 +29,9 @@ void main() async {
     // Флаг не ставится — попробуем снова при следующем запуске
     debugPrint('Exercise id migration failed: $e');
   }
+  // Свои упражнения с названием нового встроенного → объединить со встроенным
+  // (только ещё не проверенные встроенные id; ошибок наружу не бросает)
+  await BuiltinExerciseMerge().run();
 
   // Заранее строим поиск демо-картинок упражнений, чтобы кнопка ⓘ сразу знала, показываться ли
   await ExerciseImageService().init();

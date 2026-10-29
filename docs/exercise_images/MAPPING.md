@@ -4,7 +4,7 @@ Decision (2026-10-15): for the first version of exercise demo animations we use 
 
 Image URL pattern: `https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/<image path>` (paths below). Plan: download, resize (~320 px), bundle under assets, add an image field to ExerciseTemplate. Custom user exercises have no image and keep the current icon.
 
-All 48 built-in exercises (`assets/exercises/exercises.json`) are matched and were reviewed visually by Arturs.
+All 56 built-in exercises (`assets/exercises/exercises.json`) are matched. The first 48 were reviewed visually by Arturs; the 8 added on 2026-10-29 (`chest_9`, `chest_10`, `back_9`–`back_11`, `shoulders_9`, `arms_9`, `abs_9`) were picked from the folders below, resized to max 400 px WebP and added by hand.
 
 | App id | Our name (RU) | Our name (EN) | free-exercise-db name | Images |
 |---|---|---|---|---|
@@ -16,6 +16,8 @@ All 48 built-in exercises (`assets/exercises/exercises.json`) are matched and we
 | chest_6 | Кроссовер на блоке | Cable Crossover | Cable Crossover | Cable_Crossover/0.jpg, Cable_Crossover/1.jpg |
 | chest_7 | Отжимания на брусьях | Dips | Dips - Chest Version | Dips_-_Chest_Version/0.jpg, Dips_-_Chest_Version/1.jpg |
 | chest_8 | Жим на наклонной скамье | Incline Bench Press | Barbell Incline Bench Press - Medium Grip | Barbell_Incline_Bench_Press_-_Medium_Grip/0.jpg, Barbell_Incline_Bench_Press_-_Medium_Grip/1.jpg |
+| chest_9 | Жим гантелей на наклонной скамье | Incline Dumbbell Press | Incline Dumbbell Press | Incline_Dumbbell_Press/0.jpg, Incline_Dumbbell_Press/1.jpg |
+| chest_10 | Отжимания от пола | Push-ups | Pushups | Pushups/0.jpg, Pushups/1.jpg |
 | back_1 | Подтягивания | Pull-ups | Pullups | Pullups/0.jpg, Pullups/1.jpg |
 | back_2 | Тяга штанги в наклоне | Barbell Row | Bent Over Barbell Row | Bent_Over_Barbell_Row/0.jpg, Bent_Over_Barbell_Row/1.jpg |
 | back_3 | Тяга гантели одной рукой | One Arm Dumbbell Row | One-Arm Dumbbell Row | One-Arm_Dumbbell_Row/0.jpg, One-Arm_Dumbbell_Row/1.jpg |
@@ -24,6 +26,9 @@ All 48 built-in exercises (`assets/exercises/exercises.json`) are matched and we
 | back_6 | Становая тяга | Deadlift | Barbell Deadlift | Barbell_Deadlift/0.jpg, Barbell_Deadlift/1.jpg |
 | back_7 | Гиперэкстензия | Hyperextension | Hyperextensions (Back Extensions) | Hyperextensions_Back_Extensions/0.jpg, Hyperextensions_Back_Extensions/1.jpg |
 | back_8 | Тяга Т-грифа | T-Bar Row | T-Bar Row with Handle | T-Bar_Row_with_Handle/0.jpg, T-Bar_Row_with_Handle/1.jpg |
+| back_9 | Тяга штанги обратным хватом | Reverse Grip Barbell Row | Bent Over Barbell Row (the source's Reverse_Grip_Bent-Over_Rows has two identical frames, so the regular row photos are used, same as back_2) | Bent_Over_Barbell_Row/0.jpg, Bent_Over_Barbell_Row/1.jpg |
+| back_10 | Подтягивания обратным хватом | Chin-ups | Chin-Up | Chin-Up/0.jpg, Chin-Up/1.jpg |
+| back_11 | Тяга вертикального блока обратным хватом | Underhand Lat Pulldown | Underhand Cable Pulldowns | Underhand_Cable_Pulldowns/0.jpg, Underhand_Cable_Pulldowns/1.jpg |
 | legs_1 | Приседания со штангой | Barbell Squat | Barbell Squat | Barbell_Squat/0.jpg, Barbell_Squat/1.jpg |
 | legs_2 | Жим платформы ногами | Leg Press | Leg Press | Leg_Press/0.jpg, Leg_Press/1.jpg |
 | legs_3 | Разгибание ног в тренажёре | Leg Extension | Leg Extensions | Leg_Extensions/0.jpg, Leg_Extensions/1.jpg |
@@ -40,6 +45,7 @@ All 48 built-in exercises (`assets/exercises/exercises.json`) are matched and we
 | shoulders_6 | Разводка гантелей в наклоне | Rear Delt Flyes | Seated Bent-Over Rear Delt Raise | Seated_Bent-Over_Rear_Delt_Raise/0.jpg, Seated_Bent-Over_Rear_Delt_Raise/1.jpg |
 | shoulders_7 | Жим в тренажёре на плечи | Machine Shoulder Press | Machine Shoulder (Military) Press | Machine_Shoulder_Military_Press/0.jpg, Machine_Shoulder_Military_Press/1.jpg |
 | shoulders_8 | Шраги со штангой | Barbell Shrugs | Barbell Shrug | Barbell_Shrug/0.jpg, Barbell_Shrug/1.jpg |
+| shoulders_9 | Тяга к лицу (Face pull) | Face Pull | Face Pull | Face_Pull/0.jpg, Face_Pull/1.jpg |
 | arms_1 | Подъём штанги на бицепс | Barbell Curl | Barbell Curl | Barbell_Curl/0.jpg, Barbell_Curl/1.jpg |
 | arms_2 | Подъём гантелей на бицепс | Dumbbell Curl | Dumbbell Bicep Curl | Dumbbell_Bicep_Curl/0.jpg, Dumbbell_Bicep_Curl/1.jpg |
 | arms_3 | Молотки | Hammer Curl | Hammer Curls | Hammer_Curls/0.jpg, Hammer_Curls/1.jpg |
@@ -48,6 +54,7 @@ All 48 built-in exercises (`assets/exercises/exercises.json`) are matched and we
 | arms_6 | Разгибание гантели за головой | Overhead Tricep Extension | Standing Dumbbell Triceps Extension | Standing_Dumbbell_Triceps_Extension/0.jpg, Standing_Dumbbell_Triceps_Extension/1.jpg |
 | arms_7 | Концентрированный подъём | Concentration Curl | Concentration Curls | Concentration_Curls/0.jpg, Concentration_Curls/1.jpg |
 | arms_8 | Отжимания на брусьях узким хватом | Close Grip Dips | Dips - Triceps Version | Dips_-_Triceps_Version/0.jpg, Dips_-_Triceps_Version/1.jpg |
+| arms_9 | Разгибание руки с гантелью в наклоне | Dumbbell Tricep Kickback | Tricep Dumbbell Kickback | Tricep_Dumbbell_Kickback/0.jpg, Tricep_Dumbbell_Kickback/1.jpg |
 | abs_1 | Скручивания | Crunches | Crunches | Crunches/0.jpg, Crunches/1.jpg |
 | abs_2 | Планка | Plank | Plank | Plank/0.jpg, Plank/1.jpg |
 | abs_3 | Подъём ног лёжа | Lying Leg Raises | Flat Bench Lying Leg Raise | Flat_Bench_Lying_Leg_Raise/0.jpg, Flat_Bench_Lying_Leg_Raise/1.jpg |
@@ -56,3 +63,4 @@ All 48 built-in exercises (`assets/exercises/exercises.json`) are matched and we
 | abs_6 | Подъём ног в висе | Hanging Leg Raises | Hanging Leg Raise | Hanging_Leg_Raise/0.jpg, Hanging_Leg_Raise/1.jpg |
 | abs_7 | Велосипед | Bicycle Crunches | Air Bike | Air_Bike/0.jpg, Air_Bike/1.jpg |
 | abs_8 | Скалолаз | Mountain Climbers | Mountain Climbers | Mountain_Climbers/0.jpg, Mountain_Climbers/1.jpg |
+| abs_9 | Книжка | Jackknife Sit-up | Jackknife Sit-Up | Jackknife_Sit-Up/0.jpg, Jackknife_Sit-Up/1.jpg |

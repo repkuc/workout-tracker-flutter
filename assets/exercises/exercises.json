@@ -7,6 +7,8 @@
   {"id": "chest_6", "nameRu": "Кроссовер на блоке", "nameLv": "Krosoveris uz bloka", "nameEn": "Cable Crossover", "muscleGroup": "chest"},
   {"id": "chest_7", "nameRu": "Отжимания на брусьях", "nameLv": "Atspiešanās līdztekās", "nameEn": "Dips", "muscleGroup": "chest"},
   {"id": "chest_8", "nameRu": "Жим на наклонной скамье", "nameLv": "Spiešana uz slīpa soliņa", "nameEn": "Incline Bench Press", "muscleGroup": "chest"},
+  {"id": "chest_9", "nameRu": "Жим гантелей на наклонной скамье", "nameLv": "Hanteles spiešana uz slīpa soliņa", "nameEn": "Incline Dumbbell Press", "muscleGroup": "chest"},
+  {"id": "chest_10", "nameRu": "Отжимания от пола", "nameLv": "Atspiešanās no grīdas", "nameEn": "Push-ups", "muscleGroup": "chest"},
 
   {"id": "back_1", "nameRu": "Подтягивания", "nameLv": "Pievilkšanās", "nameEn": "Pull-ups", "muscleGroup": "back"},
   {"id": "back_2", "nameRu": "Тяга штанги в наклоне", "nameLv": "Stieņa vilkšana noliekumā", "nameEn": "Barbell Row", "muscleGroup": "back"},
@@ -16,6 +18,9 @@
   {"id": "back_6", "nameRu": "Становая тяга", "nameLv": "Klasiskā vilkme", "nameEn": "Deadlift", "muscleGroup": "back"},
   {"id": "back_7", "nameRu": "Гиперэкстензия", "nameLv": "Hiperekstensija", "nameEn": "Hyperextension", "muscleGroup": "back"},
   {"id": "back_8", "nameRu": "Тяга Т-грифа", "nameLv": "T-stieņa vilkšana", "nameEn": "T-Bar Row", "muscleGroup": "back"},
+  {"id": "back_9", "nameRu": "Тяга штанги обратным хватом", "nameLv": "Stieņa vilkšana noliekumā ar apgriezto satvērienu", "nameEn": "Reverse Grip Barbell Row", "muscleGroup": "back"},
+  {"id": "back_10", "nameRu": "Подтягивания обратным хватом", "nameLv": "Pievilkšanās ar apgriezto satvērienu", "nameEn": "Chin-ups", "muscleGroup": "back"},
+  {"id": "back_11", "nameRu": "Тяга вертикального блока обратным хватом", "nameLv": "Vertikālā bloka vilkšana ar apgriezto satvērienu", "nameEn": "Underhand Lat Pulldown", "muscleGroup": "back"},
 
   {"id": "legs_1", "nameRu": "Приседания со штангой", "nameLv": "Pietupieni ar stieni", "nameEn": "Barbell Squat", "muscleGroup": "legs"},
   {"id": "legs_2", "nameRu": "Жим платформы ногами", "nameLv": "Kāju preses mašīna", "nameEn": "Leg Press", "muscleGroup": "legs"},
@@ -34,6 +39,7 @@
   {"id": "shoulders_6", "nameRu": "Разводка гантелей в наклоне", "nameLv": "Hanteļu izvēršana noliecienā", "nameEn": "Rear Delt Flyes", "muscleGroup": "shoulders"},
   {"id": "shoulders_7", "nameRu": "Жим в тренажёре на плечи", "nameLv": "Plecu spiešana trenažierī", "nameEn": "Machine Shoulder Press", "muscleGroup": "shoulders"},
   {"id": "shoulders_8", "nameRu": "Шраги со штангой", "nameLv": "Plecu celšana ar stieni", "nameEn": "Barbell Shrugs", "muscleGroup": "shoulders"},
+  {"id": "shoulders_9", "nameRu": "Тяга к лицу (Face pull)", "nameLv": "Vilkšana pie sejas (Face pull)", "nameEn": "Face Pull", "muscleGroup": "shoulders"},
 
   {"id": "arms_1", "nameRu": "Подъём штанги на бицепс", "nameLv": "Roku saliekšana ar stieni", "nameEn": "Barbell Curl", "muscleGroup": "arms"},
   {"id": "arms_2", "nameRu": "Подъём гантелей на бицепс", "nameLv": "Roku saliekšana ar hantelēm", "nameEn": "Dumbbell Curl", "muscleGroup": "arms"},
@@ -43,6 +49,7 @@
   {"id": "arms_6", "nameRu": "Разгибание гантели за головой", "nameLv": "Hanteles iztaisnošana virs galvas", "nameEn": "Overhead Tricep Extension", "muscleGroup": "arms"},
   {"id": "arms_7", "nameRu": "Концентрированный подъём", "nameLv": "Koncentrēta celšana", "nameEn": "Concentration Curl", "muscleGroup": "arms"},
   {"id": "arms_8", "nameRu": "Отжимания на брусьях узким хватом", "nameLv": "Atspiešanās līdztekās tricepsam", "nameEn": "Close Grip Dips", "muscleGroup": "arms"},
+  {"id": "arms_9", "nameRu": "Разгибание руки с гантелью в наклоне", "nameLv": "Rokas iztaisnošana ar hanteli noliekumā", "nameEn": "Dumbbell Tricep Kickback", "muscleGroup": "arms"},
 
   {"id": "abs_1", "nameRu": "Скручивания", "nameLv": "Presītes", "nameEn": "Crunches", "muscleGroup": "abs"},
   {"id": "abs_2", "nameRu": "Планка", "nameLv": "Planks", "nameEn": "Plank", "muscleGroup": "abs"},
@@ -51,5 +58,6 @@
   {"id": "abs_5", "nameRu": "Русский твист", "nameLv": "Krievu twist", "nameEn": "Russian Twist", "muscleGroup": "abs"},
   {"id": "abs_6", "nameRu": "Подъём ног в висе", "nameLv": "Kāju celšana karājoties", "nameEn": "Hanging Leg Raises", "muscleGroup": "abs"},
   {"id": "abs_7", "nameRu": "Велосипед", "nameLv": "Velosipēds", "nameEn": "Bicycle Crunches", "muscleGroup": "abs"},
-  {"id": "abs_8", "nameRu": "Скалолаз", "nameLv": "Kalnā kāpējs", "nameEn": "Mountain Climbers", "muscleGroup": "abs"}
+  {"id": "abs_8", "nameRu": "Скалолаз", "nameLv": "Kalnā kāpējs", "nameEn": "Mountain Climbers", "muscleGroup": "abs"},
+  {"id": "abs_9", "nameRu": "Книжка", "nameLv": "Saliekšanās „nazis”", "nameEn": "Jackknife Sit-up", "muscleGroup": "abs"}
 ]

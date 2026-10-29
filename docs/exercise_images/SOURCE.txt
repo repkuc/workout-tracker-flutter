@@ -1,5 +1,5 @@
 Exercise photos: free-exercise-db by yuhonas
 https://github.com/yuhonas/free-exercise-db
 License: The Unlicense (public domain dedication) - free to use, modify and distribute, including commercially.
-Each built-in exercise <id> (see assets/exercises/exercises.json) has two frames: <id>_0.webp (start position) and <id>_1.webp (end position).
+Each of the 56 built-in exercises <id> (see assets/exercises/exercises.json) has two frames: <id>_0.webp (start position) and <id>_1.webp (end position).
 Resized to max 400px and converted to WebP. Mapping of app exercises to source exercises: see exercise-animations-mapping.md (project doc).

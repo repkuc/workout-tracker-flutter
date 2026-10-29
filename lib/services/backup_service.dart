@@ -11,6 +11,7 @@ import 'body_measurement_service.dart';
 import 'program_service.dart';
 import 'exercise_library_service.dart';
 import 'exercise_id_migration.dart';
+import 'builtin_exercise_merge.dart';
 import '../models/body_measurement_entry.dart';
 import '../models/exercise_template.dart';
 import '../models/program_models.dart';
@@ -119,6 +120,9 @@ class BackupService {
     } catch (e) {
       debugPrint('Exercise id migration after import failed: $e');
     }
+    // Свои дубликаты встроенных из бэкапа → объединить со встроенными
+    // (force — проверяем все встроенные; ошибок наружу не бросает)
+    await BuiltinExerciseMerge().run(force: true);
 
     return imported;
   }

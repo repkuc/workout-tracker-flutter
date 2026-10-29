@@ -127,23 +127,66 @@ class CustomExerciseService {
         : target.nameRu;
     final group = target.muscleGroup;
 
-    await _updateWorkoutExercises(sourceId, (e) {
-      e.templateId = target.id;
-      e.name = name;
-      if (group.isNotEmpty) {
-        e.muscleGroup = group;
-        e.targetMuscle = 'workout.muscle_$group'.tr();
-      }
-    });
-    await _updateProgramExercises(sourceId, (e) {
-      e.templateId = target.id;
-      e.name = name;
-      if (group.isNotEmpty) e.targetMuscle = group;
-    });
+    final workouts = await _workouts.loadAllWorkouts();
+    final programs = await _programs.loadAllPrograms();
+    final changed = repointExercises(
+      workouts: workouts,
+      programs: programs,
+      sourceId: sourceId,
+      target: target,
+      name: name,
+      workoutMuscleText:
+          group.isNotEmpty ? 'workout.muscle_$group'.tr() : null,
+    );
+    if (changed.workouts) await _workouts.saveAllWorkouts(workouts);
+    if (changed.programs) await _programs.saveAllPrograms(programs);
 
     final custom = await _library.getCustomExercises();
     await _library.saveCustomExercises(
         custom.where((t) => t.id != sourceId).toList());
+  }
+
+  // Сама замена при объединении — в памяти, без сохранения (её же
+  // использует автоматическое объединение с новыми встроенными,
+  // BuiltinExerciseMerge). Упражнения тренировок и программ с sourceId
+  // получают id цели и название name; если у цели есть группа —
+  // у тренировок muscleGroup + текст workoutMuscleText (null — текст
+  // не трогаем), у программ ключ группы. Возвращает, что изменилось.
+  static ({bool workouts, bool programs}) repointExercises({
+    required List<Workout> workouts,
+    required List<TrainingProgram> programs,
+    required String sourceId,
+    required ExerciseTemplate target,
+    required String name,
+    String? workoutMuscleText,
+  }) {
+    final group = target.muscleGroup;
+    var workoutsChanged = false;
+    for (final workout in workouts) {
+      for (final e in workout.exercises) {
+        if (e.templateId != sourceId) continue;
+        e.templateId = target.id;
+        e.name = name;
+        if (group.isNotEmpty) {
+          e.muscleGroup = group;
+          if (workoutMuscleText != null) e.targetMuscle = workoutMuscleText;
+        }
+        workoutsChanged = true;
+      }
+    }
+    var programsChanged = false;
+    for (final program in programs) {
+      for (final day in program.workouts) {
+        for (final e in day.exercises) {
+          if (e.templateId != sourceId) continue;
+          e.templateId = target.id;
+          e.name = name;
+          if (group.isNotEmpty) e.targetMuscle = group;
+          programsChanged = true;
+        }
+      }
+    }
+    return (workouts: workoutsChanged, programs: programsChanged);
   }
 
   // Проверить новое название: null — можно сохранить, 'empty' — пустое,
