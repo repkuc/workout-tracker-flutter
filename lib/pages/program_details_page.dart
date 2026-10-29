@@ -33,6 +33,7 @@ import '../widgets/exercise_display.dart';
 import '../widgets/exercise_info_button.dart';
 import '../widgets/weekday_selector.dart';
 import '../widgets/exercise_plan_editor.dart';
+import '../widgets/program_exercise_row.dart';
 
 class ProgramDetailsPage extends StatefulWidget {
   // Экран получает не саму программу, а только её ID.
@@ -782,7 +783,7 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
                       padding: const EdgeInsets.only(top: 8),
                       child: Column(
                         children: workout.exercises
-                            .map((ex) => _buildDayExerciseRow(ex))
+                            .map((ex) => ProgramExerciseRow(exercise: ex))
                             .toList(),
                       ),
                     )
@@ -834,56 +835,6 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  // Одна строка упражнения в раскрытой карточке дня: название, мышца, подходы.
-  Widget _buildDayExerciseRow(ProgramExercise ex) {
-    // В шаблоне хранится ключ мышцы (chest) — показываем перевод
-    final muscle = programExerciseMuscleLabel(context, ex);
-
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 6),
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceInset,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  programExerciseDisplayName(context, ex),
-                  style: const TextStyle(color: Colors.white, fontSize: 13),
-                ),
-                if (muscle.isNotEmpty)
-                  Text(
-                    muscle,
-                    style: const TextStyle(
-                        color: AppColors.textMuted, fontSize: 11),
-                  ),
-              ],
-            ),
-          ),
-          // Демо упражнения; нажатие не сворачивает карточку дня
-          ExerciseInfoButton(templateId: ex.templateId, name: ex.name),
-          const SizedBox(width: 8),
-          // С планом повторов — «4 × 8–12» (или «3 × 10»), без него — «4 подх.»
-          Text(
-            ex.repsRangeText != null
-                ? '${ex.targetSets} × ${ex.repsRangeText}'
-                : '${ex.targetSets} ${'programs.sets_short'.tr()}',
-            style: const TextStyle(
-                color: AppColors.accent,
-                fontSize: 12,
-                fontWeight: FontWeight.bold),
-          ),
-        ],
       ),
     );
   }

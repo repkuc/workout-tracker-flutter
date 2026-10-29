@@ -100,6 +100,14 @@ class ProgramService {
     return program;
   }
 
+  // Добавить уже собранную программу целиком (копия готовой программы).
+  // id программы и дней должны быть новыми — их задаёт вызывающий.
+  Future<void> addProgram(TrainingProgram program) async {
+    final programs = await loadAllPrograms();
+    programs.add(program);
+    await saveAllPrograms(programs);
+  }
+
   // Удалить программу по ID.
   Future<bool> deleteProgram(String id) async {
     final programs = await loadAllPrograms();

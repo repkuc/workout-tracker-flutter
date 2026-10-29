@@ -267,7 +267,12 @@
   "sets_label": "Pieejas",
   "reps_label": "Atkārtojumi",
   "reps_from": "no",
-  "reps_to": "līdz"
+  "reps_to": "līdz",
+  "builtin_section": "Gatavās programmas",
+  "builtin_badge": "GATAVA",
+  "builtin_summary": "Dienas: {days} · Vingrinājumi: {exercises}",
+  "add_to_my_programs": "Pievienot manām programmām",
+  "program_added": "Programma pievienota"
 },
 "measurements": {
   "edit_measurement": "Rediģēt mērījumu",

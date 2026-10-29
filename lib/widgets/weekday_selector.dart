@@ -13,6 +13,50 @@ String formatScheduleDays(List<int> days) {
   return sorted.map(weekdayShortName).join(' · ');
 }
 
+// Дни программы маленькими чипами только для просмотра (готовые программы).
+// Все 7 — один чип «Каждый день»; пусто — ничего.
+class ScheduleDayChips extends StatelessWidget {
+  final List<int> days;
+
+  const ScheduleDayChips({super.key, required this.days});
+
+  @override
+  Widget build(BuildContext context) {
+    context.locale; // подписка на смену языка
+    final sorted = days.toSet().toList()..sort();
+    if (sorted.isEmpty) return const SizedBox.shrink();
+    final labels = sorted.length == 7
+        ? ['programs.every_day'.tr()]
+        : sorted.map(weekdayShortName).toList();
+
+    return Wrap(
+      spacing: 4,
+      runSpacing: 4,
+      children: labels
+          .map((label) => Container(
+                constraints: const BoxConstraints(minWidth: 28),
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: AppColors.accent.withValues(alpha: 0.12),
+                  border: Border.all(
+                      color: AppColors.accent.withValues(alpha: 0.4)),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  label,
+                  style: const TextStyle(
+                    color: AppColors.accent,
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ))
+          .toList(),
+    );
+  }
+}
+
 // 7 переключателей дней недели (Пн … Вс) для расписания программы.
 // Если все 7 помещаются в строку — делят ширину поровну,
 // на узком экране (например внутри диалога) переносятся на вторую строку.

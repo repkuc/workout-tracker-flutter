@@ -267,7 +267,12 @@
   "sets_label": "Подходы",
   "reps_label": "Повторы",
   "reps_from": "от",
-  "reps_to": "до"
+  "reps_to": "до",
+  "builtin_section": "Готовые программы",
+  "builtin_badge": "ГОТОВАЯ",
+  "builtin_summary": "Дней: {days} · Упражнений: {exercises}",
+  "add_to_my_programs": "Добавить в мои программы",
+  "program_added": "Программа добавлена"
 },
 "measurements": {
   "edit_measurement": "Редактировать замер",

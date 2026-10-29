@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "programs": [
+    {
+      "id": "fullbody_beginner",
+      "name": {
+        "ru": "Фулбоди для новичков",
+        "lv": "Full body iesācējiem",
+        "en": "Full Body for Beginners"
+      },
+      "description": {
+        "ru": "Программа на всё тело для первых 2–3 месяцев в зале. Чередуйте тренировки А и Б: 3 раза в неделю (Пн · Ср · Пт) или 4 раза (например, Пн · Вт · Чт · Пт), но не больше двух дней подряд.\n\nПеред тренировкой разминайтесь 5–10 минут. Упражнения со штангой начинайте с лёгкого веса, приседания — с пустого грифа, и сначала поставьте технику.\n\nПодбирайте вес так, чтобы все подходы получались технично, а последние 1–2 повтора давались тяжело. Отдыхайте между подходами 1,5–2 минуты. Когда во всех подходах сделаете верхнюю границу повторов, в следующий раз прибавьте вес.\n\nПодтягивания и отжимания на брусьях: если пока не получается столько повторов, делайте сколько можете или используйте гравитрон или резинку. Подтягивания можно заменить упражнением «Тяга вертикального блока».",
+        "lv": "Programma visam ķermenim pirmajiem 2–3 mēnešiem sporta zālē. Pārmaiņus veiciet treniņus A un B: 3 reizes nedēļā (P · T · Pk) vai 4 reizes (piemēram, P · O · C · Pk), bet ne vairāk kā divas dienas pēc kārtas.\n\nPirms treniņa iesildieties 5–10 minūtes. Vingrinājumus ar stieni sāciet ar nelielu svaru, pietupienus — ar tukšu stieni, un vispirms apgūstiet pareizu tehniku.\n\nIzvēlieties tādu svaru, lai visas pieejas izdotos tehniski pareizi, bet pēdējie 1–2 atkārtojumi būtu smagi. Atpūtieties starp pieejām 1,5–2 minūtes. Kad visās pieejās izpildāt augšējo atkārtojumu robežu, nākamajā reizē palieliniet svaru.\n\nPievilkšanās un atspiešanās līdztekās: ja pagaidām neizdodas tik daudz atkārtojumu, dariet, cik varat, vai izmantojiet gravitronu vai gumiju. Pievilkšanos var aizstāt ar vingrinājumu „Vertikālā bloka vilkšana”.",
+        "en": "A full-body program for your first 2–3 months in the gym. Alternate Workout A and Workout B: 3 times a week (Mon · Wed · Fri) or 4 times (e.g. Mon · Tue · Thu · Fri), but no more than two days in a row.\n\nWarm up for 5–10 minutes before each workout. Start barbell exercises with a light weight (squats with an empty bar) and focus on technique first.\n\nChoose a weight that lets you do every set with good form, while the last 1–2 reps feel hard. Rest 1.5–2 minutes between sets. Once you hit the top of the rep range in all sets, add weight next time.\n\nPull-ups and dips: if you can't do that many reps yet, do as many as you can or use an assisted pull-up machine or a resistance band. You can replace pull-ups with the Lat Pulldown."
+      },
+      "scheduleDays": [1, 3, 5],
+      "days": [
+        {
+          "id": "a",
+          "name": { "ru": "Тренировка А", "lv": "Treniņš A", "en": "Workout A" },
+          "exercises": [
+            { "templateId": "legs_1", "sets": 3, "repsMin": 8, "repsMax": 12 },
+            { "templateId": "chest_1", "sets": 3, "repsMin": 8, "repsMax": 12 },
+            { "templateId": "back_2", "sets": 3, "repsMin": 10, "repsMax": 12 },
+            { "templateId": "shoulders_2", "sets": 3, "repsMin": 10, "repsMax": 12 },
+            { "templateId": "arms_2", "sets": 3, "repsMin": 12, "repsMax": 15 },
+            { "templateId": "arms_5", "sets": 3, "repsMin": 12, "repsMax": 15 },
+            { "templateId": "abs_1", "sets": 3, "repsMin": 15, "repsMax": 20 }
+          ]
+        },
+        {
+          "id": "b",
+          "name": { "ru": "Тренировка Б", "lv": "Treniņš B", "en": "Workout B" },
+          "exercises": [
+            { "templateId": "legs_2", "sets": 3, "repsMin": 10, "repsMax": 12 },
+            { "templateId": "back_1", "sets": 3, "repsMin": 5, "repsMax": 12 },
+            { "templateId": "chest_7", "sets": 3, "repsMin": 5, "repsMax": 12 },
+            { "templateId": "shoulders_3", "sets": 3, "repsMin": 12, "repsMax": 20 },
+            { "templateId": "arms_1", "sets": 3, "repsMin": 12, "repsMax": 15 },
+            { "templateId": "arms_4", "sets": 3, "repsMin": 12, "repsMax": 15 },
+            { "templateId": "abs_3", "sets": 3, "repsMin": 10, "repsMax": 15 }
+          ]
+        }
+      ]
+    }
+  ]
+}

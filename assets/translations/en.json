@@ -267,7 +267,12 @@
   "sets_label": "Sets",
   "reps_label": "Reps",
   "reps_from": "from",
-  "reps_to": "to"
+  "reps_to": "to",
+  "builtin_section": "Ready-made programs",
+  "builtin_badge": "READY-MADE",
+  "builtin_summary": "Days: {days} · Exercises: {exercises}",
+  "add_to_my_programs": "Add to my programs",
+  "program_added": "Program added"
 },
 "measurements": {
   "edit_measurement": "Edit measurement",

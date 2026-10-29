@@ -9,6 +9,9 @@ import '../models/program_models.dart';
 
 // Подключаем сервис для загрузки/сохранения программ.
 import '../services/program_service.dart';
+import '../models/builtin_program.dart';
+import '../services/builtin_program_service.dart';
+import 'builtin_program_page.dart';
 
 // Подключаем экран создания программы, чтобы можно было на него перейти.
 import 'create_program_page.dart';
@@ -34,6 +37,9 @@ class _ProgramsPageState extends State<ProgramsPage> {
   // Список программ, который будет показан на экране.
   List<TrainingProgram> _programs = [];
 
+  // Готовые программы из assets (секция под своими программами).
+  List<BuiltinProgram> _builtinPrograms = [];
+
   // Флаг — идёт ли сейчас загрузка данных (для показа спиннера).
   bool _isLoading = true;
 
@@ -56,9 +62,12 @@ class _ProgramsPageState extends State<ProgramsPage> {
   // Загружаем список программ через сервис и обновляем состояние экрана.
   Future<void> _loadPrograms() async {
     final programs = await _service.loadAllPrograms();
+    final builtinPrograms = await BuiltinProgramService().loadPrograms();
+    if (!mounted) return;
     // setState говорит Flutter "данные изменились, перерисуй экран".
     setState(() {
       _programs = programs;
+      _builtinPrograms = builtinPrograms;
       _isLoading = false;
     });
   }
@@ -80,9 +89,7 @@ class _ProgramsPageState extends State<ProgramsPage> {
                       child:
                           CircularProgressIndicator(color: AppColors.accent),
                     )
-                  : _programs.isEmpty
-                      ? _buildEmptyState()
-                      : _buildProgramsList(),
+                  : _buildProgramsList(),
             ),
 
             // Кнопка "Создать программу" внизу экрана.
@@ -99,19 +106,20 @@ class _ProgramsPageState extends State<ProgramsPage> {
   }
 
   // Пустое состояние — когда у пользователя ещё нет ни одной программы.
+  // Не по центру экрана, а сверху: сразу под ним видны готовые программы.
   Widget _buildEmptyState() {
-    return Center(
+    return Padding(
+      padding: const EdgeInsets.only(top: 16, bottom: 8),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               color: AppColors.accent.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
             child: const Icon(Icons.assignment,
-                size: 56, color: AppColors.accent),
+                size: 48, color: AppColors.accent),
           ),
           const SizedBox(height: 16),
           Text(
@@ -121,6 +129,7 @@ class _ProgramsPageState extends State<ProgramsPage> {
           const SizedBox(height: 4),
           Text(
             'programs.create_first'.tr(),
+            textAlign: TextAlign.center,
             style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
           ),
         ],
@@ -128,12 +137,133 @@ class _ProgramsPageState extends State<ProgramsPage> {
     );
   }
 
-  // Список карточек программ.
+  // Список: свои программы (или пустое состояние), ниже — готовые программы.
   Widget _buildProgramsList() {
-    return ListView.builder(
+    return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      itemCount: _programs.length,
-      itemBuilder: (context, index) => _buildProgramCard(_programs[index]),
+      children: [
+        if (_programs.isEmpty)
+          _buildEmptyState()
+        else
+          ..._programs.map(_buildProgramCard),
+        if (_builtinPrograms.isNotEmpty) ...[
+          _buildBuiltinHeader(),
+          ..._builtinPrograms.map(_buildBuiltinProgramCard),
+        ],
+      ],
+    );
+  }
+
+  // Небольшой заголовок секции «Готовые программы».
+  Widget _buildBuiltinHeader() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 12, bottom: 8),
+      child: Row(
+        children: [
+          const Icon(Icons.auto_awesome, color: AppColors.textMuted, size: 14),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text(
+              'programs.builtin_section'.tr(),
+              style: const TextStyle(
+                color: AppColors.textMuted,
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Карточка готовой программы: как своя, но с меткой «ГОТОВАЯ»;
+  // дни, упражнения и дни недели. Нажатие — просмотр.
+  Widget _buildBuiltinProgramCard(BuiltinProgram program) {
+    final lang = context.locale.languageCode;
+
+    return GestureDetector(
+      onTap: () => _openBuiltinProgram(program),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: AppColors.accent.withValues(alpha: 0.2),
+            width: 1,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    program.name(lang),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: AppColors.accent.withValues(alpha: 0.15),
+                    border: Border.all(color: AppColors.accent),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    'programs.builtin_badge'.tr(),
+                    style: const TextStyle(
+                      color: AppColors.accent,
+                      fontSize: 9,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'programs.builtin_summary'.tr(namedArgs: {
+                'days': '${program.days.length}',
+                'exercises': '${program.exerciseCount}',
+              }),
+              style: const TextStyle(color: AppColors.textMuted, fontSize: 11),
+            ),
+            if (program.scheduleDays.isNotEmpty) ...[
+              const SizedBox(height: 10),
+              ScheduleDayChips(days: program.scheduleDays),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Открыть просмотр готовой программы. Если её добавили в свои —
+  // сразу обновляем список и показываем «Программа добавлена».
+  Future<void> _openBuiltinProgram(BuiltinProgram program) async {
+    final added = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => BuiltinProgramPage(program: program),
+      ),
+    );
+    if (!mounted || added != true) return;
+    await _loadPrograms();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('programs.program_added'.tr()),
+        backgroundColor: AppColors.success,
+      ),
     );
   }
 

@@ -70,6 +70,7 @@ flutter:
     - assets/translations/
     - assets/images/muscles/
     - assets/exercises/
+    - assets/programs/
     - assets/exercise_images/
     - assets/sounds/
 
