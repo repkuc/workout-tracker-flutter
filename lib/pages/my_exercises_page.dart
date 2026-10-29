@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../models/exercise_template.dart';
 import '../services/custom_exercise_service.dart';
+import '../services/data_read_guard.dart';
 import '../services/exercise_catalog_service.dart';
 import '../services/exercise_library_service.dart';
 import '../theme/app_colors.dart';
@@ -300,6 +301,12 @@ class _MyExercisesPageState extends State<MyExercisesPage> {
       );
       if (!mounted) return;
       _showSnack('my_exercises.merged'.tr(namedArgs: {'name': targetName}));
+    } on DataReadException {
+      // Данные не прочитались — объединение не начато, ничего не изменено
+      if (mounted) {
+        _showSnack('my_exercises.merge_read_error'.tr(),
+            color: AppColors.danger);
+      }
     } catch (e) {
       if (mounted) {
         _showSnack('${'workout.error'.tr()}: $e', color: AppColors.danger);

@@ -317,6 +317,7 @@
   "merge_confirm_message": "«{source}»: treniņi ({workouts}) un programmas ({programs}) tiks pārcelti uz «{target}». To nevar atsaukt.",
   "merge_button": "Apvienot",
   "merged": "Apvienots ar «{name}»",
+  "merge_read_error": "Neizdevās apvienot: datus nevarēja nolasīt",
   "rename": "Pārdēvēt",
   "rename_title": "Pārdēvēt vingrinājumu",
   "name_taken": "«{name}» jau ir bibliotēkā. Izmanto «Apvienot ar…».",

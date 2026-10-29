@@ -42,6 +42,70 @@
           ]
         }
       ]
+    },
+    {
+      "id": "strength_mass_4day",
+      "name": {
+        "ru": "Сила и масса — 4 дня",
+        "lv": "Spēks un masa — 4 dienas",
+        "en": "Strength & Mass — 4 Days"
+      },
+      "description": {
+        "ru": "Уровень: средний · Цель: рост мышц и силы · 4 тренировки в неделю.\n\nПрограмма для тех, кто уже освоил базовые упражнения и хочет развивать силу и мышечную массу. Два дня посвящены груди и спине, два — ногам и плечам. Варианты А и Б прорабатывают мышцы под разными углами и сочетают базовые упражнения с изолирующими. Тренируйтесь по порядку: Грудь / Спина А → Ноги / Плечи А → Грудь / Спина Б → Ноги / Плечи Б.\n\nНачинайте с разминочных подходов. Выполняйте упражнения с контролируемой техникой и оставляйте 1–2 повтора в запасе. В выпадах со штангой повторы указаны на каждую ногу.\n\nПодтягивания обратным хватом, отжимания на брусьях и от пола: когда во всех подходах достигнута верхняя граница диапазона, добавляйте дополнительный вес — пояс с отягощением, жилет или блин на спину.\n\nДвойная прогрессия: сначала увеличивайте количество повторов в заданном диапазоне, затем повышайте вес. Пример для 4 × 10–12: сделали 12 / 11 / 11 / 10 — вес оставьте; сделали 12 / 12 / 12 / 12 — в следующий раз прибавьте вес. Повышайте вес, когда верх диапазона достигнут во всех подходах, а техника остаётся правильной. Это ориентир, а не обязанность ставить рекорд на каждой тренировке.",
+        "lv": "Līmenis: vidējs · Mērķis: muskuļu masas un spēka pieaugums · 4 treniņi nedēļā.\n\nProgramma tiem, kas jau apguvuši pamatvingrinājumus un vēlas attīstīt spēku un muskuļu masu. Divas dienas ir veltītas krūtīm un mugurai, divas — kājām un pleciem. Varianti A un B noslogo muskuļus no dažādiem leņķiem un apvieno pamatvingrinājumus ar izolējošiem. Trenējieties šādā secībā: Krūtis / Mugura A → Kājas / Pleci A → Krūtis / Mugura B → Kājas / Pleci B.\n\nSāciet ar iesildīšanās pieejām. Izpildiet vingrinājumus ar kontrolētu tehniku un atstājiet 1–2 atkārtojumus rezervē. Izklupienos ar stieni atkārtojumi norādīti katrai kājai.\n\nPievilkšanās ar apgriezto satvērienu, atspiešanās līdztekās un atspiešanās no grīdas: kad visās pieejās sasniedzat diapazona augšējo robežu, pievienojiet papildu svaru — jostu ar atsvaru, vesti vai disku uz muguras.\n\nDubultā progresija: vispirms palieliniet atkārtojumu skaitu norādītajā diapazonā, pēc tam palieliniet svaru. Piemērs 4 × 10–12: izpildījāt 12 / 11 / 11 / 10 — svaru atstājiet; izpildījāt 12 / 12 / 12 / 12 — nākamajā reizē pievienojiet svaru. Palieliniet svaru, kad visās pieejās sasniegta diapazona augšējā robeža un tehnika joprojām ir pareiza. Tā ir vadlīnija, nevis pienākums uzstādīt rekordu katrā treniņā.",
+        "en": "Level: intermediate · Goal: muscle and strength gain · 4 workouts a week.\n\nA program for those who have already learned the basic exercises and want to build strength and muscle mass. Two days focus on chest and back, two on legs and shoulders. Variants A and B work the muscles from different angles and combine compound and isolation exercises. Train in this order: Chest / Back A → Legs / Shoulders A → Chest / Back B → Legs / Shoulders B.\n\nStart with warm-up sets. Perform the exercises with controlled technique and keep 1–2 reps in reserve. For barbell lunges, reps are per leg.\n\nChin-ups, dips and push-ups: once you reach the top of the rep range in all sets, add extra weight — a dip belt, a weighted vest or a plate on your back.\n\nDouble progression: first increase the reps within the given range, then increase the weight. Example for 4 × 10–12: you did 12 / 11 / 11 / 10 — keep the weight; you did 12 / 12 / 12 / 12 — add weight next time. Increase the weight when you reach the top of the range in all sets and your technique stays correct. This is a guideline, not an obligation to set a record every workout."
+      },
+      "scheduleDays": [1, 2, 4, 6],
+      "days": [
+        {
+          "id": "a1",
+          "name": { "ru": "Грудь / Спина А", "lv": "Krūtis / Mugura A", "en": "Chest / Back A" },
+          "exercises": [
+            { "templateId": "back_9", "sets": 4, "repsMin": 10, "repsMax": 12 },
+            { "templateId": "chest_1", "sets": 4, "repsMin": 10, "repsMax": 12 },
+            { "templateId": "back_10", "sets": 4, "repsMin": 10, "repsMax": 15 },
+            { "templateId": "chest_9", "sets": 4, "repsMin": 10, "repsMax": 15 },
+            { "templateId": "arms_1", "sets": 4, "repsMin": 12, "repsMax": 15 },
+            { "templateId": "arms_9", "sets": 4, "repsMin": 12, "repsMax": 15 }
+          ]
+        },
+        {
+          "id": "a2",
+          "name": { "ru": "Ноги / Плечи А", "lv": "Kājas / Pleci A", "en": "Legs / Shoulders A" },
+          "exercises": [
+            { "templateId": "legs_1", "sets": 4, "repsMin": 10, "repsMax": 12 },
+            { "templateId": "shoulders_1", "sets": 4, "repsMin": 10, "repsMax": 12 },
+            { "templateId": "legs_5", "sets": 4, "repsMin": 8, "repsMax": 10 },
+            { "templateId": "shoulders_5", "sets": 4, "repsMin": 15, "repsMax": 20 },
+            { "templateId": "legs_6", "sets": 4, "repsMin": 15, "repsMax": 20 },
+            { "templateId": "abs_1", "sets": 4, "repsMin": 15, "repsMax": 25 }
+          ]
+        },
+        {
+          "id": "b1",
+          "name": { "ru": "Грудь / Спина Б", "lv": "Krūtis / Mugura B", "en": "Chest / Back B" },
+          "exercises": [
+            { "templateId": "chest_3", "sets": 4, "repsMin": 10, "repsMax": 12 },
+            { "templateId": "back_11", "sets": 4, "repsMin": 10, "repsMax": 15 },
+            { "templateId": "chest_10", "sets": 4, "repsMin": 12, "repsMax": 20 },
+            { "templateId": "back_5", "sets": 4, "repsMin": 10, "repsMax": 12 },
+            { "templateId": "chest_7", "sets": 4, "repsMin": 10, "repsMax": 15 },
+            { "templateId": "arms_2", "sets": 4, "repsMin": 12, "repsMax": 15 }
+          ]
+        },
+        {
+          "id": "b2",
+          "name": { "ru": "Ноги / Плечи Б", "lv": "Kājas / Pleci B", "en": "Legs / Shoulders B" },
+          "exercises": [
+            { "templateId": "legs_2", "sets": 4, "repsMin": 10, "repsMax": 15 },
+            { "templateId": "shoulders_3", "sets": 4, "repsMin": 15, "repsMax": 20 },
+            { "templateId": "legs_4", "sets": 4, "repsMin": 12, "repsMax": 15 },
+            { "templateId": "shoulders_9", "sets": 4, "repsMin": 15, "repsMax": 25 },
+            { "templateId": "legs_7", "sets": 4, "repsMin": 15, "repsMax": 20 },
+            { "templateId": "abs_9", "sets": 4, "repsMin": 20, "repsMax": 30 }
+          ]
+        }
+      ]
     }
   ]
 }

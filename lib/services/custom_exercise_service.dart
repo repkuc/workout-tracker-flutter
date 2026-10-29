@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import '../models/exercise_template.dart';
 import '../models/program_models.dart';
 import '../models/workout_models.dart';
+import 'data_read_guard.dart';
 import 'exercise_catalog_service.dart';
 import 'exercise_library_service.dart';
 import 'program_service.dart';
@@ -116,6 +117,7 @@ class CustomExerciseService {
   // все упражнения тренировок и программ с sourceId получают id, название
   // на текущем языке и группу мышц цели; исходное упражнение удаляется
   // из библиотеки. Если у цели нет группы, у упражнений остаётся прежняя.
+  // Данные не прочитались (битый JSON) — DataReadException, ничего не меняется.
   Future<void> merge({
     required String sourceId,
     required ExerciseTemplate target,
@@ -127,8 +129,11 @@ class CustomExerciseService {
         : target.nameRu;
     final group = target.muscleGroup;
 
-    final workouts = await _workouts.loadAllWorkouts();
-    final programs = await _programs.loadAllPrograms();
+    // Всё читаем до изменений: иначе битые тренировки прочитались бы
+    // как пустой список, и удаление упражнения стёрло бы его историю
+    final data = await loadDataForChange();
+    final workouts = data.workouts;
+    final programs = data.programs;
     final changed = repointExercises(
       workouts: workouts,
       programs: programs,
@@ -141,9 +146,8 @@ class CustomExerciseService {
     if (changed.workouts) await _workouts.saveAllWorkouts(workouts);
     if (changed.programs) await _programs.saveAllPrograms(programs);
 
-    final custom = await _library.getCustomExercises();
     await _library.saveCustomExercises(
-        custom.where((t) => t.id != sourceId).toList());
+        data.custom.where((t) => t.id != sourceId).toList());
   }
 
   // Сама замена при объединении — в памяти, без сохранения (её же

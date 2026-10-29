@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/exercise_template.dart';
 import 'custom_exercise_service.dart';
+import 'data_read_guard.dart';
 import 'exercise_catalog_service.dart';
 import 'exercise_library_service.dart';
 import 'program_service.dart';
@@ -70,21 +71,16 @@ class BuiltinExerciseMerge {
         for (final key in [_workoutsKey, _programsKey, _customKey]) {
           before[key] = prefs.getString(key);
         }
+        // Битые данные → DataReadException (loadAllWorkouts молча отдал бы []
+        // и своё упражнение удалилось бы вместе со ссылками на него).
+        // Читаем до копии — чтобы в неё не попали битые данные.
+        final data = await loadDataForChange();
+        final workouts = data.workouts;
+        final programs = data.programs;
         await _savePreMergeCopy(prefs);
 
         final workoutService = WorkoutService();
         final programService = ProgramService();
-        final workouts = await workoutService.loadAllWorkouts();
-        final programs = await programService.loadAllPrograms();
-        // loadAllWorkouts при битом JSON молча отдаёт [] — тогда своё
-        // упражнение удалилось бы, а тренировки с его id остались бы
-        // без шаблона. Проверяем сырую строку сами (битая — исключение).
-        final rawWorkouts = before[_workoutsKey];
-        if (rawWorkouts != null &&
-            rawWorkouts.isNotEmpty &&
-            (json.decode(rawWorkouts) as List).length != workouts.length) {
-          throw StateError('workouts could not be read');
-        }
         final muscleLabels = <String, Map<String, String>>{};
         var workoutsChanged = false, programsChanged = false;
 

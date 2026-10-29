@@ -39,6 +39,19 @@ class WorkoutService {
 
   // Загрузить все тренировки
   Future<List<Workout>> loadAllWorkouts() async {
+    try {
+      return await loadAllWorkoutsStrict();
+    } catch (e) {
+      // Если произошла ошибка при парсинге, возвращаем пустой список
+      print('Error parsing workouts JSON: $e');
+      return [];
+    }
+  }
+
+  // То же, но битые данные — исключение, а не пустой список.
+  // Для изменений, которым нельзя принять битые данные за «тренировок нет»
+  // (см. loadDataForChange в data_read_guard.dart).
+  Future<List<Workout>> loadAllWorkoutsStrict() async {
     final prefs = await _preferences; // Получаем SharedPreferences
     final jsonString = prefs.getString(_workoutsKey); // Получаем JSON строку
 
@@ -46,14 +59,8 @@ class WorkoutService {
       return []; // Если нет данных, возвращаем пустой список
     }
 
-    try {
-      final List<dynamic> jsonList = json.decode(jsonString);
-      return jsonList.map((json) => Workout.fromJson(json)).toList();
-    } catch (e) {
-      // Если произошла ошибка при парсинге, возвращаем пустой список
-      print('Error parsing workouts JSON: $e');
-      return [];
-    }
+    final List<dynamic> jsonList = json.decode(jsonString);
+    return jsonList.map((json) => Workout.fromJson(json)).toList();
   }
 
   // Сохранить все тренировки

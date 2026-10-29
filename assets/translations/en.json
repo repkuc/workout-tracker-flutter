@@ -317,6 +317,7 @@
   "merge_confirm_message": "«{source}»: {workouts} workouts and {programs} programs will move to «{target}». This can't be undone.",
   "merge_button": "Merge",
   "merged": "Merged into «{name}»",
+  "merge_read_error": "Couldn't merge: data could not be read",
   "rename": "Rename",
   "rename_title": "Rename exercise",
   "name_taken": "«{name}» is already in the library. Use \"Merge into…\" instead.",
