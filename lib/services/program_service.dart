@@ -88,6 +88,7 @@ class ProgramService {
       description: description,
       scheduleDays: List.of(scheduleDays)..sort(),
       isCustom: true,
+      createdAt: DateTime.now().millisecondsSinceEpoch,
     );
 
     // Загружаем текущий список, добавляем новую программу, сохраняем весь список обратно.

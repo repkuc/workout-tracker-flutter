@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import '../models/builtin_program.dart';
 import '../models/program_models.dart';
@@ -13,6 +14,10 @@ import 'program_service.dart';
 // копию на текущем языке, никак не связанную с готовой.
 class BuiltinProgramService {
   static const String _assetPath = 'assets/programs/builtin_programs.json';
+
+  // id готовых программ, которые пользователь уже видел (вкладка «Готовые»).
+  // Только для точки «новое», в бэкап не входит.
+  static const String _seenKey = 'wt.builtin_programs_seen.v1';
 
   static final BuiltinProgramService _instance =
       BuiltinProgramService._internal();
@@ -37,6 +42,23 @@ class BuiltinProgramService {
       debugPrint('BuiltinProgramService: cannot load $_assetPath: $e');
       return _cache = [];
     }
+  }
+
+  // Есть ли готовая программа, которую пользователь ещё не видел
+  // (у обновившихся пользователей ключа нет — все программы новые).
+  Future<bool> hasUnseenPrograms() async {
+    final prefs = await SharedPreferences.getInstance();
+    final seen = (prefs.getStringList(_seenKey) ?? const <String>[]).toSet();
+    return (await loadPrograms()).any((p) => !seen.contains(p.id));
+  }
+
+  // Отметить все текущие готовые программы как просмотренные
+  // (старые id из списка не убираем).
+  Future<void> markAllSeen() async {
+    final prefs = await SharedPreferences.getInstance();
+    final seen = (prefs.getStringList(_seenKey) ?? const <String>[]).toSet()
+      ..addAll((await loadPrograms()).map((p) => p.id));
+    await prefs.setStringList(_seenKey, seen.toList());
   }
 
   // Убрать упражнения, которых нет среди встроенных в каталоге.
@@ -100,6 +122,7 @@ class BuiltinProgramService {
               ))
           .toList(),
       isCustom: true,
+      createdAt: DateTime.now().millisecondsSinceEpoch,
     );
     await ProgramService().addProgram(program);
     return program;

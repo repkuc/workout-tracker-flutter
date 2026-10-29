@@ -268,11 +268,17 @@
   "reps_label": "Повторы",
   "reps_from": "от",
   "reps_to": "до",
-  "builtin_section": "Готовые программы",
   "builtin_badge": "ГОТОВАЯ",
   "builtin_summary": "Дней: {days} · Упражнений: {exercises}",
   "add_to_my_programs": "Добавить в мои программы",
-  "program_added": "Программа добавлена"
+  "program_added": "Программа добавлена",
+  "tab_my": "Мои ({count})",
+  "tab_builtin": "Готовые ({count})",
+  "browse_builtin": "Посмотреть готовые программы",
+  "last_workout": "Последняя тренировка: {when}",
+  "last_workout_today": "сегодня",
+  "last_workout_yesterday": "вчера",
+  "last_workout_days_ago": "{count} дн. назад"
 },
 "measurements": {
   "edit_measurement": "Редактировать замер",

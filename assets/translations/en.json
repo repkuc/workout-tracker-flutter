@@ -268,11 +268,17 @@
   "reps_label": "Reps",
   "reps_from": "from",
   "reps_to": "to",
-  "builtin_section": "Ready-made programs",
   "builtin_badge": "READY-MADE",
   "builtin_summary": "Days: {days} · Exercises: {exercises}",
   "add_to_my_programs": "Add to my programs",
-  "program_added": "Program added"
+  "program_added": "Program added",
+  "tab_my": "My ({count})",
+  "tab_builtin": "Ready-made ({count})",
+  "browse_builtin": "Browse ready-made programs",
+  "last_workout": "Last workout: {when}",
+  "last_workout_today": "today",
+  "last_workout_yesterday": "yesterday",
+  "last_workout_days_ago": "{count} days ago"
 },
 "measurements": {
   "edit_measurement": "Edit measurement",

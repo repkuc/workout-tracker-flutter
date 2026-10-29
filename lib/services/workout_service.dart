@@ -2,6 +2,7 @@ import 'dart:convert'; // для json
 import 'package:shared_preferences/shared_preferences.dart'; // для сохранения данных
 import 'package:uuid/uuid.dart'; // для генерации уникальных ID
 import '../models/workout_models.dart'; // импорт моделей
+import '../models/program_models.dart';
 import 'package:flutter/foundation.dart';
 import 'exercise_catalog_service.dart';
 
@@ -758,6 +759,31 @@ class WorkoutService {
     // Если ни одна тренировка не подошла под условие — значит этот день
     // программы ещё ни разу не выполнялся.
     return null;
+  }
+
+  // Время последней тренировки каждой программы (id программы → время):
+  // самая новая завершённая тренировка любого дня программы — та же привязка,
+  // что у getLastWorkoutForProgramDay (id дня, у старых — название).
+  // Время = startedAt, без него — дата тренировки. Нигде не хранится,
+  // считается заново (для сортировки «Моих» программ и строки на карточке).
+  Future<Map<String, DateTime>> getLastWorkoutTimesForPrograms(
+      List<TrainingProgram> programs) async {
+    final completed = await getCompletedWorkouts();
+    final result = <String, DateTime>{};
+    for (final w in completed) {
+      final time =
+          (w.startedAt != null ? DateTime.tryParse(w.startedAt!) : null) ??
+              DateTime.tryParse(w.date);
+      if (time == null) continue;
+      for (final program in programs) {
+        final linked = program.workouts.any(
+            (day) => _belongsToProgramDay(w, program.id, day.id, day.name));
+        if (!linked) continue;
+        final current = result[program.id];
+        if (current == null || time.isAfter(current)) result[program.id] = time;
+      }
+    }
+    return result;
   }
 
   // Привязать старые тренировки дня (созданные до появления programWorkoutId,

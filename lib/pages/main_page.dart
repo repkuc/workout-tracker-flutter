@@ -20,14 +20,16 @@ class _MainPageState extends State<MainPage> {
   // Текущий выбранный таб
   int _currentIndex = 0;
 
-  // Страницы — порядок совпадает с иконками навигации
-  final List<Widget> _pages = [
-    const HomePage(),
-    const ProgramsPage(),
-    const HistoryPage(),
-    const StatisticsPage(),
-    const SettingsPage(),
-  ];
+  // Страницы — порядок совпадает с иконками навигации.
+  // IndexedStack строит все вкладки сразу, поэтому «Программам» передаём,
+  // видна ли вкладка: при показе она пересортирует список и снимет точку «новое».
+  List<Widget> get _pages => [
+        const HomePage(),
+        ProgramsPage(isActive: _currentIndex == 1),
+        const HistoryPage(),
+        const StatisticsPage(),
+        const SettingsPage(),
+      ];
 
   @override
   Widget build(BuildContext context) {

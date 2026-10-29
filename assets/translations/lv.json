@@ -268,11 +268,17 @@
   "reps_label": "Atkārtojumi",
   "reps_from": "no",
   "reps_to": "līdz",
-  "builtin_section": "Gatavās programmas",
   "builtin_badge": "GATAVA",
   "builtin_summary": "Dienas: {days} · Vingrinājumi: {exercises}",
   "add_to_my_programs": "Pievienot manām programmām",
-  "program_added": "Programma pievienota"
+  "program_added": "Programma pievienota",
+  "tab_my": "Manas ({count})",
+  "tab_builtin": "Gatavās ({count})",
+  "browse_builtin": "Apskatīt gatavās programmas",
+  "last_workout": "Pēdējais treniņš: {when}",
+  "last_workout_today": "šodien",
+  "last_workout_yesterday": "vakar",
+  "last_workout_days_ago": "pirms {count} d."
 },
 "measurements": {
   "edit_measurement": "Rediģēt mērījumu",
