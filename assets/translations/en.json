@@ -318,6 +318,7 @@
   "merge_button": "Merge",
   "merged": "Merged into «{name}»",
   "merge_read_error": "Couldn't merge: data could not be read",
+  "delete_read_error": "Couldn't delete: data could not be read",
   "rename": "Rename",
   "rename_title": "Rename exercise",
   "name_taken": "«{name}» is already in the library. Use \"Merge into…\" instead.",

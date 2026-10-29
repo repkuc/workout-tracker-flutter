@@ -1,4 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/foundation.dart';
 import '../models/exercise_template.dart';
 import '../models/program_models.dart';
 import '../models/workout_models.dart';
@@ -45,18 +46,39 @@ class CustomExerciseService {
   // Заодно убирает из библиотеки неиспользуемые дубликаты встроенных
   // (их упражнения уже привязаны к встроенным). Дубликаты, которые ещё
   // где-то используются, остаются скрытыми и в список не попадают.
+  // Данные не прочитались (битый JSON) — уборку пропускаем: «нигде не
+  // используется» тогда может быть неправдой. Список всё равно показываем.
   Future<List<CustomExerciseEntry>> loadEntries() async {
     final catalog = ExerciseCatalogService();
     await catalog.init();
-    final usage = await _usageById();
-    final custom = await _library.getCustomExercises();
+
+    Map<String, ExerciseUsage> usage;
+    List<ExerciseTemplate> custom;
+    var canCleanUp = true;
+    try {
+      final data = await loadDataForChange();
+      usage = _usageFrom(data.workouts, data.programs);
+      custom = data.custom;
+    } on DataReadException catch (e) {
+      debugPrint('My exercises: duplicate cleanup skipped: $e');
+      canCleanUp = false;
+      // Только для показа счётчиков: непрочитанные программы — как пустые
+      List<TrainingProgram> programs;
+      try {
+        programs = await _programs.loadAllPrograms();
+      } catch (_) {
+        programs = [];
+      }
+      usage = _usageFrom(await _workouts.loadAllWorkouts(), programs);
+      custom = await _library.getCustomExercises();
+    }
 
     final unusedDuplicates = custom
         .where((t) =>
             catalog.isBuiltInDuplicate(t) && !(usage[t.id]?.isUsed ?? false))
         .map((t) => t.id)
         .toSet();
-    if (unusedDuplicates.isNotEmpty) {
+    if (canCleanUp && unusedDuplicates.isNotEmpty) {
       await _library.saveCustomExercises(
           custom.where((t) => !unusedDuplicates.contains(t.id)).toList());
     }
@@ -78,13 +100,16 @@ class CustomExerciseService {
 
   // Использование одного упражнения
   Future<ExerciseUsage> usageOf(String templateId) async =>
-      (await _usageById())[templateId] ?? const ExerciseUsage();
+      _usageFrom(await _workouts.loadAllWorkouts(),
+              await _programs.loadAllPrograms())[templateId] ??
+          const ExerciseUsage();
 
   // templateId → сколько тренировок и программ его содержат
   // (тренировка / программа считается один раз, сколько бы раз упражнение в ней ни было)
-  Future<Map<String, ExerciseUsage>> _usageById() async {
+  static Map<String, ExerciseUsage> _usageFrom(
+      List<Workout> workouts, List<TrainingProgram> programs) {
     final workoutCount = <String, int>{};
-    for (final workout in await _workouts.loadAllWorkouts()) {
+    for (final workout in workouts) {
       final ids = {
         for (final e in workout.exercises)
           if (e.templateId != null) e.templateId!,
@@ -94,7 +119,7 @@ class CustomExerciseService {
       }
     }
     final programCount = <String, int>{};
-    for (final program in await _programs.loadAllPrograms()) {
+    for (final program in programs) {
       final ids = {
         for (final day in program.workouts)
           for (final e in day.exercises)
@@ -249,9 +274,14 @@ class CustomExerciseService {
 
   // Удалить своё упражнение, только если оно нигде не используется.
   // Возвращает false, если используется (или не найдено).
+  // Данные не прочитались — DataReadException, ничего не удаляется
+  // (иначе используемое упражнение выглядело бы неиспользуемым).
   Future<bool> delete(String id) async {
-    if ((await usageOf(id)).isUsed) return false;
-    final custom = await _library.getCustomExercises();
+    final data = await loadDataForChange();
+    if (_usageFrom(data.workouts, data.programs)[id]?.isUsed ?? false) {
+      return false;
+    }
+    final custom = data.custom;
     final kept = custom.where((t) => t.id != id).toList();
     if (kept.length == custom.length) return false;
     await _library.saveCustomExercises(kept);

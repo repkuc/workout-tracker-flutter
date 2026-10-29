@@ -318,6 +318,7 @@
   "merge_button": "Apvienot",
   "merged": "Apvienots ar «{name}»",
   "merge_read_error": "Neizdevās apvienot: datus nevarēja nolasīt",
+  "delete_read_error": "Neizdevās dzēst: datus nevarēja nolasīt",
   "rename": "Pārdēvēt",
   "rename_title": "Pārdēvēt vingrinājumu",
   "name_taken": "«{name}» jau ir bibliotēkā. Izmanto «Apvienot ar…».",

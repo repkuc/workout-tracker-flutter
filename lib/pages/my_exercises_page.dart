@@ -472,7 +472,17 @@ class _MyExercisesPageState extends State<MyExercisesPage> {
     );
     if (confirmed != true || !mounted) return;
 
-    final deleted = await _service.delete(entry.template.id);
+    final bool deleted;
+    try {
+      deleted = await _service.delete(entry.template.id);
+    } on DataReadException {
+      // Данные не прочитались — ничего не удалено
+      if (mounted) {
+        _showSnack('my_exercises.delete_read_error'.tr(),
+            color: AppColors.danger);
+      }
+      return;
+    }
     if (mounted) {
       _showSnack(
         deleted
