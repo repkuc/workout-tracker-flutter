@@ -56,7 +56,7 @@
     "add_exercise_dialog_title": "Add Exercise",
     "exercise_name_hint": "e.g. Bench Press",
     "exercise_name_required": "Enter exercise name",
-    "exercise_already_in_library": "This exercise is already in the library: {name}",
+    "exercise_already_in_library_added": "«{name}» is already in the library — added",
     "add_set_button": "Add Set",
     "add_set_dialog_title": "Add Set",
     "reps_hint": "e.g. 10",
@@ -211,7 +211,7 @@
   "donate_subtitle": "Support app development",
   "exercise_photos_credit": "Exercise photos: free-exercise-db (public domain)",
   "exercises": "Exercises",
-  "my_exercises_subtitle": "Merge, rename and delete your own exercises"
+  "exercise_library_subtitle": "Built-in and your own exercises"
 },
 "calendar": {
   "mon": "Mo",
@@ -305,12 +305,10 @@
   "show": "How to do it"
 },
 "my_exercises": {
-  "title": "My exercises",
-  "count": "Exercises: {count}",
   "usage": "Workouts: {workouts} · Programs: {programs}",
   "not_used": "Not used",
   "empty": "No custom exercises yet",
-  "empty_hint": "Exercises you add yourself in the exercise library will appear here.",
+  "empty_hint": "Create your own exercise with the button below.",
   "merge": "Merge into…",
   "merge_into_title": "Merge into…",
   "merge_confirm_title": "Merge exercises?",
@@ -330,6 +328,20 @@
   "delete_confirm_title": "Delete exercise?",
   "delete_confirm_message": "«{name}» will be removed from the library.",
   "deleted": "Exercise deleted"
+},
+"exercise_library": {
+  "title": "Exercise library",
+  "tab_all": "All ({count})",
+  "tab_mine": "Mine ({count})",
+  "search_hint": "Search exercises",
+  "clear_search": "Clear search",
+  "nothing_found": "Nothing found",
+  "custom_badge": "CUSTOM",
+  "new_exercise": "New exercise",
+  "create": "Create",
+  "muscle_group": "Muscle group",
+  "already_exists": "This exercise is already in the library",
+  "added": "Exercise added"
 }
 
 }

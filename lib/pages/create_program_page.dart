@@ -373,7 +373,7 @@ class _CreateProgramPageState extends State<CreateProgramPage> {
 
     // Ошибку пустого названия дня показываем прямо под полем
     String? nameError;
-    // «Такое упражнение уже есть в библиотеке» — тоже в самом диалоге:
+    // «… уже есть в библиотеке — добавлено» — в самом диалоге:
     // SnackBar оказался бы за его фоном
     String? libraryNote;
 

@@ -4,50 +4,116 @@ import '../models/exercise_template.dart';
 import '../services/custom_exercise_service.dart';
 import '../services/data_read_guard.dart';
 import '../services/exercise_catalog_service.dart';
+import '../services/exercise_image_service.dart';
 import '../services/exercise_library_service.dart';
 import '../theme/app_colors.dart';
+import '../widgets/app_badge.dart';
 import '../widgets/app_bottom_sheet.dart';
 import '../widgets/app_dialog.dart';
+import '../widgets/app_search_field.dart';
+import '../widgets/bottom_action_button.dart';
+import '../widgets/exercise_info_button.dart';
+import '../widgets/muscle_group_chips.dart';
+import '../widgets/new_exercise_dialog.dart';
 import '../widgets/page_header.dart';
+import '../widgets/segmented_tab_switch.dart';
 import 'exercise_picker_page.dart';
 
-// «Мои упражнения» (Настройки): список своих упражнений с использованием
-// и действия — объединить, переименовать, сменить группу, удалить.
-class MyExercisesPage extends StatefulWidget {
-  const MyExercisesPage({super.key});
+// Миниатюры (кадр 0 демо) у встроенных упражнений на вкладке «Все».
+// false — вместо миниатюры значок группы мышц, как у своих упражнений.
+const bool kShowExerciseThumbnails = true;
+
+// Вкладки: «Все» (встроенные + свои) и «Мои» (только свои).
+enum _LibraryTab { all, mine }
+
+// «Библиотека упражнений» (Настройки): все упражнения с поиском и фильтром
+// по группе, демо встроенных; свои упражнения — использование и действия
+// (объединить, переименовать, сменить группу, удалить), создание нового.
+class ExerciseLibraryPage extends StatefulWidget {
+  const ExerciseLibraryPage({super.key});
 
   @override
-  State<MyExercisesPage> createState() => _MyExercisesPageState();
+  State<ExerciseLibraryPage> createState() => _ExerciseLibraryPageState();
 }
 
-class _MyExercisesPageState extends State<MyExercisesPage> {
+class _ExerciseLibraryPageState extends State<ExerciseLibraryPage> {
   final _service = CustomExerciseService();
+  final _searchController = TextEditingController();
 
+  _LibraryTab _tab = _LibraryTab.all;
+  String _selectedGroup = 'all';
+  List<ExerciseTemplate> _builtIn = [];
+  // Свои упражнения (без скрытых дубликатов встроенных), самые используемые сверху
   List<CustomExerciseEntry> _entries = [];
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
+    _searchController.addListener(() => setState(() {}));
     _load();
   }
 
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
   Future<void> _load() async {
+    // loadEntries заодно убирает неиспользуемые дубликаты встроенных
     final entries = await _service.loadEntries();
+    final builtIn = await ExerciseLibraryService().getBuiltInExercises();
+    await ExerciseImageService().init();
     if (!mounted) return;
     setState(() {
       _entries = entries;
+      _builtIn = builtIn;
       _isLoading = false;
     });
   }
 
-  String _nameOf(ExerciseTemplate t) =>
-      t.getName(context.locale.languageCode);
+  String _nameOf(ExerciseTemplate t) {
+    final lang = context.locale.languageCode;
+    return ExerciseCatalogService()
+        .displayName(templateId: t.id, name: t.getName(lang), languageCode: lang);
+  }
+
+  String _groupText(String group) =>
+      group.isNotEmpty ? 'workout.muscle_$group'.tr() : '—';
+
+  // Поиск по названию на текущем языке: без регистра, «ё» = «е», без краевых пробелов
+  bool _matchesQuery(ExerciseTemplate t) {
+    final query = ExerciseCatalogService.normalize(_searchController.text);
+    return query.isEmpty ||
+        ExerciseCatalogService.normalize(_nameOf(t)).contains(query);
+  }
+
+  // «Все»: встроенные и свои вместе, по названию; у своих — запись с использованием
+  List<(ExerciseTemplate, CustomExerciseEntry?)> get _allItems {
+    final items = <(ExerciseTemplate, CustomExerciseEntry?)>[
+      for (final t in _builtIn) (t, null),
+      for (final e in _entries) (e.template, e),
+    ].where((item) {
+      final t = item.$1;
+      final matchGroup =
+          _selectedGroup == 'all' || t.muscleGroup == _selectedGroup;
+      return matchGroup && _matchesQuery(t);
+    }).toList();
+    final lang = context.locale.languageCode;
+    final names = {for (final item in items) item.$1.id: _nameOf(item.$1)};
+    items.sort((a, b) => ExerciseCatalogService.compareNames(
+        names[a.$1.id]!, names[b.$1.id]!, lang));
+    return items;
+  }
+
+  // «Мои»: порядок из сервиса (самые используемые сверху)
+  List<CustomExerciseEntry> get _mineItems =>
+      _entries.where((e) => _matchesQuery(e.template)).toList();
 
   // «Грудь · Тренировки: 12 · Программы: 2» / «— · Не используется»
   String _subtitleOf(CustomExerciseEntry entry) {
-    final group = entry.template.muscleGroup;
-    final groupText = group.isNotEmpty ? 'workout.muscle_$group'.tr() : '—';
+    final groupText = _groupText(entry.template.muscleGroup);
     final usage = entry.usage;
     if (!usage.isUsed) return '$groupText · ${'my_exercises.not_used'.tr()}';
     return '$groupText · ${'my_exercises.usage'.tr(namedArgs: {
@@ -69,55 +135,176 @@ class _MyExercisesPageState extends State<MyExercisesPage> {
       body: SafeArea(
         child: Column(
           children: [
-            PageHeader(
-              title: 'my_exercises.title'.tr(),
-              subtitle: _isLoading || _entries.isEmpty
-                  ? null
-                  : 'my_exercises.count'
-                      .tr(namedArgs: {'count': '${_entries.length}'}),
-            ),
-            const SizedBox(height: 8),
+            PageHeader(title: 'exercise_library.title'.tr()),
+            if (!_isLoading) ...[
+              SegmentedTabSwitch(
+                options: [
+                  SegmentedTabOption('exercise_library.tab_all'.tr(namedArgs: {
+                    'count': '${_builtIn.length + _entries.length}',
+                  })),
+                  SegmentedTabOption('exercise_library.tab_mine'
+                      .tr(namedArgs: {'count': '${_entries.length}'})),
+                ],
+                selectedIndex: _tab.index,
+                onSelected: (index) =>
+                    setState(() => _tab = _LibraryTab.values[index]),
+              ),
+              AppSearchField(
+                controller: _searchController,
+                hintText: 'exercise_library.search_hint'.tr(),
+              ),
+              const SizedBox(height: 10),
+              if (_tab == _LibraryTab.all) ...[
+                MuscleGroupChips(
+                  selected: _selectedGroup,
+                  onSelected: (key) => setState(() => _selectedGroup = key),
+                ),
+                const SizedBox(height: 10),
+              ],
+            ],
             Expanded(
               child: _isLoading
                   ? const Center(
                       child: CircularProgressIndicator(color: AppColors.accent))
-                  : _entries.isEmpty
-                      ? _buildEmpty()
-                      : ListView.builder(
-                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                          itemCount: _entries.length,
-                          itemBuilder: (context, index) =>
-                              _buildItem(_entries[index]),
-                        ),
+                  : _tab == _LibraryTab.all
+                      ? _buildAllList()
+                      : _buildMineList(),
             ),
+            // Под списком, а не поверх — последний элемент не закрывается
+            if (!_isLoading && _tab == _LibraryTab.mine)
+              BottomActionButton(
+                icon: Icons.add,
+                label: 'exercise_library.new_exercise'.tr(),
+                onPressed: _createExercise,
+              ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildMuscleIcon(String group) {
-    return Container(
-      width: 36,
-      height: 36,
-      decoration: BoxDecoration(
-        color: AppColors.accent.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: group.isNotEmpty
-          ? Image.asset(
-              'assets/images/muscles/$group.png',
-              width: 24,
-              height: 24,
-              errorBuilder: (_, __, ___) => const Icon(Icons.fitness_center,
-                  color: AppColors.accent, size: 18),
-            )
-          : const Icon(Icons.fitness_center,
-              color: AppColors.accent, size: 18),
+  // Ключ — у каждой вкладки своя прокрутка (после переключения список сверху)
+  Widget _buildAllList() {
+    final items = _allItems;
+    if (items.isEmpty) return _buildNothingFound();
+    return ListView.builder(
+      key: const ValueKey(_LibraryTab.all),
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      itemCount: items.length,
+      itemBuilder: (context, index) =>
+          _buildLibraryItem(items[index].$1, items[index].$2),
     );
   }
 
-  Widget _buildItem(CustomExerciseEntry entry) {
+  Widget _buildMineList() {
+    if (_entries.isEmpty) return _buildEmpty();
+    final items = _mineItems;
+    if (items.isEmpty) return _buildNothingFound();
+    return ListView.builder(
+      key: const ValueKey(_LibraryTab.mine),
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      itemCount: items.length,
+      itemBuilder: (context, index) => _buildMineItem(items[index]),
+    );
+  }
+
+  // Слева в строке «Все»: миниатюра у встроенного (если включены и есть кадр),
+  // иначе значок группы мышц. С миниатюрами место одной ширины — названия
+  // встроенных и своих начинаются ровно.
+  Widget _buildLeading(ExerciseTemplate t, {required bool isCustom}) {
+    final icon = MuscleGroupIcon(group: t.muscleGroup);
+    if (!kShowExerciseThumbnails) return icon;
+    final paths = isCustom ? null : ExerciseImageService().imagePaths(id: t.id);
+    return SizedBox(
+      width: 44,
+      child: paths == null
+          ? Center(child: icon)
+          : ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+              child: Image.asset(
+                paths[0],
+                width: 44,
+                height: 30,
+                fit: BoxFit.cover,
+                // Декодируем в размере миниатюры, а не всего кадра
+                cacheWidth:
+                    (44 * MediaQuery.devicePixelRatioOf(context)).round(),
+                errorBuilder: (_, __, ___) => Center(child: icon),
+              ),
+            ),
+    );
+  }
+
+  // Строка вкладки «Все». Встроенное — нажатие / ⓘ открывает демо;
+  // своё — метка «СВОЁ», нажатие открывает меню действий, как в «Мои».
+  Widget _buildLibraryItem(ExerciseTemplate t, CustomExerciseEntry? entry) {
+    final isCustom = entry != null;
+    final name = _nameOf(t);
+    return GestureDetector(
+      onTap: () => isCustom ? _showActions(entry) : _openDemo(t),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.fromLTRB(14, 10, 8, 10),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            _buildLeading(t, isCustom: isCustom),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    name,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    _groupText(t.muscleGroup),
+                    style: const TextStyle(
+                        color: AppColors.textMuted, fontSize: 11),
+                  ),
+                ],
+              ),
+            ),
+            // Та же высота, что у ⓘ — строки одной высоты
+            if (isCustom)
+              SizedBox(
+                height: 40,
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 8, right: 6),
+                  child: Center(
+                    child: AppBadge(
+                      label: 'exercise_library.custom_badge'.tr(),
+                      color: AppColors.program,
+                    ),
+                  ),
+                ),
+              )
+            else
+              ExerciseInfoButton(templateId: t.id, name: name),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _openDemo(ExerciseTemplate t) {
+    final template = ExerciseImageService().findTemplate(id: t.id);
+    if (template != null) showExerciseDemoSheet(context, template);
+  }
+
+  // Строка вкладки «Мои»: группа и использование, меню действий
+  Widget _buildMineItem(CustomExerciseEntry entry) {
     return GestureDetector(
       onTap: () => _showActions(entry),
       child: Container(
@@ -129,7 +316,7 @@ class _MyExercisesPageState extends State<MyExercisesPage> {
         ),
         child: Row(
           children: [
-            _buildMuscleIcon(entry.template.muscleGroup),
+            MuscleGroupIcon(group: entry.template.muscleGroup),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -137,6 +324,8 @@ class _MyExercisesPageState extends State<MyExercisesPage> {
                 children: [
                   Text(
                     _nameOf(entry.template),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 14,
@@ -159,31 +348,65 @@ class _MyExercisesPageState extends State<MyExercisesPage> {
     );
   }
 
+  // Своих упражнений нет (кнопка «Новое упражнение» — внизу экрана)
   Widget _buildEmpty() {
-    return Center(
-      child: Padding(
+    return _buildMessage(
+      icon: Icons.fitness_center,
+      title: 'my_exercises.empty'.tr(),
+      hint: 'my_exercises.empty_hint'.tr(),
+    );
+  }
+
+  Widget _buildNothingFound() {
+    return _buildMessage(
+      icon: Icons.search_off,
+      title: 'exercise_library.nothing_found'.tr(),
+    );
+  }
+
+  // Прокручивается — на низком экране с клавиатурой не переполняется
+  Widget _buildMessage(
+      {required IconData icon, required String title, String? hint}) {
+    return LayoutBuilder(
+      builder: (context, constraints) => SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.fitness_center,
-                color: AppColors.textMuted, size: 48),
-            const SizedBox(height: 12),
-            Text(
-              'my_exercises.empty'.tr(),
-              textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.white, fontSize: 15),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              'my_exercises.empty_hint'.tr(),
-              textAlign: TextAlign.center,
-              style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
-            ),
-          ],
+        child: ConstrainedBox(
+          constraints: BoxConstraints(minHeight: constraints.maxHeight),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, color: AppColors.textMuted, size: 48),
+              const SizedBox(height: 12),
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Colors.white, fontSize: 15),
+              ),
+              if (hint != null) ...[
+                const SizedBox(height: 6),
+                Text(
+                  hint,
+                  textAlign: TextAlign.center,
+                  style:
+                      const TextStyle(color: AppColors.textMuted, fontSize: 13),
+                ),
+              ],
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  // Новое упражнение: остаёмся на «Моих», поиск сбрасываем, чтобы
+  // новое упражнение было видно в списке
+  Future<void> _createExercise() async {
+    final result = await showNewExerciseDialog(context);
+    if (result == null || !mounted) return;
+    _searchController.clear();
+    setState(() => _tab = _LibraryTab.mine);
+    await _load();
+    if (mounted) _showSnack('exercise_library.added'.tr());
   }
 
   // Нижнее меню действий; выбранное действие выполняем после закрытия меню
@@ -193,7 +416,7 @@ class _MyExercisesPageState extends State<MyExercisesPage> {
       context: context,
       builder: (sheetContext) => [
         AppSheetHeader(
-          leading: _buildMuscleIcon(entry.template.muscleGroup),
+          leading: MuscleGroupIcon(group: entry.template.muscleGroup),
           title: _nameOf(entry.template),
           bottom: Text(
             _subtitleOf(entry),
@@ -406,7 +629,7 @@ class _MyExercisesPageState extends State<MyExercisesPage> {
             final isSelected = key == current;
             return ListTile(
               contentPadding: EdgeInsets.zero,
-              leading: _buildMuscleIcon(key),
+              leading: MuscleGroupIcon(group: key),
               title: Text(
                 'workout.muscle_$key'.tr(),
                 style: TextStyle(

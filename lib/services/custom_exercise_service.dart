@@ -226,6 +226,30 @@ class CustomExerciseService {
     return existingId == null || existingId == id ? null : existingId;
   }
 
+  // Проверить название нового упражнения: null — можно создать, 'empty' —
+  // пустое, иначе id упражнения с таким же названием (встроенного на любом
+  // языке или своего). Скрытый дубликат встроенного называется как встроенное,
+  // поэтому находится как само встроенное (встроенные выигрывают в каталоге).
+  String? createConflict(String name) {
+    if (ExerciseCatalogService.normalize(name).isEmpty) return 'empty';
+    return ExerciseCatalogService().idForName(name);
+  }
+
+  // Создать своё упражнение (название одно на всех трёх языках).
+  // Проверку createConflict делает диалог до вызова.
+  Future<ExerciseTemplate> create({
+    required String name,
+    String muscleGroup = '',
+  }) {
+    final trimmed = name.trim();
+    return _library.addCustomExercise(
+      nameRu: trimmed,
+      nameLv: trimmed,
+      nameEn: trimmed,
+      muscleGroup: muscleGroup,
+    );
+  }
+
   // Переименовать своё упражнение: все три названия в библиотеке и
   // сохранённые названия упражнений тренировок и программ с этим id.
   Future<void> rename(String id, String newName) async {

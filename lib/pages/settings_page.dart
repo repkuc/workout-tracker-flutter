@@ -5,7 +5,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../theme/app_colors.dart';
 import '../widgets/tab_header.dart';
-import 'my_exercises_page.dart';
+import 'exercise_library_page.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -60,12 +60,12 @@ class _SettingsPageState extends State<SettingsPage> {
                       _buildActionItem(
                         icon: Icons.fitness_center,
                         color: AppColors.accent,
-                        title: 'my_exercises.title'.tr(),
-                        subtitle: 'settings.my_exercises_subtitle'.tr(),
+                        title: 'exercise_library.title'.tr(),
+                        subtitle: 'settings.exercise_library_subtitle'.tr(),
                         onTap: () => Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => const MyExercisesPage()),
+                              builder: (context) => const ExerciseLibraryPage()),
                         ),
                       ),
                     ]),

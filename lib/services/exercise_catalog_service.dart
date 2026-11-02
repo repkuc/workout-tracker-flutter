@@ -58,6 +58,30 @@ class ExerciseCatalogService {
       .toLowerCase()
       .replaceAll('ё', 'е');
 
+  // Латышские буквы с диакритикой идут сразу после своей основной буквы
+  // (a ā b c č … s š t … z ž); остальные символы — по коду.
+  static const Map<String, double> _lvLetterRank = {
+    'ā': 97.5, 'č': 99.5, 'ē': 101.5, 'ģ': 103.5, 'ī': 105.5, 'ķ': 107.5,
+    'ļ': 108.5, 'ņ': 110.5, 'š': 115.5, 'ū': 117.5, 'ž': 122.5,
+  };
+
+  // Сравнить названия для сортировки по алфавиту на языке languageCode:
+  // по нормализованному названию (регистр, «ё» = «е»); для lv — в латышском
+  // порядке букв. Использовать везде, где упражнения сортируются по названию.
+  static int compareNames(String a, String b, String languageCode) {
+    final x = normalize(a);
+    final y = normalize(b);
+    if (languageCode != 'lv') return x.compareTo(y);
+    final xs = x.runes.toList();
+    final ys = y.runes.toList();
+    for (var i = 0; i < xs.length && i < ys.length; i++) {
+      final rx = _lvLetterRank[String.fromCharCode(xs[i])] ?? xs[i].toDouble();
+      final ry = _lvLetterRank[String.fromCharCode(ys[i])] ?? ys[i].toDouble();
+      if (rx != ry) return rx.compareTo(ry);
+    }
+    return xs.length.compareTo(ys.length);
+  }
+
   // Нормализованные названия шаблона на всех трёх языках (без пустых)
   static Set<String> namesOf(ExerciseTemplate template) => {
         for (final name in [template.nameRu, template.nameLv, template.nameEn])

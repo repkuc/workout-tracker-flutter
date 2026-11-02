@@ -56,7 +56,7 @@
     "add_exercise_dialog_title": "Добавить упражнение",
     "exercise_name_hint": "Например: Жим лёжа",
     "exercise_name_required": "Введите название упражнения",
-    "exercise_already_in_library": "Это упражнение уже есть в библиотеке: {name}",
+    "exercise_already_in_library_added": "«{name}» уже есть в библиотеке — добавлено",
     "add_set_button": "Добавить подход",
     "add_set_dialog_title": "Добавить подход",
     "reps_hint": "Например: 10",
@@ -211,7 +211,7 @@
   "donate_subtitle": "Поддержать разработку приложения",
   "exercise_photos_credit": "Фото упражнений: free-exercise-db (общественное достояние)",
   "exercises": "Упражнения",
-  "my_exercises_subtitle": "Объединить, переименовать и удалить свои упражнения"
+  "exercise_library_subtitle": "Встроенные и свои упражнения"
 },
 "calendar": {
   "mon": "Пн",
@@ -305,12 +305,10 @@
   "show": "Как выполнять"
 },
 "my_exercises": {
-  "title": "Мои упражнения",
-  "count": "Упражнений: {count}",
   "usage": "Тренировки: {workouts} · Программы: {programs}",
   "not_used": "Не используется",
   "empty": "Своих упражнений пока нет",
-  "empty_hint": "Здесь появятся упражнения, которые вы добавите сами в библиотеке упражнений.",
+  "empty_hint": "Создайте своё упражнение кнопкой ниже.",
   "merge": "Объединить с…",
   "merge_into_title": "Объединить с…",
   "merge_confirm_title": "Объединить упражнения?",
@@ -330,6 +328,20 @@
   "delete_confirm_title": "Удалить упражнение?",
   "delete_confirm_message": "«{name}» будет удалено из библиотеки.",
   "deleted": "Упражнение удалено"
+},
+"exercise_library": {
+  "title": "Библиотека упражнений",
+  "tab_all": "Все ({count})",
+  "tab_mine": "Мои ({count})",
+  "search_hint": "Поиск упражнения",
+  "clear_search": "Очистить поиск",
+  "nothing_found": "Ничего не найдено",
+  "custom_badge": "СВОЁ",
+  "new_exercise": "Новое упражнение",
+  "create": "Создать",
+  "muscle_group": "Группа мышц",
+  "already_exists": "Такое упражнение уже есть в библиотеке",
+  "added": "Упражнение добавлено"
 }
 
 }

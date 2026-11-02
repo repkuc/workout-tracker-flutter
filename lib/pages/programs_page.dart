@@ -19,6 +19,9 @@ import 'create_program_page.dart';
 // Подключаем экран деталей программы, чтобы можно было на него перейти.
 import 'program_details_page.dart';
 import '../theme/app_colors.dart';
+import '../widgets/app_badge.dart';
+import '../widgets/bottom_action_button.dart';
+import '../widgets/segmented_tab_switch.dart';
 import '../widgets/tab_header.dart';
 import '../widgets/weekday_selector.dart';
 
@@ -210,84 +213,18 @@ class _ProgramsPageState extends State<ProgramsPage> {
 
   // Переключатель вкладок «Мои (N) | Готовые (N)».
   Widget _buildTabSwitch() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-      child: Row(
-        children: [
-          Expanded(
-            child: _buildTabOption(
-              _ProgramsTab.my,
-              'programs.tab_my'
-                  .tr(namedArgs: {'count': '${_programs.length}'}),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: _buildTabOption(
-              _ProgramsTab.builtin,
-              'programs.tab_builtin'
-                  .tr(namedArgs: {'count': '${_builtinPrograms.length}'}),
-              showDot: _hasUnseenBuiltin,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Одна половина переключателя — в стиле чипов дней недели.
-  // showDot — оранжевая точка «есть новое».
-  Widget _buildTabOption(_ProgramsTab tab, String label,
-      {bool showDot = false}) {
-    final selected = _tab == tab;
-    return Semantics(
-      button: true,
-      selected: selected,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () => _selectTab(tab),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 120),
-          height: 40,
-          alignment: Alignment.center,
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          decoration: BoxDecoration(
-            color: selected ? AppColors.accent : AppColors.surface,
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(
-              color: selected ? AppColors.accent : AppColors.chipBorder,
-            ),
-          ),
-          // Длинная подпись уменьшается, а не переносится
-          child: FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  label,
-                  style: TextStyle(
-                    color: selected ? Colors.white : AppColors.inactive,
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                if (showDot) ...[
-                  const SizedBox(width: 6),
-                  Container(
-                    width: 8,
-                    height: 8,
-                    decoration: BoxDecoration(
-                      color: selected ? Colors.white : AppColors.accent,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
+    return SegmentedTabSwitch(
+      options: [
+        SegmentedTabOption(
+            'programs.tab_my'.tr(namedArgs: {'count': '${_programs.length}'})),
+        SegmentedTabOption(
+          'programs.tab_builtin'
+              .tr(namedArgs: {'count': '${_builtinPrograms.length}'}),
+          showDot: _hasUnseenBuiltin,
         ),
-      ),
+      ],
+      selectedIndex: _tab.index,
+      onSelected: (index) => _selectTab(_ProgramsTab.values[index]),
     );
   }
 
@@ -432,22 +369,9 @@ class _ProgramsPageState extends State<ProgramsPage> {
                     ),
                   ),
                 ),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: AppColors.accent.withValues(alpha: 0.15),
-                    border: Border.all(color: AppColors.accent),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    'programs.builtin_badge'.tr(),
-                    style: const TextStyle(
-                      color: AppColors.accent,
-                      fontSize: 9,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                AppBadge(
+                  label: 'programs.builtin_badge'.tr(),
+                  color: AppColors.accent,
                 ),
               ],
             ),
@@ -533,22 +457,9 @@ class _ProgramsPageState extends State<ProgramsPage> {
                   ),
                 ),
                 if (program.isCustom)
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: AppColors.program.withOpacity(0.15),
-                      border: Border.all(color: AppColors.program),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Text(
-                      'programs.custom_badge'.tr(),
-                      style: const TextStyle(
-                        color: AppColors.program,
-                        fontSize: 9,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                  AppBadge(
+                    label: 'programs.custom_badge'.tr(),
+                    color: AppColors.program,
                   ),
               ],
             ),
@@ -627,41 +538,23 @@ class _ProgramsPageState extends State<ProgramsPage> {
 
   // Кнопка создания новой программы внизу экрана.
   Widget _buildCreateButton() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      child: SizedBox(
-        width: double.infinity,
-        child: ElevatedButton.icon(
-          //
-          onPressed: () async {
-            final countBefore = _programs.length;
-            await Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => const CreateProgramPage()),
-            );
-            // После возврата с экрана создания — перезагружаем список,
-            // чтобы новая программа сразу появилась; если её создали —
-            // переходим на «Мои» (она сверху как самая свежая).
-            await _loadPrograms();
-            if (mounted && _programs.length > countBefore) {
-              setState(() => _savedTab = _ProgramsTab.my);
-            }
-          },
-          icon: const Icon(Icons.add, size: 20),
-          label: Text(
-            'programs.create_program'.tr(),
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-          ),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.accent,
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          ),
-        ),
-      ),
+    return BottomActionButton(
+      icon: Icons.add,
+      label: 'programs.create_program'.tr(),
+      onPressed: () async {
+        final countBefore = _programs.length;
+        await Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const CreateProgramPage()),
+        );
+        // После возврата с экрана создания — перезагружаем список,
+        // чтобы новая программа сразу появилась; если её создали —
+        // переходим на «Мои» (она сверху как самая свежая).
+        await _loadPrograms();
+        if (mounted && _programs.length > countBefore) {
+          setState(() => _savedTab = _ProgramsTab.my);
+        }
+      },
     );
   }
 }

@@ -56,7 +56,7 @@
     "add_exercise_dialog_title": "Pievienot vingrinājumu",
     "exercise_name_hint": "Piemēram: Guļus spiešana",
     "exercise_name_required": "Ievadiet vingrinājuma nosaukumu",
-    "exercise_already_in_library": "Šis vingrinājums jau ir bibliotēkā: {name}",
+    "exercise_already_in_library_added": "«{name}» jau ir bibliotēkā — pievienots",
     "add_set_button": "Pievienot sēriju",
     "add_set_dialog_title": "Pievienot sēriju",
     "reps_hint": "Piemēram: 10",
@@ -211,7 +211,7 @@
   "donate_subtitle": "Atbalstīt lietotnes izstrādi",
   "exercise_photos_credit": "Vingrinājumu foto: free-exercise-db (publiskais domēns)",
   "exercises": "Vingrinājumi",
-  "my_exercises_subtitle": "Apvienot, pārdēvēt un dzēst savus vingrinājumus"
+  "exercise_library_subtitle": "Iebūvētie un savi vingrinājumi"
 },
 "calendar": {
   "mon": "P",
@@ -305,12 +305,10 @@
   "show": "Kā izpildīt"
 },
 "my_exercises": {
-  "title": "Mani vingrinājumi",
-  "count": "Vingrinājumi: {count}",
   "usage": "Treniņi: {workouts} · Programmas: {programs}",
   "not_used": "Netiek izmantots",
   "empty": "Savu vingrinājumu vēl nav",
-  "empty_hint": "Šeit parādīsies vingrinājumi, ko pats pievienosi vingrinājumu bibliotēkā.",
+  "empty_hint": "Izveidojiet savu vingrinājumu ar pogu zemāk.",
   "merge": "Apvienot ar…",
   "merge_into_title": "Apvienot ar…",
   "merge_confirm_title": "Apvienot vingrinājumus?",
@@ -330,6 +328,20 @@
   "delete_confirm_title": "Dzēst vingrinājumu?",
   "delete_confirm_message": "«{name}» tiks izņemts no bibliotēkas.",
   "deleted": "Vingrinājums dzēsts"
+},
+"exercise_library": {
+  "title": "Vingrinājumu bibliotēka",
+  "tab_all": "Visi ({count})",
+  "tab_mine": "Mani ({count})",
+  "search_hint": "Meklēt vingrinājumu",
+  "clear_search": "Notīrīt meklēšanu",
+  "nothing_found": "Nekas netika atrasts",
+  "custom_badge": "SAVS",
+  "new_exercise": "Jauns vingrinājums",
+  "create": "Izveidot",
+  "muscle_group": "Muskuļu grupa",
+  "already_exists": "Šāds vingrinājums jau ir bibliotēkā",
+  "added": "Vingrinājums pievienots"
 }
 
 }

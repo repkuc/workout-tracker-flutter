@@ -1338,7 +1338,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
 
 // Добавить упражнение из шаблона библиотеки.
 // alreadyInLibrary — введённое название уже было в библиотеке: показываем
-// одно сообщение об этом вместо «… добавлено!».
+// одно сообщение «… уже есть в библиотеке — добавлено» вместо «… добавлено!».
   Future<void> _addExerciseFromTemplate(ExerciseTemplate template,
       {bool alreadyInLibrary = false}) async {
     final lang = context.locale.languageCode;
@@ -1364,9 +1364,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
             content: Text(alreadyInLibrary
                 ? alreadyInLibraryText(context, template)
                 : '$name - ${'workout.add_exercise'.tr().toLowerCase()}!'),
-            backgroundColor: alreadyInLibrary
-                ? AppColors.snackbarNeutral
-                : AppColors.success,
+            backgroundColor: AppColors.success,
             margin: _snackBarMargin(),
           ),
         );
