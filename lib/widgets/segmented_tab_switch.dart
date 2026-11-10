@@ -12,22 +12,28 @@ class SegmentedTabOption {
 // Переключатель вкладок вверху экрана («Мои (N) | Готовые (N)»,
 // «Все (N) | Мои (N)») — половины в стиле чипов дней недели.
 // Длинная подпись уменьшается, а не переносится.
+// Внутри карточки: padding без боковых отступов и unselectedColor = surfaceInset
+// (иначе невыбранная половина сливается с фоном карточки).
 class SegmentedTabSwitch extends StatelessWidget {
   final List<SegmentedTabOption> options;
   final int selectedIndex;
   final ValueChanged<int> onSelected;
+  final EdgeInsetsGeometry padding;
+  final Color unselectedColor;
 
   const SegmentedTabSwitch({
     super.key,
     required this.options,
     required this.selectedIndex,
     required this.onSelected,
+    this.padding = const EdgeInsets.fromLTRB(16, 0, 16, 12),
+    this.unselectedColor = AppColors.surface,
   });
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+      padding: padding,
       child: Row(
         children: [
           for (var i = 0; i < options.length; i++) ...[
@@ -54,7 +60,7 @@ class SegmentedTabSwitch extends StatelessWidget {
           alignment: Alignment.center,
           padding: const EdgeInsets.symmetric(horizontal: 8),
           decoration: BoxDecoration(
-            color: selected ? AppColors.accent : AppColors.surface,
+            color: selected ? AppColors.accent : unselectedColor,
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
               color: selected ? AppColors.accent : AppColors.chipBorder,
