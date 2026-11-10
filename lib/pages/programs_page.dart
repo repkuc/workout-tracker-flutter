@@ -383,9 +383,10 @@ class _ProgramsPageState extends State<ProgramsPage> {
               }),
               style: const TextStyle(color: AppColors.textMuted, fontSize: 11),
             ),
+            // Дни недели — той же строкой, что и на карточках «Мои»
             if (program.scheduleDays.isNotEmpty) ...[
-              const SizedBox(height: 10),
-              ScheduleDayChips(days: program.scheduleDays),
+              const SizedBox(height: 4),
+              ScheduleDaysLine(days: program.scheduleDays),
             ],
           ],
         ),
@@ -467,18 +468,7 @@ class _ProgramsPageState extends State<ProgramsPage> {
             // Дни недели («Пн · Ср · Пт» / «Каждый день») — только если выбраны.
             if (program.scheduleDays.isNotEmpty) ...[
               const SizedBox(height: 4),
-              Row(
-                children: [
-                  const Icon(Icons.calendar_today,
-                      color: AppColors.textMuted, size: 12),
-                  const SizedBox(width: 4),
-                  Text(
-                    formatScheduleDays(program.scheduleDays),
-                    style:
-                        const TextStyle(color: AppColors.textMuted, fontSize: 11),
-                  ),
-                ],
-              ),
+              ScheduleDaysLine(days: program.scheduleDays),
             ],
 
             // Последняя тренировка программы — только если она была.

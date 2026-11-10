@@ -13,7 +13,35 @@ String formatScheduleDays(List<int> days) {
   return sorted.map(weekdayShortName).join(' · ');
 }
 
-// Дни программы маленькими чипами только для просмотра (готовые программы).
+// Дни программы одной строкой для карточек списка программ (Мои и Готовые):
+// иконка календаря + «Пн · Ср · Пт». Пусто — ничего.
+class ScheduleDaysLine extends StatelessWidget {
+  final List<int> days;
+
+  const ScheduleDaysLine({super.key, required this.days});
+
+  @override
+  Widget build(BuildContext context) {
+    context.locale; // подписка на смену языка
+    if (days.isEmpty) return const SizedBox.shrink();
+    return Row(
+      children: [
+        const Icon(Icons.calendar_today, color: AppColors.textMuted, size: 12),
+        const SizedBox(width: 4),
+        Expanded(
+          child: Text(
+            formatScheduleDays(days),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(color: AppColors.textMuted, fontSize: 11),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// Дни программы маленькими чипами только для просмотра (страница готовой программы).
 // Все 7 — один чип «Каждый день»; пусто — ничего.
 class ScheduleDayChips extends StatelessWidget {
   final List<int> days;
@@ -33,10 +61,11 @@ class ScheduleDayChips extends StatelessWidget {
       spacing: 4,
       runSpacing: 4,
       children: labels
+          // Без alignment у Container: с ним чип растягивается на всю ширину Wrap.
+          // Короткий текст центрируется через textAlign внутри minWidth.
           .map((label) => Container(
                 constraints: const BoxConstraints(minWidth: 28),
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                alignment: Alignment.center,
                 decoration: BoxDecoration(
                   color: AppColors.accent.withValues(alpha: 0.12),
                   border: Border.all(
@@ -45,6 +74,7 @@ class ScheduleDayChips extends StatelessWidget {
                 ),
                 child: Text(
                   label,
+                  textAlign: TextAlign.center,
                   style: const TextStyle(
                     color: AppColors.accent,
                     fontSize: 11,

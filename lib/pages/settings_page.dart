@@ -65,7 +65,8 @@ class _SettingsPageState extends State<SettingsPage> {
                         onTap: () => Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => const ExerciseLibraryPage()),
+                              builder: (context) =>
+                                  const ExerciseLibraryPage()),
                         ),
                       ),
                     ]),
@@ -129,10 +130,13 @@ class _SettingsPageState extends State<SettingsPage> {
                     ]),
                     const SizedBox(height: 20),
                     _buildSectionTitle('settings.support'.tr()),
-                    GestureDetector(
-                      onTap: _openDonateLink,
-                      child: Container(
-                        padding: const EdgeInsets.all(16),
+                    // Material + Ink + InkWell: нажимается весь баннер,
+                    // ripple рисуется поверх градиента и по скруглению.
+                    Material(
+                      color: Colors.transparent,
+                      borderRadius: BorderRadius.circular(14),
+                      clipBehavior: Clip.antiAlias,
+                      child: Ink(
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: [
@@ -140,46 +144,52 @@ class _SettingsPageState extends State<SettingsPage> {
                               AppColors.accent.withOpacity(0.7),
                             ],
                           ),
-                          borderRadius: BorderRadius.circular(14),
                         ),
-                        child: Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.2),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: const Text('☕',
-                                  style: TextStyle(fontSize: 22)),
-                            ),
-                            const SizedBox(width: 14),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'settings.donate_title'.tr(),
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                        child: InkWell(
+                          onTap: _openDonateLink,
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.2),
+                                    borderRadius: BorderRadius.circular(10),
                                   ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    'settings.donate_subtitle'.tr(),
-                                    style: TextStyle(
-                                      color: Colors.white.withOpacity(0.85),
-                                      fontSize: 12,
-                                    ),
+                                  child: const Text('☕',
+                                      style: TextStyle(fontSize: 22)),
+                                ),
+                                const SizedBox(width: 14),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'settings.donate_title'.tr(),
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        'settings.donate_subtitle'.tr(),
+                                        style: TextStyle(
+                                          color: Colors.white.withOpacity(0.85),
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ],
-                              ),
+                                ),
+                                const Icon(Icons.chevron_right,
+                                    color: Colors.white, size: 20),
+                              ],
                             ),
-                            const Icon(Icons.chevron_right,
-                                color: Colors.white, size: 20),
-                          ],
+                          ),
                         ),
                       ),
                     ),
@@ -240,11 +250,13 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
+  // Material (а не Container) — чтобы InkWell строк рисовал ripple,
+  // а clipBehavior обрезал его по скруглённым углам карточки.
   Widget _buildCard({required List<Widget> children}) {
-    return Container(
-      decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(14)),
+    return Material(
+      color: AppColors.surface,
+      borderRadius: BorderRadius.circular(14),
+      clipBehavior: Clip.antiAlias,
       child: Column(children: children),
     );
   }
@@ -257,7 +269,7 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget _buildLanguageItem(
       BuildContext context, String flag, String name, String code) {
     final isSelected = context.locale.languageCode == code;
-    return GestureDetector(
+    return InkWell(
       onTap: () => context.setLocale(Locale(code)),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -269,8 +281,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 child: Text(name,
                     style: const TextStyle(color: Colors.white, fontSize: 15))),
             if (isSelected)
-              const Icon(Icons.check_circle,
-                  color: AppColors.accent, size: 20),
+              const Icon(Icons.check_circle, color: AppColors.accent, size: 20),
           ],
         ),
       ),
@@ -283,7 +294,9 @@ class _SettingsPageState extends State<SettingsPage> {
       required String title,
       required String subtitle,
       required VoidCallback onTap}) {
-    return GestureDetector(
+    // InkWell ловит нажатие по всей строке (иконка, текст, пустое место,
+    // стрелка), а не только по нарисованным виджетам, как GestureDetector.
+    return InkWell(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -311,7 +324,8 @@ class _SettingsPageState extends State<SettingsPage> {
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right, color: AppColors.textMuted, size: 20),
+            const Icon(Icons.chevron_right,
+                color: AppColors.textMuted, size: 20),
           ],
         ),
       ),

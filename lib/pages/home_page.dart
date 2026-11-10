@@ -120,6 +120,15 @@ class _HomePageState extends State<HomePage> {
     return '${minutes}${'workout.minutes_short'.tr()}';
   }
 
+  // Заголовок календаря: именительный падеж месяца (LLLL, «Октябрь», а не «октября»)
+  // с заглавной буквы — в lv/ru месяцы пишутся со строчной.
+  String _monthHeader(BuildContext context) {
+    final text = DateFormat('LLLL yyyy', context.locale.languageCode)
+        .format(_calendarMonth);
+    if (text.isEmpty) return text;
+    return text[0].toUpperCase() + text.substring(1);
+  }
+
   String _formatVolume(double kg) {
     if (kg >= 1000)
       return '${(kg / 1000).toStringAsFixed(1)}${'workout.t'.tr()}';
@@ -394,8 +403,7 @@ class _HomePageState extends State<HomePage> {
                 }),
               ),
               Text(
-                DateFormat('MMMM yyyy', context.locale.languageCode)
-                    .format(_calendarMonth),
+                _monthHeader(context),
                 style: const TextStyle(
                     color: Colors.white,
                     fontSize: 13,

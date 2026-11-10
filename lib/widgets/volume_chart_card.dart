@@ -129,7 +129,7 @@ class _VolumeChartCardState extends State<VolumeChartCard> {
                   Text(
                     _isLoading
                         ? '...'
-                        : '${(_totalVolume / 1000).toStringAsFixed(1)}т',
+                        : '${(_totalVolume / 1000).toStringAsFixed(1)}${'workout.t'.tr()}',
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 22,
@@ -264,7 +264,7 @@ class _VolumeChartCardState extends State<VolumeChartCard> {
               reservedSize: 40,
               getTitlesWidget: (value, meta) {
                 return Text(
-                  '${(value / 1000).toStringAsFixed(1)}т',
+                  '${(value / 1000).toStringAsFixed(1)}${'workout.t'.tr()}',
                   style: const TextStyle(
                     color: AppColors.chartTextMuted,
                     fontSize: 10,

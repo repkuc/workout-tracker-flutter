@@ -529,79 +529,92 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
               ],
             ),
 
-            // Строка 2: таймер отдыха (всегда видна)
+            // Строка 2: таймер отдыха (всегда видна).
+            // Высота 48: у ✕ и чипсов зона нажатия на всю высоту строки.
+            // DecoratedBox (а не Container): рамка рисуется поверх и не уменьшает ✕.
             const SizedBox(height: 6),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              decoration: BoxDecoration(
-                color: _restSeconds > 0
-                    ? AppColors.restTimer.withOpacity(0.1)
-                    : AppColors.restTimer.withOpacity(0.05),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
+            SizedBox(
+              height: 48,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
                   color: _restSeconds > 0
-                      ? AppColors.restTimer
-                      : AppColors.restTimer.withOpacity(0.2),
-                  width: 1,
+                      ? AppColors.restTimer.withOpacity(0.1)
+                      : AppColors.restTimer.withOpacity(0.05),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: _restSeconds > 0
+                        ? AppColors.restTimer
+                        : AppColors.restTimer.withOpacity(0.2),
+                    width: 1,
+                  ),
                 ),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.bedtime,
-                      color: _restSeconds > 0
-                          ? AppColors.restTimer
-                          : AppColors.restTimer.withOpacity(0.4),
-                      size: 14),
-                  const SizedBox(width: 4),
-                  Text(
-                    'workout.rest_timer'.tr(),
-                    style: TextStyle(
-                      color: _restSeconds > 0
-                          ? AppColors.restTimer
-                          : AppColors.restTimer.withOpacity(0.4),
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1,
-                    ),
-                  ),
-                  if (_restSeconds > 0) ...[
-                    const SizedBox(width: 6),
-                    Text(
-                      _formatDuration(_restSeconds),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
-                        fontFeatures: [FontFeature.tabularFigures()],
+                child: Padding(
+                  // Справа отступ даёт сама кнопка ✕ (или 10, если её нет)
+                  padding: EdgeInsets.only(
+                      left: 10, right: _restSeconds > 0 ? 0 : 10),
+                  child: Row(
+                    children: [
+                      Icon(Icons.bedtime,
+                          color: _restSeconds > 0
+                              ? AppColors.restTimer
+                              : AppColors.restTimer.withOpacity(0.4),
+                          size: 14),
+                      const SizedBox(width: 4),
+                      Text(
+                        'workout.rest_timer'.tr(),
+                        style: TextStyle(
+                          color: _restSeconds > 0
+                              ? AppColors.restTimer
+                              : AppColors.restTimer.withOpacity(0.4),
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1,
+                        ),
                       ),
-                    ),
-                  ],
-                  const SizedBox(width: 6),
-                  // Чипсы
-                  Expanded(
-                    child: Row(
-                      children: [
-                        _buildRestChip(30, '30${'workout.seconds_short'.tr()}'),
-                        const SizedBox(width: 3),
-                        _buildRestChip(60, '1${'workout.minutes_short'.tr()}'),
-                        const SizedBox(width: 3),
-                        _buildRestChip(120, '2${'workout.minutes_short'.tr()}'),
-                        const SizedBox(width: 3),
-                        _buildRestChip(180, '3${'workout.minutes_short'.tr()}'),
-                        const SizedBox(width: 3),
-                        _buildRestChip(0, 'workout.rest_off'.tr()),
+                      if (_restSeconds > 0) ...[
+                        const SizedBox(width: 6),
+                        Text(
+                          _formatDuration(_restSeconds),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            fontFeatures: [FontFeature.tabularFigures()],
+                          ),
+                        ),
                       ],
-                    ),
+                      const SizedBox(width: 4),
+                      // Чипсы: занимают оставшуюся ширину и прокручиваются,
+                      // если не помещаются (узкий экран, длинное «выкл»).
+                      Expanded(
+                        child: _RestChipsStrip(
+                          children: [
+                            _buildRestChip(
+                                30, '30${'workout.seconds_short'.tr()}'),
+                            _buildRestChip(
+                                60, '1${'workout.minutes_short'.tr()}'),
+                            _buildRestChip(
+                                120, '2${'workout.minutes_short'.tr()}'),
+                            _buildRestChip(
+                                180, '3${'workout.minutes_short'.tr()}'),
+                            _buildRestChip(0, 'workout.rest_off'.tr()),
+                          ],
+                        ),
+                      ),
+                      if (_restSeconds > 0)
+                        IconButton(
+                          key: const ValueKey('rest_timer_close'),
+                          onPressed: _stopRestTimer,
+                          tooltip: 'workout.rest_stop'.tr(),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints.tightFor(
+                              width: 48, height: 48),
+                          icon: const Icon(Icons.close,
+                              color: AppColors.textMuted, size: 16),
+                        ),
+                    ],
                   ),
-                  if (_restSeconds > 0) ...[
-                    const SizedBox(width: 6),
-                    GestureDetector(
-                      onTap: _stopRestTimer,
-                      child: const Icon(Icons.close,
-                          color: AppColors.textMuted, size: 16),
-                    ),
-                  ],
-                ],
+                ),
               ),
             ),
           ], // ← Отступ между таймером и объёмом
@@ -1130,7 +1143,10 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
 
   Widget _buildRestChip(int seconds, String label) {
     final isSelected = _restDuration == seconds;
+    // Зона нажатия — вся высота строки таймера, промежутки между чипсами
+    // тоже входят в неё (horizontal padding вместо SizedBox).
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: () {
         setState(() => _restDuration = seconds);
         if (seconds == 0) {
@@ -1139,25 +1155,30 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
           _startRestTimer();
         }
       },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? AppColors.restTimer.withOpacity(0.2)
-              : AppColors.surfaceInset,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color:
-                isSelected ? AppColors.restTimer : AppColors.chipBorder,
-          ),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color:
-                isSelected ? AppColors.restTimer : AppColors.textMuted,
-            fontSize: 10,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 1.5),
+        child: Center(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+            decoration: BoxDecoration(
+              color: isSelected
+                  ? AppColors.restTimer.withOpacity(0.2)
+                  : AppColors.surfaceInset,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: isSelected ? AppColors.restTimer : AppColors.chipBorder,
+              ),
+            ),
+            child: Text(
+              label,
+              maxLines: 1,
+              softWrap: false,
+              style: TextStyle(
+                color: isSelected ? AppColors.restTimer : AppColors.textMuted,
+                fontSize: 10,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              ),
+            ),
           ),
         ),
       ),
@@ -2691,6 +2712,67 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
           ],
         ),
       ),
+    );
+  }
+}
+
+// Полоса чипсов таймера отдыха: прокрутка по горизонтали, если не помещается.
+// Пока есть что прокрутить, край плавно гаснет — видно, что чипсы
+// продолжаются, а не обрезаны.
+class _RestChipsStrip extends StatefulWidget {
+  final List<Widget> children;
+
+  const _RestChipsStrip({required this.children});
+
+  @override
+  State<_RestChipsStrip> createState() => _RestChipsStripState();
+}
+
+class _RestChipsStripState extends State<_RestChipsStrip> {
+  bool _fadeStart = false;
+  bool _fadeEnd = false;
+
+  bool _onMetrics(ScrollMetrics m) {
+    final start = m.pixels > m.minScrollExtent + 0.5;
+    final end = m.pixels < m.maxScrollExtent - 0.5;
+    if (start != _fadeStart || end != _fadeEnd) {
+      // Метрики приходят во время layout — обновляем после кадра
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {
+            _fadeStart = start;
+            _fadeEnd = end;
+          });
+        }
+      });
+    }
+    return false;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final scroll = NotificationListener<ScrollMetricsNotification>(
+      onNotification: (n) => _onMetrics(n.metrics),
+      child: NotificationListener<ScrollNotification>(
+        onNotification: (n) => _onMetrics(n.metrics),
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(children: widget.children),
+        ),
+      ),
+    );
+    return ShaderMask(
+      shaderCallback: (rect) => LinearGradient(
+        colors: [
+          _fadeStart ? Colors.transparent : Colors.black,
+          Colors.black,
+          Colors.black,
+          _fadeEnd ? Colors.transparent : Colors.black,
+        ],
+        stops: const [0, 0.1, 0.9, 1],
+      ).createShader(rect),
+      blendMode: BlendMode.dstIn,
+      child: scroll,
     );
   }
 }
