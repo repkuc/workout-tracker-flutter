@@ -136,7 +136,7 @@ class Workout {
   String? programWorkoutName; // Название тренировки в программе, если применимо
   // ID дня программы (ProgramWorkout.id). Связь с днём ищется по нему, а не по
   // названию — переименование дня не теряет историю. У старых тренировок null:
-  // для них остаётся поиск по programWorkoutName (см. getLastWorkoutForProgramDay).
+  // для них остаётся поиск по programWorkoutName (см. getLastWorkoutsForProgramDays).
   String? programWorkoutId;
   // Название самой программы на момент создания тренировки — сохраняем "снимок",
   // а не ищем программу заново по ID каждый раз. Так бейдж в истории останется

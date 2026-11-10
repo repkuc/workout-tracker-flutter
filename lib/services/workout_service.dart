@@ -5,6 +5,7 @@ import '../models/workout_models.dart'; // импорт моделей
 import '../models/program_models.dart';
 import 'package:flutter/foundation.dart';
 import 'exercise_catalog_service.dart';
+import 'exercise_library_service.dart';
 
 // Сервис для работы с тренировками (аналог workouts.js)
 class WorkoutService {
@@ -749,28 +750,126 @@ class WorkoutService {
     return w.programWorkoutName == dayName;
   }
 
-  // Найти последнюю завершённую тренировку конкретного дня программы
-  // (для «Последний раз» и источника подходов в «Повторить»).
-  Future<Workout?> getLastWorkoutForProgramDay(
-    String programId, {
-    required String dayId,
-    required String dayName,
-  }) async {
-    // getCompletedWorkouts() уже возвращает список отсортированный
-    // от новых к старым, поэтому первое совпадение и будет последним по времени.
+  // Последняя завершённая тренировка каждого дня программы (id дня → тренировка)
+  // для «Последний раз» и источника подходов в «Повторить».
+  // История читается ОДИН раз на все дни (раньше — заново на каждый день).
+  // День без тренировок в Map не попадает.
+  Future<Map<String, Workout>> getLastWorkoutsForProgramDays(
+      TrainingProgram program) async {
+    // getCompletedWorkouts() уже отсортирован от новых к старым,
+    // поэтому первое совпадение для дня и есть последнее по времени.
     final completed = await getCompletedWorkouts();
-
-    for (final w in completed) {
-      if (_belongsToProgramDay(w, programId, dayId, dayName)) return w;
+    final result = <String, Workout>{};
+    for (final day in program.workouts) {
+      for (final w in completed) {
+        if (_belongsToProgramDay(w, program.id, day.id, day.name)) {
+          result[day.id] = w;
+          break;
+        }
+      }
     }
-    // Если ни одна тренировка не подошла под условие — значит этот день
-    // программы ещё ни разу не выполнялся.
-    return null;
+    return result;
+  }
+
+  // id шаблона упражнения программы (если вдруг нет — ищем по названию)
+  String? _programExerciseTemplateId(ProgramExercise exercise) =>
+      exercise.templateId ?? ExerciseCatalogService().idForName(exercise.name);
+
+  // Ключ группы мышц для тренировки: из программы, иначе из шаблона
+  String? _programExerciseMuscleGroup(ProgramExercise exercise) {
+    if (ExerciseLibraryService.validGroups.contains(exercise.targetMuscle)) {
+      return exercise.targetMuscle;
+    }
+    final group = ExerciseCatalogService()
+            .templateById(_programExerciseTemplateId(exercise))
+            ?.muscleGroup ??
+        '';
+    return group.isEmpty ? null : group;
+  }
+
+  // Собрать в памяти тренировку по дню программы («Начать» / «Повторить»).
+  // Упражнения — из АКТУАЛЬНОГО шаблона дня (с планом-«снимком»). Если передан
+  // lastWorkout («Повторить») — у каждого упражнения, которое было в прошлой
+  // тренировке (по identityKey: id шаблона, иначе название на любом языке),
+  // копируются её подходы (вес и повторы), невыполненными.
+  // muscleText — переведённый текст группы мышц по ключу (снимок targetMuscle).
+  Workout buildProgramDayWorkout({
+    required TrainingProgram program,
+    required ProgramWorkout day,
+    Workout? lastWorkout,
+    required String Function(String muscleKey) muscleText,
+  }) {
+    final workout = Workout(
+      id: _uuid.v4(),
+      date: getTodayDate(),
+      name: day.name,
+      status: 'draft',
+      muscleGroups: [],
+      programId: program.id,
+      programWorkoutName: day.name,
+      programWorkoutId: day.id, // Связь с днём по ID — переживает переименование дня
+      programName: program.name, // «Снимок» названия программы
+      // Связь с прошлой тренировкой — для сравнения «было / стало» в редакторе
+      copiedFromWorkoutId: lastWorkout?.id,
+    );
+
+    final catalog = ExerciseCatalogService();
+    for (final templateExercise in day.exercises) {
+      final exercise = Exercise(
+        id: _uuid.v4(),
+        workoutId: workout.id,
+        name: templateExercise.name,
+        targetMuscle: templateExercise.targetMuscle.isNotEmpty
+            ? muscleText(templateExercise.targetMuscle)
+            : '',
+        templateId: _programExerciseTemplateId(templateExercise),
+        muscleGroup: _programExerciseMuscleGroup(templateExercise),
+        position: workout.exercises.length,
+        plannedSets: templateExercise.targetSets,
+        plannedRepsMin: templateExercise.repsMin,
+        plannedRepsMax: templateExercise.repsMax,
+      );
+
+      if (lastWorkout != null) {
+        // То же упражнение в прошлой тренировке — по id шаблона, а не по
+        // тексту названия: день мог быть собран на другом языке.
+        final key = catalog.identityKey(
+            templateId: templateExercise.templateId,
+            name: templateExercise.name);
+        for (final old in lastWorkout.exercises) {
+          if (catalog.identityKey(templateId: old.templateId, name: old.name) !=
+              key) {
+            continue;
+          }
+          for (final oldSet in old.sets) {
+            exercise.sets.add(WorkoutSet(
+              id: _uuid.v4(),
+              exerciseId: exercise.id,
+              reps: oldSet.reps,
+              weight: oldSet.weight,
+              isDone: false,
+            ));
+          }
+          break; // берём только первое совпадение, как раньше
+        }
+      }
+      workout.exercises.add(exercise);
+    }
+    return workout;
+  }
+
+  // Сохранить новую тренировку-черновик целиком: одно чтение и одна запись
+  // истории (а не по записи на каждое упражнение и подход), текущий черновик = она.
+  Future<void> saveNewDraft(Workout workout) async {
+    final workouts = await loadAllWorkouts();
+    workouts.add(workout);
+    await saveAllWorkouts(workouts);
+    await setCurrentWorkoutId(workout.id);
   }
 
   // Время последней тренировки каждой программы (id программы → время):
   // самая новая завершённая тренировка любого дня программы — та же привязка,
-  // что у getLastWorkoutForProgramDay (id дня, у старых — название).
+  // что у getLastWorkoutsForProgramDays (id дня, у старых — название).
   // Время = startedAt, без него — дата тренировки. Нигде не хранится,
   // считается заново (для сортировки «Моих» программ и строки на карточке).
   Future<Map<String, DateTime>> getLastWorkoutTimesForPrograms(

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 // Подключаем базовые виджеты Flutter.
 import 'package:flutter/material.dart';
 
@@ -10,8 +12,6 @@ import '../models/program_models.dart';
 // Подключаем сервис программ — чтобы заново загрузить программу по ID
 // (на случай если что-то изменилось, например через другой экран).
 import '../services/program_service.dart';
-import '../services/exercise_catalog_service.dart';
-import '../services/exercise_library_service.dart';
 
 // Подключаем сервис тренировок — он нам нужен чтобы создать
 // настоящую Workout на основе шаблона ProgramWorkout.
@@ -65,6 +65,13 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
   final Set<String> _expandedDayIds = {};
   // Описание программы раскрыто полностью (иначе — первые 2 строки).
   bool _descriptionExpanded = false;
+  // Идёт создание тренировки по «Начать» / «Повторить» — повторные нажатия
+  // игнорируются, пока не откроется редактор.
+  bool _creatingWorkout = false;
+  // День, на кнопке которого крутится индикатор. Ставится таймером только если
+  // создание идёт дольше 300 мс — на быстрых нажатиях индикатор не мелькает.
+  String? _spinnerDayId;
+  Timer? _spinnerTimer;
 
   @override
   void initState() {
@@ -89,22 +96,12 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
     // Для каждого дня программы ищем — была ли уже тренировка этого дня
     // внутри этой же программы (по ID дня, у старых тренировок — по названию).
     // Складываем результаты в Map для быстрого доступа при отрисовке карточек.
-    final Map<String, Workout> lastWorkouts = {};
-    if (program != null) {
-      for (final workout in program.workouts) {
-        final last = await _workoutService.getLastWorkoutForProgramDay(
-          program.id,
-          dayId: workout.id,
-          dayName: workout.name,
-        );
-        // Добавляем в Map только если действительно нашли прошлую тренировку —
-        // иначе для этого дня в Map не будет записи, и мы будем знать
-        // что нужно показать "Начать", а не "Повторить".
-        if (last != null) {
-          lastWorkouts[workout.id] = last;
-        }
-      }
-    }
+    // История читается один раз на все дни. Дня без прошлой тренировки
+    // в Map нет — значит показываем "Начать", а не "Повторить".
+    final Map<String, Workout> lastWorkouts = program == null
+        ? {}
+        : await _workoutService.getLastWorkoutsForProgramDays(program);
+    if (!mounted) return;
 
     setState(() {
       _program = program;
@@ -812,11 +809,18 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
               child: ElevatedButton.icon(
                 // Если уже есть история — запускаем "Повторить" с подтягиванием
                 // прошлых результатов, иначе просто "Начать" с нуля из шаблона.
-                onPressed: () => hasHistory
-                    ? _repeatWorkoutFromTemplate(workout, lastWorkout)
-                    : _startWorkoutFromTemplate(workout),
-                icon:
-                    Icon(hasHistory ? Icons.repeat : Icons.play_arrow, size: 18),
+                onPressed: () =>
+                    _createWorkoutFromDay(workout, lastWorkout),
+                // Индикатор вместо иконки, если создание затянулось (> 300 мс)
+                icon: _spinnerDayId == workout.id
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                            strokeWidth: 2, color: Colors.white),
+                      )
+                    : Icon(hasHistory ? Icons.repeat : Icons.play_arrow,
+                        size: 18),
                 label: Text(
                   hasHistory
                       ? 'workout.repeat_workout'.tr()
@@ -847,149 +851,51 @@ class _ProgramDetailsPageState extends State<ProgramDetailsPage> {
     return '${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year}';
   }
 
-  // id шаблона упражнения программы (если вдруг нет — ищем по названию)
-  String? _templateIdOf(ProgramExercise exercise) =>
-      exercise.templateId ?? ExerciseCatalogService().idForName(exercise.name);
-
-  // Ключ группы мышц для тренировки: из программы, иначе из шаблона
-  String? _muscleGroupOf(ProgramExercise exercise) {
-    if (ExerciseLibraryService.validGroups.contains(exercise.targetMuscle)) {
-      return exercise.targetMuscle;
-    }
-    final group = ExerciseCatalogService()
-            .templateById(_templateIdOf(exercise))
-            ?.muscleGroup ??
-        '';
-    return group.isEmpty ? null : group;
+  @override
+  void dispose() {
+    _spinnerTimer?.cancel();
+    super.dispose();
   }
 
-  // Начать тренировку с нуля по шаблону программы (когда истории ещё нет).
-  Future<void> _startWorkoutFromTemplate(ProgramWorkout template) async {
-    // Создаём новую тренировку, сразу указывая programId и название дня —
-    // это то самое связывание, которое мы добавили в модель Workout.
-    final workout = await _workoutService.createWorkout(
-      date: _workoutService.getTodayDate(),
-      name: template.name,
-      programId: _program!.id,
-      programWorkoutName: template.name,
-      programWorkoutId: template.id, // Связь с днём по ID — переживает переименование дня
-      programName: _program!.name, // Сохраняем "снимок" названия программы
-    );
+  // «Начать» (lastWorkout == null) или «Повторить» день программы.
+  // Тренировка собирается целиком в памяти (упражнения из АКТУАЛЬНОГО шаблона
+  // дня, план, у «Повторить» — подходы прошлой тренировки этого дня) и
+  // сохраняется ОДНОЙ записью. Раньше каждое упражнение и каждый подход
+  // сохранялись отдельно: ~30 перезаписей всей истории, и после каждой все
+  // вкладки перечитывали её заново — «Повторить» подвисал на ~2 с.
+  Future<void> _createWorkoutFromDay(
+      ProgramWorkout template, Workout? lastWorkout) async {
+    if (_creatingWorkout) return; // повторные нажатия, пока создаём
+    _creatingWorkout = true;
+    _spinnerTimer = Timer(const Duration(milliseconds: 300), () {
+      if (mounted) setState(() => _spinnerDayId = template.id);
+    });
 
-    // Добавляем каждое упражнение из шаблона, пока без подходов.
-    // План (подходы, повторы) копируем «снимком» — это цель на карточке упражнения.
-    for (final exercise in template.exercises) {
-      await _workoutService.addExercise(
-        workout.id,
-        name: exercise.name,
-        targetMuscle: exercise.targetMuscle.isNotEmpty
-            ? 'workout.muscle_${exercise.targetMuscle}'.tr()
-            : '',
-        templateId: _templateIdOf(exercise),
-        muscleGroup: _muscleGroupOf(exercise),
-        plannedSets: exercise.targetSets,
-        plannedRepsMin: exercise.repsMin,
-        plannedRepsMax: exercise.repsMax,
+    try {
+      final workout = _workoutService.buildProgramDayWorkout(
+        program: _program!,
+        day: template,
+        lastWorkout: lastWorkout,
+        muscleText: (key) => 'workout.muscle_$key'.tr(),
       );
-    }
+      await _workoutService.saveNewDraft(workout);
 
-    if (mounted) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => WorkoutEditorPage(workoutId: workout.id)),
-      ).then((_) => _loadProgram());
-      // .then() гарантированно сработает когда мы вернёмся с экрана
-      // редактора тренировки — надёжнее чем полагаться на didChangeDependencies,
-      // которое не всегда переигрывается при обычном Navigator.pop().
-    }
-  }
-
-  // Повторить тренировку: берём АКТУАЛЬНЫЙ список упражнений из шаблона программы
-
-  // Повторить тренировку: берём АКТУАЛЬНЫЙ список упражнений из шаблона программы
-  // (а не из старой тренировки), но для каждого упражнения — если это то же
-  // упражнение, что в прошлой тренировке (по identityKey: id шаблона, иначе
-  // название на любом языке) — подтягиваем оттуда подходы (вес и повторы),
-  // чтобы не вводить всё заново руками.
-  Future<void> _repeatWorkoutFromTemplate(
-    ProgramWorkout template,
-    Workout lastWorkout,
-  ) async {
-    // Создаём новую тренировку, снова помечая её как принадлежащую программе.
-    final workout = await _workoutService.createWorkout(
-      date: _workoutService.getTodayDate(),
-      name: template.name,
-      programId: _program!.id,
-      programWorkoutName: template.name,
-      programWorkoutId: template.id, // Связь с днём по ID — переживает переименование дня
-      programName: _program!.name, // Сохраняем "снимок" названия программы
-      // Сохраняем связь с прошлой тренировкой — это то же поле что
-      // используется в обычном copyWorkout(), нужно для сравнения
-      // "было / стало" на экране редактора (стрелочки прогресса).
-      copiedFromWorkoutId: lastWorkout.id,
-    );
-
-    // Идём по упражнениям из АКТУАЛЬНОГО шаблона программы, а не из старой тренировки.
-    // Это значит: если упражнение убрали из шаблона — оно не попадёт сюда.
-    // Если добавили новое — оно попадёт, просто без истории весов.
-    final catalog = ExerciseCatalogService();
-    for (final templateExercise in template.exercises) {
-      // Ищем в прошлой тренировке то же упражнение — по id шаблона, а не по
-      // тексту названия: день мог быть собран на другом языке.
-      final key = catalog.identityKey(
-          templateId: templateExercise.templateId, name: templateExercise.name);
-      Exercise? matchingOld;
-      try {
-        matchingOld = lastWorkout.exercises.firstWhere(
-          (e) => catalog.identityKey(templateId: e.templateId, name: e.name) == key,
-        );
-      } catch (e) {
-        // Совпадения нет — это новое упражнение в шаблоне, добавим его пустым.
-        matchingOld = null;
+      if (mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => WorkoutEditorPage(workoutId: workout.id)),
+        ).then((_) => _loadProgram());
+        // .then() гарантированно сработает когда мы вернёмся с экрана
+        // редактора тренировки — надёжнее чем полагаться на didChangeDependencies,
+        // которое не всегда переигрывается при обычном Navigator.pop().
       }
-
-      // Добавляем упражнение в новую тренировку вместе с планом из шаблона
-      // (цель на карточке; подходы не создаём — они подтягиваются ниже, как раньше).
-      await _workoutService.addExercise(
-        workout.id,
-        name: templateExercise.name,
-        targetMuscle: templateExercise.targetMuscle.isNotEmpty
-            ? 'workout.muscle_${templateExercise.targetMuscle}'.tr()
-            : '',
-        templateId: _templateIdOf(templateExercise),
-        muscleGroup: _muscleGroupOf(templateExercise),
-        plannedSets: templateExercise.targetSets,
-        plannedRepsMin: templateExercise.repsMin,
-        plannedRepsMax: templateExercise.repsMax,
-      );
-
-      // Если нашли совпадение по имени в прошлой тренировке — копируем
-      // все её подходы (вес и повторы), но делаем их невыполненными,
-      // чтобы пользователь заново отмечал прогресс сегодняшней тренировки.
-      if (matchingOld != null && matchingOld.sets.isNotEmpty) {
-        // Заново загружаем тренировку, чтобы получить ID только что
-        // добавленного упражнения (addExercise не возвращает сам объект).
-        final updatedWorkout = await _workoutService.getWorkout(workout.id);
-        final newExercise = updatedWorkout!.exercises.last;
-
-        for (final oldSet in matchingOld.sets) {
-          await _workoutService.addSet(
-            workout.id,
-            newExercise.id,
-            reps: oldSet.reps,
-            weight: oldSet.weight,
-          );
-        }
+    } finally {
+      _spinnerTimer?.cancel();
+      _creatingWorkout = false;
+      if (mounted && _spinnerDayId != null) {
+        setState(() => _spinnerDayId = null);
       }
-    }
-
-    if (mounted) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => WorkoutEditorPage(workoutId: workout.id)),
-      ).then((_) => _loadProgram());
     }
   }
 }
