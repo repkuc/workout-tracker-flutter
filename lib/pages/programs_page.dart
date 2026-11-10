@@ -72,13 +72,20 @@ class _ProgramsPageState extends State<ProgramsPage> {
     // Как только страница создаётся — сразу начинаем загружать программы.
     _loadPrograms();
     // Тренировки изменились (завершили, удалили, импорт) — пересортировать
-    WorkoutService().dataChanged.addListener(_loadPrograms);
+    WorkoutService().dataChanged.addListener(_onWorkoutDataChanged);
   }
 
   @override
   void dispose() {
-    WorkoutService().dataChanged.removeListener(_loadPrograms);
+    WorkoutService().dataChanged.removeListener(_onWorkoutDataChanged);
     super.dispose();
+  }
+
+  // Тренировки изменились: перечитываем, только если вкладка видна. Скрытая
+  // перечитает при показе (didUpdateWidget ниже) — без чтения истории на
+  // каждую отметку подхода в редакторе, открытом поверх.
+  void _onWorkoutDataChanged() {
+    if (mounted && widget.isActive) _loadPrograms();
   }
 
   // Вкладку «Программы» открыли — перезагрузить (свежесть могла измениться).

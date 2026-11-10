@@ -4,6 +4,7 @@ import 'package:fl_chart/fl_chart.dart';
 import '../services/workout_service.dart';
 import '../theme/app_colors.dart';
 import 'exercise_display.dart';
+import 'tab_visibility.dart';
 
 class ExerciseProgressCard extends StatefulWidget {
   final int? selectedDays;
@@ -17,7 +18,8 @@ class ExerciseProgressCard extends StatefulWidget {
   State<ExerciseProgressCard> createState() => _ExerciseProgressCardState();
 }
 
-class _ExerciseProgressCardState extends State<ExerciseProgressCard> {
+class _ExerciseProgressCardState extends State<ExerciseProgressCard>
+    with ReloadWhenVisible {
   final _workoutService = WorkoutService();
 
   // Все данные прогресса по ключу упражнения (WorkoutService.exerciseKey):
@@ -50,18 +52,18 @@ class _ExerciseProgressCardState extends State<ExerciseProgressCard> {
     super.initState();
     _loadData();
     // Данные тренировок изменились (например, в «Моих упражнениях») — перечитываем
-    _workoutService.dataChanged.addListener(_onDataChanged);
+    _workoutService.dataChanged.addListener(onWorkoutDataChanged);
   }
 
   @override
   void dispose() {
-    _workoutService.dataChanged.removeListener(_onDataChanged);
+    _workoutService.dataChanged.removeListener(onWorkoutDataChanged);
     super.dispose();
   }
 
-  void _onDataChanged() {
-    if (mounted) _loadData();
-  }
+  // Изменение данных: видимая вкладка перечитывает сразу, скрытая — при показе
+  @override
+  void reloadVisibleData() => _loadData(showSpinner: false);
 
   @override
   void didUpdateWidget(ExerciseProgressCard oldWidget) {
@@ -71,8 +73,8 @@ class _ExerciseProgressCardState extends State<ExerciseProgressCard> {
     }
   }
 
-  Future<void> _loadData() async {
-    setState(() => _isLoading = true);
+  Future<void> _loadData({bool showSpinner = true}) async {
+    if (showSpinner) setState(() => _isLoading = true);
 
     // Загружаем прогресс упражнений и топ-5
     final data = await _workoutService.getExerciseProgressByDate(

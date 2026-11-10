@@ -9,6 +9,7 @@ import 'workout_editor_page.dart';
 import '../theme/app_colors.dart';
 import '../widgets/app_bottom_sheet.dart';
 import '../widgets/app_dialog.dart';
+import '../widgets/tab_visibility.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -17,7 +18,7 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage> with ReloadWhenVisible {
   final _service = WorkoutService();
   final _bodyWeightService = BodyWeightService();
 
@@ -53,18 +54,22 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _loadData();
-    _service.dataChanged.addListener(_loadData);
+    _service.dataChanged.addListener(onWorkoutDataChanged);
   }
 
   @override
   void dispose() {
-    _service.dataChanged.removeListener(_loadData);
+    _service.dataChanged.removeListener(onWorkoutDataChanged);
     _newWorkoutNameController.dispose();
     super.dispose();
   }
 
-  Future<void> _loadData() async {
-    setState(() => _isLoading = true);
+  // Изменение данных: видимая вкладка перечитывает сразу, скрытая — при показе
+  @override
+  void reloadVisibleData() => _loadData(showSpinner: false);
+
+  Future<void> _loadData({bool showSpinner = true}) async {
+    if (showSpinner) setState(() => _isLoading = true);
     final workouts = await _service.getCompletedWorkouts();
     final draft = await _service.getDraftWorkout();
     final todayWeight = await _bodyWeightService.getTodayEntry();

@@ -9,6 +9,7 @@ import '../widgets/tab_header.dart';
 import '../widgets/exercise_display.dart';
 import '../widgets/exercise_info_button.dart';
 import '../widgets/segmented_tab_switch.dart';
+import '../widgets/tab_visibility.dart';
 
 class StatisticsPage extends StatefulWidget {
   const StatisticsPage({super.key});
@@ -105,7 +106,7 @@ class _OverviewTab extends StatefulWidget {
   State<_OverviewTab> createState() => _OverviewTabState();
 }
 
-class _OverviewTabState extends State<_OverviewTab> {
+class _OverviewTabState extends State<_OverviewTab> with ReloadWhenVisible {
   final _service = WorkoutService();
   bool _isLoading = true;
   int _selectedPeriodDays = 0;
@@ -130,21 +131,21 @@ class _OverviewTabState extends State<_OverviewTab> {
     super.initState();
     _loadStatistics();
     // Данные тренировок изменились (например, в «Моих упражнениях») — перечитываем
-    _service.dataChanged.addListener(_onDataChanged);
+    _service.dataChanged.addListener(onWorkoutDataChanged);
   }
 
   @override
   void dispose() {
-    _service.dataChanged.removeListener(_onDataChanged);
+    _service.dataChanged.removeListener(onWorkoutDataChanged);
     super.dispose();
   }
 
-  void _onDataChanged() {
-    if (mounted) _loadStatistics();
-  }
+  // Изменение данных: видимая вкладка перечитывает сразу, скрытая — при показе
+  @override
+  void reloadVisibleData() => _loadStatistics(showSpinner: false);
 
-  Future<void> _loadStatistics() async {
-    setState(() => _isLoading = true);
+  Future<void> _loadStatistics({bool showSpinner = true}) async {
+    if (showSpinner) setState(() => _isLoading = true);
 
     final allWorkouts = await _service.getCompletedWorkouts();
 

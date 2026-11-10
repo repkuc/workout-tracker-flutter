@@ -5,6 +5,7 @@ import '../services/workout_service.dart';
 import '../models/workout_models.dart';
 import '../pages/workout_editor_page.dart';
 import '../theme/app_colors.dart';
+import 'tab_visibility.dart';
 
 class ActiveWorkoutBanner extends StatefulWidget {
   const ActiveWorkoutBanner({super.key});
@@ -13,7 +14,8 @@ class ActiveWorkoutBanner extends StatefulWidget {
   State<ActiveWorkoutBanner> createState() => _ActiveWorkoutBannerState();
 }
 
-class _ActiveWorkoutBannerState extends State<ActiveWorkoutBanner> {
+class _ActiveWorkoutBannerState extends State<ActiveWorkoutBanner>
+    with ReloadWhenVisible {
   final _service = WorkoutService();
   Workout? _activeWorkout;
   Timer? _timer;
@@ -24,15 +26,20 @@ class _ActiveWorkoutBannerState extends State<ActiveWorkoutBanner> {
     super.initState();
     _loadActiveWorkout();
     // Слушаем изменения данных — обновляемся когда тренировка начинается/заканчивается
-    _service.dataChanged.addListener(_loadActiveWorkout);
+    _service.dataChanged.addListener(onWorkoutDataChanged);
   }
 
   @override
   void dispose() {
     _timer?.cancel();
-    _service.dataChanged.removeListener(_loadActiveWorkout);
+    _service.dataChanged.removeListener(onWorkoutDataChanged);
     super.dispose();
   }
+
+  // Изменение данных: баннер виден — перечитываем сразу; закрыт другим
+  // экраном (например, редактором) — один раз, когда снова виден
+  @override
+  void reloadVisibleData() => _loadActiveWorkout();
 
   Future<void> _loadActiveWorkout() async {
     final draft = await _service.getDraftWorkout();

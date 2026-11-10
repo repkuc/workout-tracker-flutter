@@ -558,22 +558,18 @@ class WorkoutService {
     return newWorkout;
   }
 
-  // Получить оригинальное упражнение (для сравнения при копировании)
-  Future<Exercise?> getOriginalExercise(String copiedFromExerciseId) async {
-    final workouts = await loadAllWorkouts();
-
-    // Ищем упражнение во всех тренировках
-    for (final workout in workouts) {
-      try {
-        final exercise =
-            workout.exercises.firstWhere((e) => e.id == copiedFromExerciseId);
-        return exercise;
-      } catch (e) {
-        // Продолжаем поиск
+  // Оригинальные упражнения (для сравнения «было / стало» в скопированной
+  // тренировке): id исходного упражнения → упражнение. История читается
+  // один раз на все id (раньше — заново на каждое упражнение). Не найденных нет в Map.
+  Future<Map<String, Exercise>> getOriginalExercises(Set<String> ids) async {
+    final result = <String, Exercise>{};
+    if (ids.isEmpty) return result;
+    for (final workout in await loadAllWorkouts()) {
+      for (final exercise in workout.exercises) {
+        if (ids.contains(exercise.id)) result.putIfAbsent(exercise.id, () => exercise);
       }
     }
-
-    return null; // Не найдено
+    return result;
   }
 
   // Получить сегодняшнюю дату в формате YYYY-MM-DD

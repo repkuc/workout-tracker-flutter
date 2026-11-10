@@ -3,6 +3,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../services/workout_service.dart';
 import '../theme/app_colors.dart';
+import 'tab_visibility.dart';
 
 class VolumeChartCard extends StatefulWidget {
   final int? selectedDays;
@@ -16,7 +17,8 @@ class VolumeChartCard extends StatefulWidget {
   State<VolumeChartCard> createState() => _VolumeChartCardState();
 }
 
-class _VolumeChartCardState extends State<VolumeChartCard> {
+class _VolumeChartCardState extends State<VolumeChartCard>
+    with ReloadWhenVisible {
   final _workoutService = WorkoutService();
 
   // Список записей: [{date, volume, name}, ...]
@@ -42,18 +44,18 @@ class _VolumeChartCardState extends State<VolumeChartCard> {
     super.initState();
     _loadData();
     // Данные тренировок изменились (например, в «Моих упражнениях») — перечитываем
-    _workoutService.dataChanged.addListener(_onDataChanged);
+    _workoutService.dataChanged.addListener(onWorkoutDataChanged);
   }
 
   @override
   void dispose() {
-    _workoutService.dataChanged.removeListener(_onDataChanged);
+    _workoutService.dataChanged.removeListener(onWorkoutDataChanged);
     super.dispose();
   }
 
-  void _onDataChanged() {
-    if (mounted) _loadData();
-  }
+  // Изменение данных: видимая вкладка перечитывает сразу, скрытая — при показе
+  @override
+  void reloadVisibleData() => _loadData(showSpinner: false);
 
   @override
   void didUpdateWidget(VolumeChartCard oldWidget) {
@@ -63,8 +65,8 @@ class _VolumeChartCardState extends State<VolumeChartCard> {
     }
   }
 
-  Future<void> _loadData() async {
-    setState(() => _isLoading = true);
+  Future<void> _loadData({bool showSpinner = true}) async {
+    if (showSpinner) setState(() => _isLoading = true);
 
     final data = await _workoutService.getVolumeByDateWithName(
       days: widget.selectedDays,

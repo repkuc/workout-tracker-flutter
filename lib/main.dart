@@ -9,6 +9,7 @@ import 'services/exercise_catalog_service.dart';
 import 'services/exercise_id_migration.dart';
 import 'services/builtin_exercise_merge.dart';
 import 'theme/app_colors.dart';
+import 'widgets/tab_visibility.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -120,6 +121,8 @@ class MyApp extends StatelessWidget {
         ),
         child: child!,
       ),
+      // MainPage узнаёт, что её закрыл другой экран (ленивые перезагрузки вкладок)
+      navigatorObservers: [appRouteObserver],
       home: const MainPage(),
     );
   }

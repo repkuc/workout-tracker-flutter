@@ -7,6 +7,7 @@ import 'workout_details_page.dart';
 import '../theme/app_colors.dart';
 import '../widgets/app_bottom_sheet.dart';
 import '../widgets/tab_header.dart';
+import '../widgets/tab_visibility.dart';
 
 class HistoryPage extends StatefulWidget {
   const HistoryPage({super.key});
@@ -15,7 +16,7 @@ class HistoryPage extends StatefulWidget {
   State<HistoryPage> createState() => _HistoryPageState();
 }
 
-class _HistoryPageState extends State<HistoryPage> {
+class _HistoryPageState extends State<HistoryPage> with ReloadWhenVisible {
   final _service = WorkoutService();
   List<Workout> _workouts = [];
   bool _isLoading = true;
@@ -35,14 +36,18 @@ class _HistoryPageState extends State<HistoryPage> {
   void initState() {
     super.initState();
     _loadWorkouts();
-    _service.dataChanged.addListener(_loadWorkouts);
+    _service.dataChanged.addListener(onWorkoutDataChanged);
   }
 
   @override
   void dispose() {
-    _service.dataChanged.removeListener(_loadWorkouts);
+    _service.dataChanged.removeListener(onWorkoutDataChanged);
     super.dispose();
   }
+
+  // Изменение данных: видимая вкладка перечитывает сразу, скрытая — при показе
+  @override
+  void reloadVisibleData() => _loadWorkouts();
 
   Future<void> _loadWorkouts() async {
     final completed = await _service.getCompletedWorkouts();

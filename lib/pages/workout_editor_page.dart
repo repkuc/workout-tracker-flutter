@@ -47,6 +47,12 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
   int _restDuration = 120; // Длительность паузы в секундах (например, 2 минуты)
   Timer? _restTimer; // Таймер для паузы
 
+  // Сохранения отметок подходов идут по очереди (каждое — чтение и запись всей
+  // истории): иначе быстрые нажатия перезаписали бы друг друга. Остальные
+  // изменения тренировки в редакторе сначала ждут эту очередь.
+  Future<void> _tickSaveChain = Future.value();
+  bool _autoStartingTimer = false; // автостарт таймера по первой отметке уже идёт
+
   // Ключ блока нижних кнопок — по нему узнаём его реальную высоту для отступа SnackBar
   final _bottomButtonsKey = GlobalKey();
 
@@ -91,17 +97,16 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
 
     final workout = await _service.getWorkout(widget.workoutId);
 
-    // Загружаем оригинальные упражнения для сравнения
+    // Загружаем оригинальные упражнения для сравнения (одно чтение истории на все)
     final originalExercises = <String, Exercise>{};
     if (workout != null) {
+      final originals = await _service.getOriginalExercises({
+        for (final e in workout.exercises)
+          if (e.copiedFromExerciseId != null) e.copiedFromExerciseId!
+      });
       for (final exercise in workout.exercises) {
-        if (exercise.copiedFromExerciseId != null) {
-          final original = await _service
-              .getOriginalExercise(exercise.copiedFromExerciseId!);
-          if (original != null) {
-            originalExercises[exercise.id] = original;
-          }
-        }
+        final original = originals[exercise.copiedFromExerciseId];
+        if (original != null) originalExercises[exercise.id] = original;
       }
     }
 
@@ -137,6 +142,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
 
   // Запустить таймер тренировки
   Future<void> _startTimer() async {
+    await _tickSaveChain; // сначала — несохранённые отметки подходов
     await _service.startWorkoutTimer(widget.workoutId);
     await _loadWorkout();
     _isPaused = false;
@@ -157,11 +163,13 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
   Future<void> _togglePause() async {
     if (_isPaused) {
       // Продолжаем
+      await _tickSaveChain; // сначала — несохранённые отметки подходов
       await _service.resumeWorkout(widget.workoutId);
       await _loadWorkout();
       setState(() => _isPaused = false);
     } else {
       // Пауза
+      await _tickSaveChain; // сначала — несохранённые отметки подходов
       await _service.pauseWorkout(widget.workoutId);
       setState(() => _isPaused = true);
     }
@@ -1231,11 +1239,32 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
       }
     }
 
-    await _service.toggleSetDone(widget.workoutId, exerciseId, setId, isDone);
+    // 1. Сразу показываем отметку — не ждём сохранения (раньше зелёный
+    //    появлялся только после записи и полной перезагрузки тренировки).
+    _setLocalSetDone(exerciseId, setId, isDone);
+
+    // Таймер отдыха — сразу, как и раньше при отметке
+    if (isDone) {
+      _startRestTimer();
+    } else {
+      _stopRestTimer();
+    }
+
+    // 2. Сохраняем сразу после кадра, по очереди с другими отметками.
+    final needsTimerStart = isDone && _workout?.startedAt == null;
+    final step = _tickSaveChain.then((_) => _saveSetDone(exerciseId, setId, isDone));
+    _tickSaveChain = step.then((_) {});
+    final saved = await step;
+    if (!mounted || !saved) return;
 
     // Автостарт таймера при первой отметке
-    if (isDone && _workout?.startedAt == null) {
-      await _startTimer();
+    if (needsTimerStart && _workout?.startedAt == null && !_autoStartingTimer) {
+      _autoStartingTimer = true;
+      try {
+        await _startTimer();
+      } finally {
+        _autoStartingTimer = false;
+      }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -1248,15 +1277,47 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
         );
       }
     }
+  }
 
-    // Запускаем таймер отдыха если подход выполнен
-    if (isDone) {
-      _startRestTimer();
-    } else {
-      _stopRestTimer();
+  // Поменять отметку подхода в показанной тренировке (без чтения хранилища)
+  void _setLocalSetDone(String exerciseId, String setId, bool isDone) {
+    for (final exercise in _workout?.exercises ?? const <Exercise>[]) {
+      if (exercise.id != exerciseId) continue;
+      for (final set in exercise.sets) {
+        if (set.id == setId) setState(() => set.isDone = isDone);
+      }
     }
+  }
 
-    await _loadWorkout();
+  // Сохранить отметку. Не получилось — вернуть отметку назад, показать ошибку.
+  // Возвращает true, если сохранено. Исключения наружу не бросает (очередь).
+  Future<bool> _saveSetDone(String exerciseId, String setId, bool isDone) async {
+    // Дать кадру с новой отметкой отрисоваться до чтения / записи истории
+    await WidgetsBinding.instance.endOfFrame;
+    Object? error;
+    bool saved = false;
+    try {
+      saved = await _service.toggleSetDone(
+          widget.workoutId, exerciseId, setId, isDone);
+    } catch (e) {
+      error = e;
+    }
+    if (saved) return true;
+    if (mounted) {
+      _setLocalSetDone(exerciseId, setId, !isDone);
+      if (isDone) _stopRestTimer();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(error != null
+              ? '${'workout.error'.tr()}: $error'
+              : 'workout.error'.tr()),
+          backgroundColor: AppColors.danger,
+          behavior: SnackBarBehavior.floating,
+          margin: _snackBarMargin(),
+        ),
+      );
+    }
+    return false;
   }
 
   // Показать диалог добавления подхода
@@ -1291,6 +1352,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
     final lastSet = exercise.sets.last;
 
     // Добавляем через сервис (передаём параметры напрямую)
+    await _tickSaveChain; // сначала — несохранённые отметки подходов
     await _service.addSet(
       widget.workoutId,
       exercise.id,
@@ -1321,6 +1383,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
     final reps = int.parse(_repsController.text.trim());
     final weight = _parseWeight(_weightController.text)!;
 
+    await _tickSaveChain; // сначала — несохранённые отметки подходов
     final success = await _service.addSet(
       widget.workoutId,
       exerciseId,
@@ -1368,6 +1431,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
         ? 'workout.muscle_${template.muscleGroup}'.tr()
         : '';
 
+    await _tickSaveChain; // сначала — несохранённые отметки подходов
     final success = await _service.addExercise(
       widget.workoutId,
       name: name,
@@ -1397,6 +1461,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
   Future<void> _toggleExerciseCompleted(Exercise exercise) async {
     final newStatus = !exercise.isCompleted;
 
+    await _tickSaveChain; // сначала — несохранённые отметки подходов
     final success = await _service.toggleExerciseCompleted(
       widget.workoutId,
       exercise.id,
@@ -1528,6 +1593,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
 
   // Удалить подход
   Future<void> _deleteSet(String exerciseId, String setId) async {
+    await _tickSaveChain; // сначала — несохранённые отметки подходов
     final success = await _service.removeSet(
       widget.workoutId,
       exerciseId,
@@ -1883,6 +1949,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
     final reps = int.parse(_repsController.text.trim());
     final weight = _parseWeight(_weightController.text)!;
 
+    await _tickSaveChain; // сначала — несохранённые отметки подходов
     final success = await _service.updateSet(
       widget.workoutId,
       exerciseId,
@@ -2517,6 +2584,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
 
 // Завершить тренировку
   Future<void> _finishWorkout() async {
+    await _tickSaveChain; // сначала — несохранённые отметки подходов
     final success = await _service.finishWorkout(widget.workoutId);
 
     if (success) {
@@ -2610,6 +2678,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
   Future<void> _updateWorkoutName() async {
     final name = _workoutNameController.text.trim();
 
+    await _tickSaveChain; // сначала — несохранённые отметки подходов
     final success = await _service.updateWorkoutMeta(
       widget.workoutId,
       name: name,
