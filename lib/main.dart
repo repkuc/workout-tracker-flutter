@@ -8,6 +8,7 @@ import 'services/exercise_image_service.dart';
 import 'services/exercise_catalog_service.dart';
 import 'services/exercise_id_migration.dart';
 import 'services/builtin_exercise_merge.dart';
+import 'services/review_prompt_service.dart';
 import 'theme/app_colors.dart';
 import 'widgets/tab_visibility.dart';
 
@@ -33,6 +34,10 @@ void main() async {
   // Свои упражнения с названием нового встроенного → объединить со встроенным
   // (только ещё не проверенные встроенные id; ошибок наружу не бросает)
   await BuiltinExerciseMerge().run();
+
+  // Просьба об оценке: при первом запуске с этой функцией пройденные рубежи
+  // (4 / 8 / 16 тренировок) отмечаются использованными; ошибок наружу не бросает
+  await ReviewPromptService().seedIfNeeded();
 
   // Заранее строим поиск демо-картинок упражнений, чтобы кнопка ⓘ сразу знала, показываться ли
   await ExerciseImageService().init();

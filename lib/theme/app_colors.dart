@@ -60,6 +60,7 @@ abstract final class AppColors {
   static const Color iconExport = Color(0xFF10B981);
   static const Color iconImport = Color(0xFF60A5FA);
   static const Color iconInfo = Color(0xFF818CF8);
+  static const Color iconRate = Color(0xFFFBBF24); // звезда «Оценить приложение»
 
   // ── Медали топа упражнений ──
   static const Color medalGold = Color(0xFFFFD700);

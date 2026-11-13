@@ -43,6 +43,7 @@ dependencies:
   vibration: ^2.0.0      # для вибрации при завершении отдыха
   audioplayers: ^6.0.0     # для звуковых уведомлений при завершении отдыха
   url_launcher: ^6.2.5    # для открытия ссылок в браузере
+  in_app_review: ^2.0.12   # окно оценки Google Play (In-App Review) и страница в магазине
 
 dev_dependencies:
   flutter_test:

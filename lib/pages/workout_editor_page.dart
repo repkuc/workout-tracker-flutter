@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../services/workout_service.dart';
+import '../services/review_prompt_service.dart';
 import '../models/workout_models.dart';
 import 'dart:async';
 import '../models/exercise_template.dart';
@@ -73,6 +74,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
   @override
   void initState() {
     super.initState();
+    ReviewPromptService().editorOpened(); // просьба об оценке — не в редакторе
     _loadWorkout();
   }
 
@@ -84,6 +86,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
     _timer?.cancel(); // Останавливаем таймер при уничтожении страницы
     _restTimer?.cancel();
     _audioPlayer.dispose();
+    ReviewPromptService().editorClosed();
     super.dispose();
   }
 
@@ -2622,6 +2625,9 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
         // Закрываем экран редактора и возвращаемся на главный экран
         Navigator.pop(context);
       }
+      // Рубеж 4 / 8 / 16 тренировок → окно оценки Google Play, через паузу,
+      // уже вне редактора (не ждём: редактор закрывается)
+      unawaited(ReviewPromptService().onWorkoutFinished());
     }
   }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../services/backup_service.dart';
+import '../services/review_prompt_service.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../theme/app_colors.dart';
@@ -193,6 +194,18 @@ class _SettingsPageState extends State<SettingsPage> {
                         ),
                       ),
                     ),
+                    const SizedBox(height: 8),
+                    // Оценить в Google Play: страница приложения в магазине
+                    // (без квоты, в отличие от окна In-App Review)
+                    _buildCard(children: [
+                      _buildActionItem(
+                        icon: Icons.star_rounded,
+                        color: AppColors.iconRate,
+                        title: 'settings.rate_app'.tr(),
+                        subtitle: '',
+                        onTap: () => ReviewPromptService().openStoreListing(),
+                      ),
+                    ]),
                     const SizedBox(height: 20),
                     _buildSectionTitle('settings.about'.tr()),
                     _buildCard(children: [
