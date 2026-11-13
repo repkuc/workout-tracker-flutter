@@ -108,6 +108,30 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
         final original = originals[exercise.copiedFromExerciseId];
         if (original != null) originalExercises[exercise.id] = original;
       }
+
+      // Старые черновики «Повторить» дня программы: до исправления у
+      // упражнений не было copiedFromExerciseId, только связь тренировки.
+      // Тогда ищем исходные упражнения в прошлой тренировке по identityKey
+      // (каждое — один раз). Только в памяти, в данные ничего не пишется.
+      if (workout.programId != null &&
+          workout.copiedFromWorkoutId != null &&
+          workout.exercises.every((e) => e.copiedFromExerciseId == null)) {
+        final source = await _service.getWorkout(workout.copiedFromWorkoutId!);
+        if (source != null) {
+          final used = <String>{};
+          for (final exercise in workout.exercises) {
+            final key = _service.exerciseKey(exercise);
+            for (final old in source.exercises) {
+              if (used.contains(old.id) || _service.exerciseKey(old) != key) {
+                continue;
+              }
+              used.add(old.id);
+              originalExercises[exercise.id] = old;
+              break;
+            }
+          }
+        }
+      }
     }
 
     setState(() {

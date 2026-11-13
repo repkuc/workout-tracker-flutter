@@ -810,6 +810,10 @@ class WorkoutService {
     );
 
     final catalog = ExerciseCatalogService();
+    // Упражнения прошлой тренировки, уже связанные через copiedFromExerciseId:
+    // одно и то же старое упражнение не связываем дважды (иначе его объём
+    // посчитался бы в «было» два раза, если упражнение стоит в дне дважды).
+    final linkedOldIds = <String>{};
     for (final templateExercise in day.exercises) {
       final exercise = Exercise(
         id: _uuid.v4(),
@@ -837,6 +841,10 @@ class WorkoutService {
               key) {
             continue;
           }
+          // Связь с упражнением прошлой тренировки — как в copyWorkout: по ней
+          // редактор показывает прошлый объём и разницу (у тренировки и у
+          // каждого упражнения). Новые в дне упражнения остаются без связи.
+          if (linkedOldIds.add(old.id)) exercise.copiedFromExerciseId = old.id;
           for (final oldSet in old.sets) {
             exercise.sets.add(WorkoutSet(
               id: _uuid.v4(),
