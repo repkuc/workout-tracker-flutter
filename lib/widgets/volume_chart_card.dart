@@ -1,9 +1,32 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../services/workout_service.dart';
 import '../theme/app_colors.dart';
+import 'chart_helpers.dart';
 import 'tab_visibility.dart';
+
+// Один столбик = одна завершённая тренировка (её цветом, по дате).
+// В видимое окно графика помещается не больше ОДНОГО ГОДА: 7д / 30д / Год и
+// «Все» с историей до года — всё на одном экране, ширина столбика — от ширины
+// и числа столбиков. «Все» дольше года — в окне последние 12 месяцев (тот же
+// размер столбиков, что у «Года»), более старые прокручиваются влево; только
+// тогда снизу полоса прокрутки. Открывается на самых новых справа.
+const int kVolumeWindowDays = 365;
+
+// Ширина столбика: ячейка (ширина окна / столбиков в окне) × 1 — соседние
+// касаются и сливаются в сплошную «лесенку»; при широкой ячейке (короткие
+// периоды, мало тренировок) — 75 % ячейки, чтобы был виден зазор.
+// Не тоньше kVolumeMinBarWidth (тогда столбики перекрываются, новые — сверху)
+// и не шире kVolumeMaxBarWidth.
+const double kVolumeMinBarWidth = 3;
+const double kVolumeMaxBarWidth = 10;
+const double kVolumeGapFromSlot = 8; // ячейка от 8 dp — с зазором
+
+const double _plotHeight = 128;
+const double _labelsHeight = 18;
 
 class VolumeChartCard extends StatefulWidget {
   final int? selectedDays;
@@ -25,6 +48,14 @@ class _VolumeChartCardState extends State<VolumeChartCard>
   List<Map<String, dynamic>> _data = [];
   double _totalVolume = 0;
   bool _isLoading = true;
+
+  // Горизонтальная прокрутка столбиков; после загрузки — к самым новым
+  final _scroll = ScrollController();
+  bool _scrollToEnd = true;
+
+  // Столбик под пальцем (подсказка рисуется своей, поверх окна графика,
+  // чтобы у краёв её не обрезала прокрутка)
+  int? _touchedIndex;
 
   // Цвета для разных тренировок
   final List<Color> _colors = [
@@ -50,6 +81,7 @@ class _VolumeChartCardState extends State<VolumeChartCard>
   @override
   void dispose() {
     _workoutService.dataChanged.removeListener(onWorkoutDataChanged);
+    _scroll.dispose();
     super.dispose();
   }
 
@@ -93,11 +125,13 @@ class _VolumeChartCardState extends State<VolumeChartCard>
       (sum, item) => sum + (item['volume'] as double),
     );
 
+    if (!mounted) return;
     setState(() {
       _data = data;
       _totalVolume = total;
       _nameColors = nameColors;
       _isLoading = false;
+      _scrollToEnd = true; // новые данные — снова к самым новым тренировкам
     });
   }
 
@@ -185,140 +219,401 @@ class _VolumeChartCardState extends State<VolumeChartCard>
           const SizedBox(height: 12),
 
           // График
-          SizedBox(
-            height: 150,
-            child: _isLoading
-                ? const Center(
-                    child: CircularProgressIndicator(
-                      color: AppColors.accent,
-                    ),
-                  )
-                : _data.isEmpty
-                    ? Center(
-                        child: Text(
-                          'progress.no_data'.tr(),
-                          style: const TextStyle(
-                            color: AppColors.chartTextMuted,
-                          ),
-                        ),
-                      )
-                    : _buildChart(),
-          ),
+          if (_isLoading)
+            const SizedBox(
+              height: 150,
+              child: Center(
+                child: CircularProgressIndicator(color: AppColors.accent),
+              ),
+            )
+          else if (_data.isEmpty)
+            SizedBox(
+              height: 150,
+              child: Center(
+                child: Text(
+                  'progress.no_data'.tr(),
+                  style: const TextStyle(color: AppColors.chartTextMuted),
+                ),
+              ),
+            )
+          else
+            _buildChart(),
         ],
       ),
     );
   }
 
-  Widget _buildChart() {
-    return BarChart(
-      BarChartData(
-        minY: _calcMinY(), // ← ДОБАВЬ
-        borderData: FlBorderData(show: false),
-        gridData: FlGridData(
-          show: true,
-          drawVerticalLine: false,
-          // Больше горизонтальных линий — лучше видна прогрессия
-          horizontalInterval: _calcInterval(),
-          getDrawingHorizontalLine: (value) {
-            // Каждые 5т — яркая линия-рубеж
-            final is5t = value % 5000 == 0;
-            return FlLine(
-              color: is5t
-                  ? AppColors.chartGridMajor // ярче
-                  : AppColors.chartGrid, // обычная тёмная
-              strokeWidth: is5t ? 1.5 : 0.8,
-            );
-          },
-        ),
-        titlesData: FlTitlesData(
-          topTitles: AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
-          ),
-          rightTitles: AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
-          ),
-          bottomTitles: AxisTitles(
-            sideTitles: SideTitles(
-              showTitles: true,
-              getTitlesWidget: (value, meta) {
-                final index = value.toInt();
-                if (index < 0 || index >= _data.length) {
-                  return const SizedBox();
-                }
-                final step = (_data.length / 4).ceil();
-                if (index % step != 0) return const SizedBox();
-
-                final date = _data[index]['date'] as String;
-                final parts = date.split('-');
-                return Text(
-                  '${parts[2]}.${parts[1]}',
-                  style: const TextStyle(
-                    color: AppColors.chartTextMuted,
-                    fontSize: 10,
-                  ),
-                );
-              },
-            ),
-          ),
-          leftTitles: AxisTitles(
-            sideTitles: SideTitles(
-              showTitles: true,
-              reservedSize: 40,
-              getTitlesWidget: (value, meta) {
-                return Text(
-                  '${(value / 1000).toStringAsFixed(1)}${'workout.t'.tr()}',
-                  style: const TextStyle(
-                    color: AppColors.chartTextMuted,
-                    fontSize: 10,
-                  ),
-                );
-              },
-            ),
-          ),
-        ),
-        barGroups: _data.asMap().entries.map((entry) {
-          final index = entry.key;
-          final item = entry.value;
-          final name = item['name'] as String;
-          final volume = item['volume'] as double;
-          final color = _nameColors[name] ?? const Color(0xFFF97316);
-
-          return BarChartGroupData(
-            x: index,
-            barRods: [
-              BarChartRodData(
-                toY: volume,
-                color: color,
-                width: _data.length > 20 ? 4 : 8,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(4),
-                  topRight: Radius.circular(4),
-                ),
+  // Подсказка: дата, название тренировки (её цветом), объём —
+  // тёмная карточка в стиле подсказок остальных графиков
+  Widget _tooltip(int index) {
+    final item = _data[index];
+    final name = item['name'] as String;
+    return Container(
+      constraints: const BoxConstraints(maxWidth: 220),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceInset,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AppColors.chartGridMajor),
+      ),
+      child: Text.rich(
+        TextSpan(
+          text: '${chartTooltipDate(chartParseDate(item['date'] as String))}\n',
+          style: kChartTooltipTitleStyle,
+          children: [
+            TextSpan(
+              text: '$name\n',
+              style: TextStyle(
+                color: _nameColors[name] ?? AppColors.accent,
+                fontSize: 11,
               ),
-            ],
-          );
-        }).toList(),
+            ),
+            TextSpan(
+              text:
+                  '${((item['volume'] as double) / 1000).toStringAsFixed(1)}${'workout.t'.tr()}',
+              style: chartTooltipValueStyle(AppColors.volume),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  // Считаем интервал для горизонтальных линий
-  // Чем меньше интервал — тем больше линий — тем лучше видна прогрессия
-  double _calcInterval() {
-    // if (_data.isEmpty) return 1000;
-    // final maxVolume =
-    //     _data.map((e) => e['volume'] as double).reduce((a, b) => a > b ? a : b);
-    // // Делим на 10 вместо 6 — больше горизонтальных линий
-    // return (maxVolume / 10).roundToDouble();
-    return 1000; // деление каждые 2т — много линий
+  Widget _buildChart() {
+    final t = 'workout.t'.tr();
+    final maxVolume = _data
+        .map((e) => e['volume'] as double)
+        .fold<double>(0, (a, b) => a > b ? a : b);
+    final scale = ChartScale.nice(0, maxVolume, fromZero: true);
+    final leftWidth = scale.leftWidth(context, t, divisor: 1000);
+
+    // Сколько последних столбиков помещается в окно (не больше года по датам):
+    // история до года — все; дольше — тренировки последних 12 месяцев
+    final n = _data.length;
+    final lastDate = chartParseDate(_data.last['date'] as String);
+    final windowStart = lastDate.subtract(const Duration(days: kVolumeWindowDays));
+    final inWindow = _data
+        .where((e) => !chartParseDate(e['date'] as String).isBefore(windowStart))
+        .length;
+
+    return LayoutBuilder(builder: (context, constraints) {
+      final viewport = constraints.maxWidth - leftWidth;
+      final scrollable = inWindow < n;
+      final slot = viewport / inWindow;
+      final content = slot * n;
+      // Ширина столбика — см. kVolumeMinBarWidth: вплотную, с зазором 25 %
+      // только при широкой ячейке
+      final barWidth = (slot >= kVolumeGapFromSlot ? slot * 0.75 : slot)
+          .clamp(kVolumeMinBarWidth, kVolumeMaxBarWidth)
+          .toDouble();
+
+      if (_scrollToEnd) {
+        _scrollToEnd = false;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (_scroll.hasClients) {
+            _scroll.jumpTo(_scroll.position.maxScrollExtent);
+          }
+        });
+      }
+
+      return Column(
+        children: [
+          SizedBox(
+            height: _plotHeight,
+            child: Row(
+              children: [
+                // Подписи Y не прокручиваются
+                ChartYAxisColumn(
+                    scale: scale, unit: t, divisor: 1000, height: _plotHeight),
+                Expanded(
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Positioned.fill(
+                        child: SingleChildScrollView(
+                          controller: _scroll,
+                          scrollDirection: Axis.horizontal,
+                          physics: const ClampingScrollPhysics(),
+                          child: SizedBox(
+                            width: content,
+                            height: _plotHeight,
+                            child: _buildBars(scale, slot, barWidth),
+                          ),
+                        ),
+                      ),
+                      // Подсказка поверх окна: над столбиком, внутри видимой части
+                      if (_touchedIndex != null && _touchedIndex! < n)
+                        Positioned.fill(
+                          child: IgnorePointer(
+                            child: AnimatedBuilder(
+                              animation: _scroll,
+                              builder: (context, _) {
+                                final i = _touchedIndex!;
+                                final offset = _scroll.hasClients ? _scroll.offset : 0.0;
+                                return CustomSingleChildLayout(
+                                  delegate: _TooltipLayout(
+                                    barX: slot * (i + 0.5) - offset,
+                                    barTop: _plotHeight *
+                                        (1 -
+                                            scale.toChart(_data[i]['volume'] as double) /
+                                                scale.maxY),
+                                  ),
+                                  child: _tooltip(i),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Подписи дат — по видимой части (первый и последний видимый столбик)
+          Padding(
+            padding: EdgeInsets.only(left: leftWidth),
+            child: SizedBox(
+              height: _labelsHeight,
+              child: AnimatedBuilder(
+                animation: _scroll,
+                builder: (context, _) =>
+                    _buildDateLabels(viewport: viewport, slot: slot),
+              ),
+            ),
+          ),
+          // Полоса прокрутки — только если история дольше года (окно не вмещает всё)
+          if (scrollable)
+            Padding(
+              padding: EdgeInsets.only(left: leftWidth),
+              child: _ChartScrollbar(
+                  controller: _scroll, viewport: viewport, content: content),
+            ),
+        ],
+      );
+    });
   }
 
-  double _calcMinY() {
-    // if (_data.isEmpty) return 0;
-    // final minVolume =
-    //     _data.map((e) => e['volume'] as double).reduce((a, b) => a < b ? a : b);
-    // // Начинаем чуть ниже минимума чтобы был отступ снизу
-    // return (minVolume * 0.7).roundToDouble();
-    return 0; // всегда от 0 — так лучше видно прогрессию, особенно если объёмы растут от 0 до нескольких тысяч
+  Widget _buildBars(ChartScale scale, double slot, double barWidth) {
+    return BarChart(
+      BarChartData(
+        minY: 0,
+        maxY: scale.maxY,
+        // Центры столбиков — ровно посередине своей ячейки (slot × (i + 0.5)),
+        // по ним же стоят подписи дат и подсказка
+        alignment: BarChartAlignment.spaceAround,
+        borderData: FlBorderData(show: false),
+        gridData: scale.grid(),
+        titlesData: const FlTitlesData(show: false),
+        barTouchData: BarTouchData(
+          // Своя подсказка (не встроенная). Столбик выбираем сами — по ячейке
+          // под пальцем (x / slot), на любой высоте: это ближайший столбик,
+          // даже когда столбики шире ячейки и перекрываются (fl_chart выбрал
+          // бы первый, т. е. более старый, нижний).
+          handleBuiltInTouches: false,
+          touchCallback: (event, response) {
+            final x = event.localPosition?.dx;
+            final index = event.isInterestedForInteractions && x != null
+                ? (x / slot).floor().clamp(0, _data.length - 1)
+                : null;
+            if (index != _touchedIndex) setState(() => _touchedIndex = index);
+          },
+        ),
+        barGroups: [
+          for (var i = 0; i < _data.length; i++)
+            BarChartGroupData(
+              x: i,
+              barRods: [
+                BarChartRodData(
+                  toY: scale.toChart(_data[i]['volume'] as double),
+                  // Выбранный столбик — светлее, видно, о каком подсказка
+                  color: i == _touchedIndex
+                      ? Color.lerp(_nameColors[_data[i]['name']] ?? AppColors.accent,
+                          Colors.white, 0.35)
+                      : _nameColors[_data[i]['name']] ?? AppColors.accent,
+                  width: barWidth,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(barWidth / 2),
+                    topRight: Radius.circular(barWidth / 2),
+                  ),
+                ),
+              ],
+            ),
+        ],
+      ),
+    );
   }
+
+  // Подписи дат под видимыми столбиками: всегда первый и последний видимый,
+  // между ними равномерно (до 4), без наложения; формат — по видимому диапазону.
+  Widget _buildDateLabels({required double viewport, required double slot}) {
+    final n = _data.length;
+    final offset = _scroll.hasClients && _scroll.position.hasContentDimensions
+        ? _scroll.offset
+        : 0.0;
+    final first =
+        ((offset / slot - 0.5).ceil()).clamp(0, n - 1); // первый видимый
+    final last =
+        (((offset + viewport) / slot - 0.5).floor()).clamp(first, n - 1);
+    final lang = context.locale.languageCode;
+    final style = chartDateStyleFor(chartParseDate(_data[first]['date']),
+        chartParseDate(_data[last]['date']));
+
+    // Подписи для count штук: индекс, текст, левый край, ширина
+    List<(int, String, double, double)> layout(int count) {
+      final indices = <int>{
+        for (var i = 0; i < count; i++)
+          count == 1
+              ? last
+              : first + ((last - first) * i / (count - 1)).round(),
+      }.toList();
+      return [
+        for (final i in indices)
+          () {
+            final text = chartAxisDate(
+                chartParseDate(_data[i]['date'] as String), style, lang);
+            final w = chartTextWidth(context, text);
+            final x = slot * (i + 0.5) - offset;
+            return (
+              i,
+              text,
+              (x - w / 2).clamp(0.0, math.max(0.0, viewport - w)).toDouble(),
+              w
+            );
+          }(),
+      ];
+    }
+
+    bool fits(List<(int, String, double, double)> labels) {
+      for (var j = 1; j < labels.length; j++) {
+        if (labels[j].$3 < labels[j - 1].$3 + labels[j - 1].$4 + 6) return false;
+      }
+      return true;
+    }
+
+    var labels = layout(1);
+    for (var k = math.min(4, last - first + 1); k >= 2; k--) {
+      final candidate = layout(k);
+      if (fits(candidate) || k == 2) {
+        labels = fits(candidate) ? candidate : layout(1);
+        break;
+      }
+    }
+
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        for (final l in labels)
+          Positioned(
+            left: l.$3,
+            top: 4,
+            child: Text(l.$2,
+                style: kChartAxisStyle, maxLines: 1, softWrap: false),
+          ),
+      ],
+    );
+  }
+}
+
+// Полоса прокрутки под графиком: тонкая дорожка и ползунок; ползунок можно
+// тянуть, нажатие на дорожку переносит к этому месту.
+class _ChartScrollbar extends StatelessWidget {
+  final ScrollController controller;
+  final double viewport;
+  final double content;
+
+  const _ChartScrollbar({
+    required this.controller,
+    required this.viewport,
+    required this.content,
+  });
+
+  double get _thumbWidth =>
+      math.max(24.0, viewport * viewport / content).clamp(0.0, viewport);
+
+  double get _maxOffset => math.max(0.0, content - viewport);
+
+  void _jumpTo(double offset) {
+    if (!controller.hasClients) return;
+    controller.jumpTo(offset.clamp(0.0, _maxOffset));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final thumb = _thumbWidth;
+    final travel = math.max(1.0, viewport - thumb);
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onHorizontalDragUpdate: (d) => _jumpTo(
+          (controller.hasClients ? controller.offset : 0) +
+              d.delta.dx * _maxOffset / travel),
+      onTapDown: (d) =>
+          _jumpTo((d.localPosition.dx - thumb / 2) / travel * _maxOffset),
+      child: SizedBox(
+        height: 20,
+        width: viewport,
+        child: AnimatedBuilder(
+          animation: controller,
+          builder: (context, _) {
+            final offset = controller.hasClients &&
+                    controller.position.hasContentDimensions
+                ? controller.offset
+                : _maxOffset;
+            final left = _maxOffset == 0 ? 0.0 : offset / _maxOffset * travel;
+            return Stack(
+              alignment: Alignment.centerLeft,
+              children: [
+                Container(
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: AppColors.chartScrollTrack,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                Positioned(
+                  left: left,
+                  child: Container(
+                    key: const ValueKey('volume-scroll-thumb'),
+                    width: thumb,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: AppColors.chartScrollThumb,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+// Положение подсказки: по центру над столбиком (barX — центр столбика в окне,
+// barTop — верх столбика), но целиком внутри окна графика по горизонтали;
+// если над столбиком мало места — вплотную к верху.
+class _TooltipLayout extends SingleChildLayoutDelegate {
+  final double barX;
+  final double barTop;
+
+  _TooltipLayout({required this.barX, required this.barTop});
+
+  @override
+  BoxConstraints getConstraintsForChild(BoxConstraints constraints) =>
+      constraints.loosen();
+
+  @override
+  Offset getPositionForChild(Size size, Size child) {
+    final x = (barX - child.width / 2)
+        .clamp(0.0, math.max(0.0, size.width - child.width))
+        .toDouble();
+    final y = math.max(0.0, barTop - child.height - 6);
+    return Offset(x, y);
+  }
+
+  @override
+  bool shouldRelayout(_TooltipLayout old) =>
+      old.barX != barX || old.barTop != barTop;
 }

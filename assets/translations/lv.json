@@ -301,7 +301,8 @@
   "unit_cm": "cm",
   "delete_confirm": "Dzēst mērījumu?",
   "delete_message": "Ieraksts par {date} tiks dzēsts.",
-  "need_more_data": "Nepieciešami vismaz 2 ieraksti diagrammai"
+  "need_more_data": "Nepieciešami vismaz 2 ieraksti diagrammai",
+  "last_time": "iepriekšējo reizi: {value} ({date})"
 },
 "exercise_demo": {
   "show": "Kā izpildīt"

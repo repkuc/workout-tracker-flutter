@@ -578,19 +578,24 @@ class WorkoutService {
     return '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
   }
 
+  // Начало периода фильтра статистики «последние N дней» как 'YYYY-MM-DD'
+  // (null = всё время). Тренировка входит в период по своей дате
+  // (workout.date >= начала) — одинаково для итогов «Статистики» и всех графиков.
+  String? periodStartDate(int? days) {
+    if (days == null) return null;
+    final cutoff = DateTime.now().subtract(Duration(days: days));
+    return '${cutoff.year}-'
+        '${cutoff.month.toString().padLeft(2, '0')}-'
+        '${cutoff.day.toString().padLeft(2, '0')}';
+  }
+
 // Получить объём по завершённым тренировкам за период
 // Теперь возвращает также название тренировки для цвета
   Future<List<Map<String, dynamic>>> getVolumeByDateWithName(
       {int? days}) async {
     final workouts = await getCompletedWorkouts();
 
-    String? cutoffStr;
-    if (days != null) {
-      final cutoff = DateTime.now().subtract(Duration(days: days));
-      cutoffStr = '${cutoff.year}-'
-          '${cutoff.month.toString().padLeft(2, '0')}-'
-          '${cutoff.day.toString().padLeft(2, '0')}';
-    }
+    final cutoffStr = periodStartDate(days);
 
     final List<Map<String, dynamic>> result = [];
 
@@ -599,12 +604,9 @@ class WorkoutService {
         continue;
       }
 
-      double totalVolume = 0;
-      for (final exercise in workout.exercises) {
-        for (final set in exercise.sets) {
-          totalVolume += set.weight * set.reps;
-        }
-      }
+      // Только выполненные подходы — то же правило, что в итогах «Статистики»
+      // (раньше здесь считались все подходы, и итог графика расходился)
+      final totalVolume = workout.doneVolume;
 
       if (totalVolume == 0) continue;
 
@@ -636,14 +638,8 @@ class WorkoutService {
   }) async {
     final workouts = await getCompletedWorkouts();
 
-    // Считаем границу периода если нужен фильтр
-    String? cutoffStr;
-    if (days != null) {
-      final cutoff = DateTime.now().subtract(Duration(days: days));
-      cutoffStr = '${cutoff.year}-'
-          '${cutoff.month.toString().padLeft(2, '0')}-'
-          '${cutoff.day.toString().padLeft(2, '0')}';
-    }
+    // Граница периода — общая для итогов «Статистики» и графиков
+    final cutoffStr = periodStartDate(days);
 
     // Map: { "chest_1": { "2024-03-15": 100.0, ... }, ... }
     final Map<String, Map<String, double>> result = {};

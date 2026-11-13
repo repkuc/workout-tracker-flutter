@@ -164,13 +164,7 @@ class _HistoryPageState extends State<HistoryPage> with ReloadWhenVisible {
             e.sets
                 .where((set) => set.isDone)
                 .fold(0, (r, set) => r + set.reps));
-    final totalVolume = workout.exercises.fold<double>(
-        0,
-        (s, e) =>
-            s +
-            e.sets
-                .where((set) => set.isDone)
-                .fold(0.0, (v, set) => v + set.weight * set.reps));
+    final totalVolume = workout.doneVolume; // только выполненные подходы
 
     final dateTime = DateTime.tryParse(workout.finishedAt ?? workout.date);
     final formattedDate = dateTime != null

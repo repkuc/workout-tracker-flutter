@@ -301,7 +301,8 @@
   "unit_cm": "см",
   "delete_confirm": "Удалить замер?",
   "delete_message": "Запись за {date} будет удалена.",
-  "need_more_data": "Нужно минимум 2 записи для графика"
+  "need_more_data": "Нужно минимум 2 записи для графика",
+  "last_time": "в прошлый раз: {value} ({date})"
 },
 "exercise_demo": {
   "show": "Как выполнять"

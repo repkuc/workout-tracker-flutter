@@ -4,6 +4,7 @@ import 'package:fl_chart/fl_chart.dart';
 import '../services/body_weight_service.dart';
 import '../models/body_weight_entry.dart';
 import '../theme/app_colors.dart';
+import 'chart_helpers.dart';
 
 class BodyWeightChartCard extends StatefulWidget {
   final int? selectedDays;
@@ -134,150 +135,66 @@ class _BodyWeightChartCardState extends State<BodyWeightChartCard> {
   }
 
   // Бейдж с дельтой (разница между первым и последним весом)
-  Widget _buildDelta() {
-    final first = _entries.first.weight;
-    final last = _entries.last.weight;
-    final delta = last - first;
-    final isDown = delta < 0; // похудел = хорошо (зелёный)
+  Widget _buildDelta() => ChartChangeBadge(
+        delta: _entries.last.weight - _entries.first.weight,
+        unit: 'workout.kg'.tr(),
+      );
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: isDown
-            ? AppColors.weightDownBackground // тёмно-зелёный
-            : AppColors.weightUpBackground, // тёмно-красный
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Text(
-        '${isDown ? '' : '+'}${delta.toStringAsFixed(1)} ${'workout.kg'.tr()}',
-        style: TextStyle(
-          color: isDown ? AppColors.weightDownText : AppColors.weightUpText,
-          fontSize: 13,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    );
-  }
-
+  // График по общим правилам (chart_helpers.dart): ось X по времени,
+  // круглые деления по весу, точка только на последней записи, если записей много.
   Widget _buildChart() {
-    final spots = _entries.asMap().entries.map((entry) {
-      return FlSpot(entry.key.toDouble(), entry.value.weight);
-    }).toList();
-
+    final kg = 'workout.kg'.tr();
     final weights = _entries.map((e) => e.weight).toList();
-    final minY = (weights.reduce((a, b) => a < b ? a : b) - 0.5);
-    final maxY = (weights.reduce((a, b) => a > b ? a : b) + 0.5);
+    final scale = ChartScale.nice(weights.reduce((a, b) => a < b ? a : b),
+        weights.reduce((a, b) => a > b ? a : b));
+    final days = _entries.map((e) => chartDayOf(chartParseDate(e.date))).toList();
 
-    return LineChart(
-      LineChartData(
-        borderData: FlBorderData(show: false),
-        minY: minY,
-        maxY: maxY,
-        gridData: FlGridData(
-          show: true,
-          drawVerticalLine: false,
-          horizontalInterval: 0.5, // деление каждые 0.5кг
-          getDrawingHorizontalLine: (value) {
-            // Целые кг — ярче и толще
-            final isWhole = value == value.roundToDouble();
-            return FlLine(
-              color:
-                  isWhole ? AppColors.chartGridMajor : AppColors.chartGrid,
-              strokeWidth: isWhole ? 1.2 : 0.6,
-            );
-          },
-        ),
-        titlesData: FlTitlesData(
-          topTitles: AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
-          ),
-          rightTitles: AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
-          ),
-          bottomTitles: AxisTitles(
-            sideTitles: SideTitles(
-              showTitles: true,
-              getTitlesWidget: (value, meta) {
-                final index = value.toInt();
-                if (index < 0 || index >= _entries.length) {
-                  return const SizedBox();
-                }
-                // Если записей мало — показываем все даты
-                // Если много — каждые 3
-                int step;
-                if (_entries.length <= 10) {
-                  step = 1; // все даты
-                } else if (_entries.length <= 20) {
-                  step = 3; // каждая 3я
-                } else if (_entries.length <= 40) {
-                  step = 5; // каждая 5я
-                } else {
-                  step = 7; // каждая 7я (раз в неделю примерно)
-                }
-                if (index % step != 0) return const SizedBox();
+    return LayoutBuilder(builder: (context, constraints) {
+      final axis = ChartTimeAxis.build(
+        context,
+        firstDay: days.first,
+        lastDay: days.last,
+        plotWidth: constraints.maxWidth - scale.leftWidth(context, kg),
+      );
+      final spots = [
+        for (var i = 0; i < _entries.length; i++)
+          FlSpot(axis.x(days[i]), scale.toChart(weights[i])),
+      ];
 
-                final date = _entries[index].date;
-                final parts = date.split('-');
-                return Padding(
-                  padding: const EdgeInsets.only(top: 4),
-                  child: Text(
-                    '${parts[2]}.${parts[1]}',
-                    style: const TextStyle(
-                      color: AppColors.chartTextMuted,
-                      fontSize: 9,
-                    ),
-                  ),
-                );
-              },
-            ),
+      return LineChart(
+        LineChartData(
+          borderData: FlBorderData(show: false),
+          minX: axis.minX,
+          maxX: axis.maxX,
+          minY: 0,
+          maxY: scale.maxY,
+          gridData: scale.grid(),
+          titlesData: FlTitlesData(
+            topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            bottomTitles: axis.bottomTitles(),
+            leftTitles: scale.leftTitles(context, kg),
           ),
-          leftTitles: AxisTitles(
-            sideTitles: SideTitles(
-              showTitles: true,
-              reservedSize: 40,
-              interval: 1, // подпись каждый 1кг
-              getTitlesWidget: (value, meta) {
-                // Показываем только целые кг
-                if (value != value.roundToDouble()) return const SizedBox();
-                return Text(
-                  value.toInt().toString(),
-                  style: const TextStyle(
-                    color: AppColors.chartTextMuted,
-                    fontSize: 9,
+          lineTouchData: chartLineTouch(
+            items: (touched) => touched.map((spot) {
+              final entry = _entries[spot.spotIndex];
+              return LineTooltipItem(
+                '${chartTooltipDate(chartParseDate(entry.date))}\n',
+                kChartTooltipTitleStyle,
+                children: [
+                  TextSpan(
+                    text: '${chartNumber(entry.weight)} $kg',
+                    style: chartTooltipValueStyle(AppColors.bodyWeight),
                   ),
-                );
-              },
-            ),
+                ],
+              );
+            }).toList(),
           ),
+          lineBarsData: [
+            chartLine(spots: spots, color: AppColors.bodyWeight, area: true),
+          ],
         ),
-        lineBarsData: [
-          LineChartBarData(
-            spots: spots,
-            color: AppColors.bodyWeight,
-            barWidth: 2,
-            isCurved: true,
-            curveSmoothness: 0.3,
-            dotData: FlDotData(
-              show: true,
-              getDotPainter: (spot, percent, bar, index) {
-                // Каждые 3 точки — крупнее и ярче
-                final isBig = index % 3 == 0;
-                return FlDotCirclePainter(
-                  radius: isBig ? 4 : 2,
-                  color: isBig
-                      ? AppColors.bodyWeight
-                      : AppColors.bodyWeight.withOpacity(0.4),
-                  strokeWidth: 0,
-                );
-              },
-            ),
-            belowBarData: BarAreaData(
-              show: true,
-              color: AppColors.bodyWeight.withOpacity(0.08),
-            ),
-          ),
-        ],
-      ),
-    );
+      );
+    });
   }
 }

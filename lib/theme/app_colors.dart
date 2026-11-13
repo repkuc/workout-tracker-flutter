@@ -78,7 +78,9 @@ abstract final class AppColors {
   static const Color chartText = Color(0xFF94A3B8); // заголовки и легенда
   static const Color chartTextMuted = textMuted; // подписи осей, «нет данных»
   static const Color chartGrid = Color(0xFF334155); // обычные линии сетки
-  static const Color chartGridMajor = Color(0xFF475569); // «главные» линии: целые кг (вес), каждые 5 т (объём)
+  static const Color chartGridMajor = Color(0xFF475569); // линия-указатель касания и рамка подсказки графиков
+  static const Color chartScrollTrack = Color(0xFF334155); // дорожка полосы прокрутки под графиком объёма
+  static const Color chartScrollThumb = Color(0xFF94A3B8); // ползунок этой полосы
   static const Color chartPill = Color(0xFF334155); // кнопка «показать ещё / свернуть» под чипами упражнений
 
   // ── Material-темы (main.dart) ──

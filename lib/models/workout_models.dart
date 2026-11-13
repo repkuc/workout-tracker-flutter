@@ -78,6 +78,12 @@ class Exercise {
   // Сколько подходов отмечено выполненными
   int get doneSetsCount => sets.where((s) => s.isDone).length;
 
+  // Объём упражнения: вес × повторы только ВЫПОЛНЕННЫХ подходов.
+  // Единое правило объёма для всего приложения (итоги, графики, карточки).
+  double get doneVolume => sets
+      .where((s) => s.isDone)
+      .fold<double>(0, (sum, s) => sum + s.weight * s.reps);
+
   // Конвертация в JSON для сохранения
   Map<String, dynamic> toJson() => {
     'id': id,
@@ -166,6 +172,10 @@ class Workout {
     this.programName,
   }) : exercises = exercises ?? [], // Инициализация пустым списком, если не передан
       muscleGroups = muscleGroups ?? []; // Инициализация пустым списком, если не передан
+
+  // Объём тренировки — только выполненные подходы (см. Exercise.doneVolume)
+  double get doneVolume =>
+      exercises.fold<double>(0, (sum, e) => sum + e.doneVolume);
 
   // Конвертация в JSON для сохранения
   Map<String, dynamic> toJson() => {

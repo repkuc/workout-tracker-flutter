@@ -149,18 +149,15 @@ class _OverviewTabState extends State<_OverviewTab> with ReloadWhenVisible {
 
     final allWorkouts = await _service.getCompletedWorkouts();
 
-    final List<Workout> workouts;
-    if (_selectedPeriodDays == 0) {
-      workouts = allWorkouts;
-    } else {
-      final cutoff =
-          DateTime.now().subtract(Duration(days: _selectedPeriodDays));
-      workouts = allWorkouts.where((w) {
-        final d = DateTime.tryParse(w.finishedAt ?? w.date);
-        return d != null && d.isAfter(cutoff);
-      }).toList();
-    }
+    // Период — общая граница с графиками (по дате тренировки), 0 = всё время
+    final start = _service
+        .periodStartDate(_selectedPeriodDays == 0 ? null : _selectedPeriodDays);
+    final List<Workout> workouts = start == null
+        ? allWorkouts
+        : allWorkouts.where((w) => w.date.compareTo(start) >= 0).toList();
 
+    // Объём — только выполненные подходы (Workout / Exercise.doneVolume),
+    // одинаково с графиком объёма, «Главной» и карточками истории
     double volume = 0;
     int reps = 0;
     int duration = 0;
@@ -168,15 +165,16 @@ class _OverviewTabState extends State<_OverviewTab> with ReloadWhenVisible {
 
     for (final workout in workouts) {
       duration += workout.duration ?? 0;
+      volume += workout.doneVolume;
       for (final exercise in workout.exercises) {
-        for (final set in exercise.sets) {
-          if (set.isDone) {
-            volume += set.weight * set.reps;
-            reps += set.reps;
-            final key = _service.exerciseKey(exercise);
-            exerciseVolumes[key] =
-                (exerciseVolumes[key] ?? 0) + set.weight * set.reps;
-          }
+        reps += exercise.sets
+            .where((s) => s.isDone)
+            .fold<int>(0, (sum, s) => sum + s.reps);
+        // Есть выполненные подходы (в том числе с весом 0) — упражнение в списке, как раньше
+        if (exercise.doneSetsCount > 0) {
+          final key = _service.exerciseKey(exercise);
+          exerciseVolumes[key] =
+              (exerciseVolumes[key] ?? 0) + exercise.doneVolume;
         }
       }
     }

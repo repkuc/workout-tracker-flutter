@@ -3,6 +3,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../services/workout_service.dart';
 import '../theme/app_colors.dart';
+import 'chart_helpers.dart';
 import 'exercise_display.dart';
 import 'tab_visibility.dart';
 
@@ -148,9 +149,68 @@ class _ExerciseProgressCardState extends State<ExerciseProgressCard>
                       )
                     : _buildChart(),
           ),
+
+          // Итог по каждому видимому упражнению: лучший вес и изменение
+          if (!_isLoading) ..._buildSummaryRows(),
         ],
       ),
     );
+  }
+
+  // Видимые упражнения с данными — в порядке ключей (как цвета и чипы)
+  List<String> get _visibleKeys => _allData.keys
+      .where((k) => _activeExercises.contains(k) && _allData[k]!.isNotEmpty)
+      .toList();
+
+  // «Жим штанги лёжа — 97.5 кг · +12.5 кг» цветом линии; изменение
+  // (первое → последнее значение периода) — только если точек больше одной
+  List<Widget> _buildSummaryRows() {
+    final kg = 'workout.kg'.tr();
+    final keys = _visibleKeys;
+    if (keys.isEmpty) return [];
+    return [
+      const SizedBox(height: 10),
+      for (final key in keys)
+        Builder(builder: (context) {
+          final points = _allData[key]!;
+          final best = points.map((e) => e.value).reduce((a, b) => a > b ? a : b);
+          final change = points.last.value - points.first.value;
+          final color = _colorFor(key);
+          final values = points.length > 1
+              ? '${chartNumber(best)} $kg · ${chartSignedNumber(change)} $kg'
+              : '${chartNumber(best)} $kg';
+          return Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Container(
+                    width: 8,
+                    height: 8,
+                    decoration:
+                        BoxDecoration(color: color, shape: BoxShape.circle),
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    exerciseKeyLabel(context, key, _latestNames),
+                    style: TextStyle(color: color, fontSize: 12),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  values,
+                  style: TextStyle(
+                      color: color, fontSize: 12, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+          );
+        }),
+    ];
   }
 
   // Чипы — кнопки включения/выключения упражнений
@@ -216,11 +276,12 @@ class _ExerciseProgressCardState extends State<ExerciseProgressCard>
                     ),
                     const SizedBox(width: 5),
                     Flexible(
+                      // Длинное название — в 2 строки, а не обрезка «…» сразу
                       child: Text(
                         exerciseKeyLabel(context, name, _latestNames),
                         style: TextStyle(color: color, fontSize: 11),
                         overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
+                        maxLines: 2,
                       ),
                     ),
                   ],
@@ -271,114 +332,94 @@ class _ExerciseProgressCardState extends State<ExerciseProgressCard>
   );
 }
 
+
+  // График по общим правилам (chart_helpers.dart): ось X по времени (даты
+  // видимых упражнений), круглые деления веса, прямые линии, точки — по правилу.
+  // Невидимая линия-«сетка дат» ловит касание: подсказка показывает ВСЕ
+  // видимые упражнения, у которых есть значение в эту дату, полными названиями.
   Widget _buildChart() {
-    // Собираем все уникальные даты из активных упражнений
-    final allDates = <String>{};
-    for (final name in _activeExercises) {
-      if (_allData.containsKey(name)) {
-        for (final entry in _allData[name]!) {
-          allDates.add(entry.key);
-        }
-      }
-    }
+    final keys = _visibleKeys;
+    if (keys.isEmpty) return const SizedBox();
+    final kg = 'workout.kg'.tr();
 
-    // Сортируем даты
-    final sortedDates = allDates.toList()..sort();
-    if (sortedDates.isEmpty) return const SizedBox();
+    // Все даты видимых упражнений и значения: ключ → {день → вес}
+    final byDay = <String, Map<int, double>>{
+      for (final key in keys)
+        key: {
+          for (final e in _allData[key]!)
+            chartDayOf(chartParseDate(e.key)): e.value,
+        },
+    };
+    final days = byDay.values.expand((m) => m.keys).toSet().toList()..sort();
+    final values = byDay.values.expand((m) => m.values);
+    final scale = ChartScale.nice(values.reduce((a, b) => a < b ? a : b),
+        values.reduce((a, b) => a > b ? a : b));
 
-    // Строим линии для каждого активного упражнения
-    final lines = <LineChartBarData>[];
-    for (final name in _activeExercises) {
-      if (!_allData.containsKey(name)) continue;
-      final data = _allData[name]!;
-      if (data.isEmpty) continue;
+    return LayoutBuilder(builder: (context, constraints) {
+      final axis = ChartTimeAxis.build(
+        context,
+        firstDay: days.first,
+        lastDay: days.last,
+        plotWidth: constraints.maxWidth - scale.leftWidth(context, kg),
+      );
 
-      // Точки графика — X это индекс даты, Y это вес
-      final spots = data.map((entry) {
-        final x = sortedDates.indexOf(entry.key).toDouble();
-        final y = entry.value;
-        return FlSpot(x, y);
-      }).toList();
+      final lines = [
+        for (final key in keys)
+          chartLine(
+            spots: [
+              for (final entry in byDay[key]!.entries)
+                FlSpot(axis.x(entry.key), scale.toChart(entry.value)),
+            ],
+            color: _colorFor(key),
+          ),
+        chartDateGuideLine([for (final d in days) axis.x(d)], 0),
+      ];
+      final guideIndex = lines.length - 1;
 
-      lines.add(LineChartBarData(
-        spots: spots,
-        color: _colorFor(name),
-        barWidth: 2,
-        dotData: FlDotData(
-          show: true,
-          getDotPainter: (spot, percent, bar, index) =>
-              FlDotCirclePainter(
-                radius: 3,
-                color: _colorFor(name),
-                strokeWidth: 0,
+      List<LineTooltipItem?> tooltip(List<LineBarSpot> touched) {
+        final guide = touched.where((s) => s.barIndex == guideIndex);
+        if (guide.isEmpty) return List.filled(touched.length, null);
+        final day = axis.dayAtX(guide.first.x);
+        final rows = <TextSpan>[
+          for (final key in keys)
+            if (byDay[key]![day] != null)
+              TextSpan(
+                text: '\n${exerciseKeyLabel(context, key, _latestNames)}: '
+                    '${chartNumber(byDay[key]![day]!)} $kg',
+                style: chartTooltipValueStyle(_colorFor(key)),
               ),
-        ),
-        isCurved: true,
-        curveSmoothness: 0.3,
-        belowBarData: BarAreaData(show: false),
-      ));
-    }
+        ];
+        return [
+          for (final s in touched)
+            s.barIndex == guideIndex && identical(s, guide.first)
+                ? LineTooltipItem(
+                    chartTooltipDate(chartDateOfDay(day)),
+                    kChartTooltipTitleStyle,
+                    textAlign: TextAlign.left,
+                    children: rows,
+                  )
+                : null,
+        ];
+      }
 
-    return LineChart(
-      LineChartData(
-        borderData: FlBorderData(show: false),
-        gridData: FlGridData(
-          show: true,
-          drawVerticalLine: false,
-          getDrawingHorizontalLine: (value) => FlLine(
-            color: AppColors.chartGrid,
-            strokeWidth: 1,
+      return LineChart(
+        LineChartData(
+          borderData: FlBorderData(show: false),
+          minX: axis.minX,
+          maxX: axis.maxX,
+          minY: 0,
+          maxY: scale.maxY,
+          gridData: scale.grid(),
+          titlesData: FlTitlesData(
+            topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            bottomTitles: axis.bottomTitles(),
+            leftTitles: scale.leftTitles(context, kg),
           ),
+          lineTouchData: chartLineTouch(items: tooltip, hasDateGuide: true),
+          lineBarsData: lines,
         ),
-        titlesData: FlTitlesData(
-          topTitles: AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
-          ),
-          rightTitles: AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
-          ),
-          bottomTitles: AxisTitles(
-            sideTitles: SideTitles(
-              showTitles: true,
-              getTitlesWidget: (value, meta) {
-                final index = value.toInt();
-                if (index < 0 || index >= sortedDates.length) {
-                  return const SizedBox();
-                }
-                // Показываем каждую N-ю метку
-                final step = (sortedDates.length / 4).ceil();
-                if (index % step != 0) return const SizedBox();
-
-                final date = sortedDates[index];
-                final parts = date.split('-');
-                return Text(
-                  '${parts[2]}.${parts[1]}',
-                  style: const TextStyle(
-                    color: AppColors.chartTextMuted,
-                    fontSize: 10,
-                  ),
-                );
-              },
-            ),
-          ),
-          leftTitles: AxisTitles(
-            sideTitles: SideTitles(
-              showTitles: true,
-              reservedSize: 36,
-              getTitlesWidget: (value, meta) {
-                return Text(
-                  '${value.toInt()}',
-                  style: const TextStyle(
-                    color: AppColors.chartTextMuted,
-                    fontSize: 10,
-                  ),
-                );
-              },
-            ),
-          ),
-        ),
-        lineBarsData: lines,
-      ),
-    );
+      );
+    });
   }
 }

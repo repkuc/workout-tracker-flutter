@@ -301,7 +301,8 @@
   "unit_cm": "cm",
   "delete_confirm": "Delete measurement?",
   "delete_message": "The entry for {date} will be deleted.",
-  "need_more_data": "Need at least 2 entries for the chart"
+  "need_more_data": "Need at least 2 entries for the chart",
+  "last_time": "last time: {value} ({date})"
 },
 "exercise_demo": {
   "show": "How to do it"

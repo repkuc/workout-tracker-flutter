@@ -473,15 +473,9 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
                       );
                       final previousVolume =
                           _workout!.copiedFromWorkoutId != null
+                              // «Было» — только выполненные подходы (единое правило объёма)
                               ? _originalExercises.values.fold<double>(
-                                  0,
-                                  (sum, ex) =>
-                                      sum +
-                                      ex.sets.fold<double>(
-                                        0,
-                                        (s, set) => s + (set.weight * set.reps),
-                                      ),
-                                )
+                                  0, (sum, ex) => sum + ex.doneVolume)
                               : null;
                       final difference = previousVolume != null
                           ? currentVolume - previousVolume
@@ -829,10 +823,7 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
 
                   // Оригинальное упражнение (если скопировано)
                   final original = _originalExercises[exercise.id];
-                  final previousVolume = original?.sets.fold<double>(
-                    0,
-                    (sum, s) => sum + (s.weight * s.reps),
-                  );
+                  final previousVolume = original?.doneVolume; // только выполненные
 
                   // Разница
                   final hasPrevious = previousVolume != null;
@@ -2056,15 +2047,9 @@ class _WorkoutEditorPageState extends State<WorkoutEditorPage> {
         0,
         (sum, ex) => sum + ex.sets.length,
       );
-      previousVolume = _originalExercises.values.fold<double>(
-        0,
-        (sum, ex) =>
-            sum +
-            ex.sets.fold<double>(
-              0,
-              (s, set) => s + (set.weight * set.reps),
-            ),
-      );
+      // Только выполненные подходы — единое правило объёма
+      previousVolume = _originalExercises.values
+          .fold<double>(0, (sum, ex) => sum + ex.doneVolume);
 
       // Загружаем оригинальную тренировку для времени
       final originalWorkout =

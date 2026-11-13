@@ -12,6 +12,7 @@ import '../services/body_measurement_service.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../theme/app_colors.dart';
 import '../widgets/app_dialog.dart';
+import '../widgets/chart_helpers.dart';
 
 class BodyMeasurementsPage extends StatefulWidget {
   const BodyMeasurementsPage({super.key});
@@ -78,10 +79,6 @@ class _BodyMeasurementsPageState extends State<BodyMeasurementsPage> {
     },
   ];
 
-  // Ключи замеров которые сейчас включены на графике — по умолчанию
-  // включаем первые два, чтобы график не был пустым при первом открытии,
-  // но и не был перегружен девятью линиями сразу.
-  Set<String> _visibleKeys = {'waist', 'chest'};
 
   @override
   void initState() {
@@ -150,12 +147,35 @@ class _BodyMeasurementsPageState extends State<BodyMeasurementsPage> {
     );
   }
 
-  // График замеров тела — линии для каждого включённого вида замера,
-  // плюс чипсы под графиком чтобы включать/выключать какие линии видны.
+  // Выбранный замер на графике (один за раз). static — выбор помнится,
+  // пока приложение запущено (в том числе при перестройке вкладок).
+  static String? _savedKey;
+
+  // Какой замер показывать: выбранный пользователем, иначе талия, если по
+  // ней есть данные, иначе первый замер с данными.
+  String get _selectedKey {
+    if (_savedKey != null) return _savedKey!;
+    bool hasData(String key) => _entries.any((e) => e.getByKey(key) != null);
+    if (hasData('waist')) return 'waist';
+    for (final type in _measurementTypes) {
+      final key = type['key'] as String;
+      if (hasData(key)) return key;
+    }
+    return 'waist';
+  }
+
+  // Карточка графика: заголовок (последнее значение + изменение с первой
+  // записи), график ОДНОГО замера в его собственном масштабе, чипсы выбора.
   Widget _buildChartCard() {
-    // Берём записи в хронологическом порядке (старые слева, новые справа) —
-    // _entries у нас отсортирован от новых к старым, разворачиваем.
-    final chronological = _entries.reversed.toList();
+    final key = _selectedKey;
+    final type = _measurementTypes.firstWhere((t) => t['key'] == key);
+    final color = type['color'] as Color;
+    final cm = 'measurements.unit_cm'.tr();
+
+    // Записи с этим замером в хронологическом порядке (_entries — от новых к старым)
+    final points = _entries.reversed
+        .where((e) => e.getByKey(key) != null)
+        .toList();
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -165,9 +185,49 @@ class _BodyMeasurementsPageState extends State<BodyMeasurementsPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Заголовок — как у карточки веса тела
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      (type['labelKey'] as String).tr().toUpperCase(),
+                      style: const TextStyle(
+                        color: AppColors.chartText,
+                        fontSize: 11,
+                        letterSpacing: 1.5,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      points.isEmpty
+                          ? '—'
+                          : '${chartNumber(points.last.getByKey(key)!)} $cm',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (points.length >= 2)
+                ChartChangeBadge(
+                  delta: points.last.getByKey(key)! -
+                      points.first.getByKey(key)!,
+                  unit: cm,
+                ),
+            ],
+          ),
+          const SizedBox(height: 12),
           SizedBox(
             height: 160,
-            child: chronological.length < 2
+            child: points.length < 2
                 // Графику нужно минимум 2 точки чтобы нарисовать линию —
                 // если записей меньше, просто показываем подсказку.
                 ? Center(
@@ -177,114 +237,31 @@ class _BodyMeasurementsPageState extends State<BodyMeasurementsPage> {
                           color: AppColors.textMuted, fontSize: 12),
                     ),
                   )
-                : LineChart(
-                    LineChartData(
-                      gridData: FlGridData(
-                        show: true,
-                        drawVerticalLine: false,
-                        getDrawingHorizontalLine: (value) => FlLine(
-                            color: AppColors.chartGrid, strokeWidth: 0.8),
-                      ),
-                      borderData: FlBorderData(show: false),
-                      titlesData: FlTitlesData(
-                        topTitles: const AxisTitles(
-                            sideTitles: SideTitles(showTitles: false)),
-                        rightTitles: const AxisTitles(
-                            sideTitles: SideTitles(showTitles: false)),
-                        leftTitles: AxisTitles(
-                          sideTitles: SideTitles(
-                            showTitles: true,
-                            reservedSize: 32,
-                            getTitlesWidget: (value, meta) => Text(
-                              '${value.toInt()}',
-                              style: const TextStyle(
-                                  color: AppColors.chartTextMuted, fontSize: 10),
-                            ),
-                          ),
-                        ),
-                        bottomTitles: AxisTitles(
-                          sideTitles: SideTitles(
-                            showTitles: true,
-                            getTitlesWidget: (value, meta) {
-                              final index = value.toInt();
-                              if (index < 0 || index >= chronological.length)
-                                return const SizedBox();
-                              // Показываем не каждую точку а прорежённо, чтобы подписи не слипались.
-                              final step = (chronological.length / 4)
-                                  .ceil()
-                                  .clamp(1, chronological.length);
-                              if (index % step != 0) return const SizedBox();
-                              final date =
-                                  DateTime.tryParse(chronological[index].date);
-                              if (date == null) return const SizedBox();
-                              return Text(
-                                '${date.day}.${date.month}',
-                                style: const TextStyle(
-                                    color: AppColors.chartTextMuted, fontSize: 9),
-                              );
-                            },
-                          ),
-                        ),
-                      ),
-                      // Строим одну линию на каждый включённый вид замера.
-                      lineBarsData: _visibleKeys.map((key) {
-                        final type = _measurementTypes
-                            .firstWhere((t) => t['key'] == key);
-                        final color = type['color'] as Color;
-
-                        // Собираем точки только там где значение реально есть —
-                        // fl_chart соединит их линией пропуская дни без этого замера.
-                        final spots = <FlSpot>[];
-                        for (int i = 0; i < chronological.length; i++) {
-                          final value = chronological[i].getByKey(key);
-                          if (value != null) {
-                            spots.add(FlSpot(i.toDouble(), value));
-                          }
-                        }
-
-                        return LineChartBarData(
-                          spots: spots,
-                          isCurved: true,
-                          color: color,
-                          barWidth: 2,
-                          dotData: const FlDotData(show: true),
-                          belowBarData: BarAreaData(show: false),
-                        );
-                      }).toList(),
-                    ),
-                  ),
+                : _buildChart(points, key, color),
           ),
           const SizedBox(height: 10),
 
-          // Чипсы для включения/выключения замеров на графике.
+          // Чипсы — выбор ОДНОГО замера для графика
           Wrap(
             spacing: 6,
             runSpacing: 6,
             children: _measurementTypes.map((type) {
-              final key = type['key'] as String;
-              final color = type['color'] as Color;
-              final isVisible = _visibleKeys.contains(key);
+              final typeKey = type['key'] as String;
+              final typeColor = type['color'] as Color;
+              final isSelected = typeKey == key;
 
               return GestureDetector(
-                onTap: () {
-                  setState(() {
-                    if (isVisible) {
-                      _visibleKeys.remove(key);
-                    } else {
-                      _visibleKeys.add(key);
-                    }
-                  });
-                },
+                onTap: () => setState(() => _savedKey = typeKey),
                 child: Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
                   decoration: BoxDecoration(
-                    color: isVisible
-                        ? color.withOpacity(0.15)
+                    color: isSelected
+                        ? typeColor.withOpacity(0.15)
                         : AppColors.surfaceInset,
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                        color: isVisible ? color : AppColors.chipBorder),
+                        color: isSelected ? typeColor : AppColors.chipBorder),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -293,17 +270,17 @@ class _BodyMeasurementsPageState extends State<BodyMeasurementsPage> {
                         width: 6,
                         height: 6,
                         decoration: BoxDecoration(
-                            color: isVisible ? color : AppColors.textMuted,
+                            color: isSelected ? typeColor : AppColors.textMuted,
                             shape: BoxShape.circle),
                       ),
                       const SizedBox(width: 4),
                       Text(
                         (type['labelKey'] as String).tr(),
                         style: TextStyle(
-                          color: isVisible ? color : AppColors.textMuted,
+                          color: isSelected ? typeColor : AppColors.textMuted,
                           fontSize: 10,
                           fontWeight:
-                              isVisible ? FontWeight.bold : FontWeight.normal,
+                              isSelected ? FontWeight.bold : FontWeight.normal,
                         ),
                       ),
                     ],
@@ -315,6 +292,90 @@ class _BodyMeasurementsPageState extends State<BodyMeasurementsPage> {
         ],
       ),
     );
+  }
+
+  // Линия одного замера по общим правилам графиков (chart_helpers.dart)
+  Widget _buildChart(
+      List<BodyMeasurementEntry> points, String key, Color color) {
+    final cm = 'measurements.unit_cm'.tr();
+    final values = points.map((e) => e.getByKey(key)!).toList();
+    final days =
+        points.map((e) => chartDayOf(chartParseDate(e.date))).toList();
+    final scale = ChartScale.nice(values.reduce((a, b) => a < b ? a : b),
+        values.reduce((a, b) => a > b ? a : b));
+
+    return LayoutBuilder(builder: (context, constraints) {
+      final axis = ChartTimeAxis.build(
+        context,
+        firstDay: days.first,
+        lastDay: days.last,
+        plotWidth: constraints.maxWidth - scale.leftWidth(context, cm),
+      );
+      return LineChart(
+        LineChartData(
+          borderData: FlBorderData(show: false),
+          minX: axis.minX,
+          maxX: axis.maxX,
+          minY: 0,
+          maxY: scale.maxY,
+          gridData: scale.grid(),
+          titlesData: FlTitlesData(
+            topTitles:
+                const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            rightTitles:
+                const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            leftTitles: scale.leftTitles(context, cm),
+            bottomTitles: axis.bottomTitles(),
+          ),
+          lineTouchData: chartLineTouch(
+            items: (touched) => touched.map((spot) {
+              final i = spot.spotIndex;
+              return LineTooltipItem(
+                '${chartTooltipDate(chartParseDate(points[i].date))}\n',
+                kChartTooltipTitleStyle,
+                children: [
+                  TextSpan(
+                    text: '${chartNumber(values[i])} $cm',
+                    style: chartTooltipValueStyle(color),
+                  ),
+                ],
+              );
+            }).toList(),
+          ),
+          lineBarsData: [
+            chartLine(
+              spots: [
+                for (var i = 0; i < points.length; i++)
+                  FlSpot(axis.x(days[i]), scale.toChart(values[i])),
+              ],
+              color: color,
+            ),
+          ],
+        ),
+      );
+    });
+  }
+
+  // Подсказка под полем диалога: прошлое значение этого замера — из самой
+  // новой записи ДО даты date, где он заполнен. Нет такой — null.
+  String? _lastTimeHint(String key, String date) {
+    for (final e in _entries) {
+      // _entries отсортирован от новых к старым
+      if (e.date.compareTo(date) >= 0) continue;
+      final value = e.getByKey(key);
+      if (value == null) continue;
+      final d = DateTime.tryParse(e.date);
+      final target = DateTime.tryParse(date);
+      final dateText = d == null
+          ? e.date
+          : DateFormat(d.year == target?.year ? 'dd.MM' : 'dd.MM.yyyy')
+              .format(d);
+      return 'measurements.last_time'.tr(namedArgs: {
+        'value': '${chartNumber(value)} ${'measurements.unit_cm'.tr()}',
+        'date': dateText,
+      });
+    }
+    return null;
   }
 
   // Секция с историей записей.
@@ -460,6 +521,8 @@ class _BodyMeasurementsPageState extends State<BodyMeasurementsPage> {
               const SizedBox(height: 12),
               ..._measurementTypes.map((type) {
                 final key = type['key'] as String;
+                // Прошлое значение — из записи ДО даты этой записи (у новой — до сегодня)
+                final hint = _lastTimeHint(key, targetEntry?.date ?? _getTodayDate());
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 8),
                   child: TextField(
@@ -473,6 +536,8 @@ class _BodyMeasurementsPageState extends State<BodyMeasurementsPage> {
                       labelStyle: TextStyle(color: type['color'] as Color, fontSize: 12),
                       suffixText: 'measurements.unit_cm'.tr(),
                       suffixStyle: const TextStyle(color: AppColors.textMuted, fontSize: 12),
+                      helperText: hint,
+                      helperStyle: const TextStyle(color: AppColors.textMuted, fontSize: 10),
                     ),
                   ),
                 );

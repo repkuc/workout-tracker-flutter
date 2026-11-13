@@ -86,7 +86,7 @@ class _WorkoutDetailsPageState extends State<WorkoutDetailsPage> {
     final totalSets = _workout!.exercises.fold<int>(0, (s, e) => s + e.sets.length);
     final doneSets = _workout!.exercises.fold<int>(0, (s, e) => s + e.sets.where((set) => set.isDone).length);
     final totalReps = _workout!.exercises.fold<int>(0, (s, e) => s + e.sets.where((set) => set.isDone).fold(0, (r, set) => r + set.reps));
-    final totalVolume = _workout!.exercises.fold<double>(0, (s, e) => s + e.sets.where((set) => set.isDone).fold(0.0, (v, set) => v + set.weight * set.reps));
+    final totalVolume = _workout!.doneVolume; // только выполненные подходы
 
     return PageHeader(
       title: _workout!.name,
@@ -164,9 +164,7 @@ class _WorkoutDetailsPageState extends State<WorkoutDetailsPage> {
   }
 
   Widget _buildExerciseCard(Exercise exercise) {
-    final volume = exercise.sets
-        .where((s) => s.isDone)
-        .fold<double>(0, (sum, s) => sum + s.weight * s.reps);
+    final volume = exercise.doneVolume;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),

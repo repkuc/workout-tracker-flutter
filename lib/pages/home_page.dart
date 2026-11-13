@@ -103,15 +103,9 @@ class _HomePageState extends State<HomePage> with ReloadWhenVisible {
   // Дни в которых были тренировки
   Set<String> get _workoutDays => _completedWorkouts.map((w) => w.date).toSet();
 
-  // Общий объём за всё время
-  double get _totalVolume => _completedWorkouts.fold(
-      0,
-      (sum, w) =>
-          sum +
-          w.exercises.fold(
-              0,
-              (s, e) =>
-                  s + e.sets.fold(0, (ss, set) => ss + set.weight * set.reps)));
+  // Общий объём за всё время — только выполненные подходы (как в «Статистике»)
+  double get _totalVolume =>
+      _completedWorkouts.fold(0, (sum, w) => sum + w.doneVolume);
 
   // Общее время за всё время (секунды)
   int get _totalDuration =>
@@ -892,10 +886,8 @@ class _HomePageState extends State<HomePage> with ReloadWhenVisible {
     // Считаем статистику
     final totalSets =
         workout.exercises.fold<int>(0, (sum, e) => sum + e.sets.length);
-    final totalVolume = workout.exercises.fold<double>(
-        0,
-        (sum, e) =>
-            sum + e.sets.fold(0, (s, set) => s + set.weight * set.reps));
+    // Объём — только выполненные подходы (как в истории и «Статистике»)
+    final totalVolume = workout.doneVolume;
 
     showAppBottomSheet(
       context: context,
